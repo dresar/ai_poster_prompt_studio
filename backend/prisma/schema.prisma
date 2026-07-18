@@ -1,0 +1,157 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  engineType    = "binary"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "debian-openssl-1.1.x"]
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  passwordHash          String
+  role                  Role      @default(USER)
+  subscriptionStatus    String    @default("FREE") // "FREE" | "PRO"
+  subscriptionExpiresAt DateTime?
+  credits               Int       @default(10)
+  createdAt             DateTime  @default(now())
+  prompts               Prompt[]
+  logs                  Log[]
+  developerApiKeys      DeveloperApiKey[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model LicenseKey {
+  id        String    @id @default(cuid())
+  key       String    @unique
+  days      Int       @default(30)
+  credits   Int       @default(300)
+  isUsed    Boolean   @default(false)
+  usedBy    String?
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Prompt {
+  id                String   @id @default(cuid())
+  userId            String
+  mode              String   // "poster" | "photo_enhance"
+  topic             String
+  payloadJson       Json     // Sumber kebenaran utama
+  promptFinal       String   @db.Text
+  referenceImageUrl String?
+  category          String?
+  hooks             String[]
+  viralScore        Int?
+  isFavorite        Boolean  @default(false)
+  isShared          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DropdownOption {
+  id         String   @id @default(cuid())
+  groupKey   String   // "kategori_poster" | "gaya_desain" | "rasio" | dst
+  label      String
+  value      String
+  helperText String?
+  icon       String?
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+}
+
+model PromptTemplate {
+  id       String  @id @default(cuid())
+  category String
+  template String  @db.Text
+  isActive Boolean @default(true)
+}
+
+model HookPattern {
+  id       String  @id @default(cuid())
+  pattern  String
+  category String
+  isActive Boolean @default(true)
+}
+
+model ContentIdeaCategory {
+  id       String  @id @default(cuid())
+  name     String
+  isActive Boolean @default(true)
+}
+
+model GeminiApiKey {
+  id           String    @id @default(cuid())
+  keyEncrypted String
+  isActive     Boolean   @default(true)
+  priority     Int       @default(0)
+  usageCount   Int       @default(0)
+  lastUsedAt   DateTime?
+  healthStatus String    @default("healthy") // "healthy" | "limited" | "error"
+  provider     String    @default("gemini")  // "gemini" | "groq"
+}
+
+model AppSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  detail    Json
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model ContentIdea {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String
+  idea      String
+  createdAt DateTime @default(now())
+}
+
+model VisualStyle {
+  id              String   @id @default(cuid())
+  name            String
+  promptTemplate  String   @db.Text
+  previewImageUrl String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+model DeveloperApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String   @default("Default Key")
+  apiKey    String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Character {
+  id                String   @id @default(cuid())
+  name              String
+  description       String   @db.Text
+  imageUrl          String?
+  promptConsistency String   @db.Text
+  characterBible    Json?
+  positivePrompt    String?  @db.Text
+  negativePrompt    String?  @db.Text
+  masterPrompt      String?  @db.Text
+  category          String   @default("general")
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

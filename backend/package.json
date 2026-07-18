@@ -1,0 +1,42 @@
+{
+  "name": "ai-poster-prompt-studio-backend",
+  "version": "1.0.0",
+  "description": "Backend for AI Poster Prompt Studio",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "esbuild src/server.ts --bundle --platform=node --target=node20 --outfile=app.js",
+    "bundle": "esbuild src/server.ts --bundle --platform=node --target=node20 --outfile=app.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@neondatabase/serverless": "^1.1.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.45.2",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "kill-port": "^2.0.1",
+    "postgres": "^3.4.9",
+    "sharp": "^0.35.3",
+    "ulid": "^3.0.2",
+    "winston": "^3.12.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/kill-port": "^2.0.3",
+    "@types/node": "^20.11.30",
+    "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.28.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.3"
+  }
+}

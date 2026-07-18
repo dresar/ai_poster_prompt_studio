@@ -1,0 +1,150 @@
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
+import { env } from './config/env';
+import { logger } from './config/logger';
+import { errorHandler } from './middlewares/errorHandler';
+import { db } from './config/db';
+import { sql } from 'drizzle-orm';
+
+import authRoutes from './modules/auth/auth.routes';
+import posterRoutes from './modules/poster/poster.routes';
+import historyRoutes from './modules/history/history.routes';
+import dropdownRoutes from './modules/dropdown/dropdown.routes';
+import adminRoutes from './modules/admin/admin.routes';
+import developerRoutes from './modules/developer/developer.routes';
+import syncRoutes from './modules/sync/sync.routes';
+import templatesRoutes from './modules/templates/templates.routes';
+import formInfoRoutes from './modules/formInfo/formInfo.routes';
+
+const app = express();
+
+// Middlewares
+const ALLOWED_ORIGINS = [
+  'https://porto.apprentice.cyou',
+  'https://full-feature-showcase.vercel.app', // admin panel di vercel
+  'https://promtingfrontend.vercel.app',
+  'http://localhost:5173',  // admin dev
+  'http://localhost:4173',  // admin preview
+  'http://localhost:8080',  // flutter web dev
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, Postman)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+}));
+
+// Strict HTTP Security Headers
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
+
+// Configure base64 limits for larger reference images
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Local Uploads Folder setup for backend fallback storage
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.http(`${req.method} ${req.originalUrl} - IP: ${req.ip}`);
+  next();
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ success: true, status: 'OK', timestamp: new Date() });
+});
+
+// DB Health check — diagnosa koneksi database dari server
+app.get('/health/db', async (req, res) => {
+  try {
+    const result = await db.execute(sql`SELECT 1 AS ok`);
+    const dbUrl = process.env.DATABASE_URL || '';
+    const host = dbUrl ? new URL(dbUrl.replace(/[&?]channel_binding=\w+/g, '')).hostname : 'unknown';
+    res.status(200).json({
+      success: true,
+      status: 'DB Connected',
+      host,
+      timestamp: new Date(),
+    });
+  } catch (e: any) {
+    const cause = e?.cause;
+    res.status(500).json({
+      success: false,
+      status: 'DB Failed',
+      error: e?.message?.split('\n')[0] || 'Unknown error',
+      cause: cause?.message || null,
+      pgCode: cause?.code || null,
+      detail: cause?.detail || null,
+      hint: cause?.hint || null,
+      dbUrlSet: !!process.env.DATABASE_URL,
+      timestamp: new Date(),
+    });
+  }
+});
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/poster', posterRoutes);
+app.use('/api/history', historyRoutes);
+app.use('/api/dropdown-options', dropdownRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/v1', developerRoutes);
+app.use('/api/sync', syncRoutes);
+app.use('/api/templates', templatesRoutes);
+app.use('/api/form-infos', formInfoRoutes);
+
+// 404 Route handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'API route not found',
+    code: 'NOT_FOUND',
+  });
+});
+
+// Global Error Handler
+app.use(errorHandler);
+
+// Start server
+import killPort from 'kill-port';
+
+import { scheduleImageCleanup } from './utils/image-cleanup';
+
+async function startServer() {
+  try {
+    // Try to kill the port if it's in use
+    await killPort(env.PORT);
+    logger.info(`Cleared port ${env.PORT}`);
+  } catch (err) {
+    // Port is probably not in use
+  }
+
+  app.listen(env.PORT, () => {
+    logger.info(`Server is running in ${env.NODE_ENV} mode on port ${env.PORT}`);
+    // Start automatic garbage collection of unused uploads/images
+    scheduleImageCleanup();
+  });
+}
+
+startServer();

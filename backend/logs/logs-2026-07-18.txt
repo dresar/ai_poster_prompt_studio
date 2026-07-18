@@ -1,0 +1,4 @@
+[2026-07-18 21:11:59:1159] info: Cleared port 3000
+[2026-07-18 21:11:59:1159] info: Server is running in development mode on port 3000
+[2026-07-18 21:12:29:1229] info: Starting automatic image cleanup. Total files in uploads: 4
+[2026-07-18 21:12:30:1230] info: Image cleanup finished. Deleted 2 unused local images.

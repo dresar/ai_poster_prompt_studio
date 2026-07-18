@@ -9,20 +9,41 @@
 
 ---
 
-## 📸 Demo & Tampilan Antarmuka (Admin Portal)
+## 📸 Demo & Tampilan Antarmuka (Aplikasi Klien)
 
-Berikut adalah beberapa tampilan fitur manajemen sistem pada Admin Portal (**React + TanStack Start**):
+Berikut adalah alur tampilan antarmuka utama pada aplikasi klien (**Flutter App**):
 
-| Fitur | Cuplikan Layar | Deskripsi |
-| :--- | :--- | :--- |
-| **Dashboard Utama Admin** | <img src="assets/demo/Cuplikan layar 2026-07-18 211424.png" width="350"/> | Halaman utama admin yang menampilkan ringkasan data, grafik statistik, jumlah pengguna, voucher aktif, dan kuota API. |
-| **Manajemen Dropdown Dinamis** | <img src="assets/demo/Cuplikan layar 2026-07-18 211447.png" width="350"/> | Pengaturan dropdown pilihan dinamis yang akan dirender secara real-time pada aplikasi Flutter Client. |
-| **Informasi Form & Deskripsi** | <img src="assets/demo/Cuplikan layar 2026-07-18 211459.png" width="350"/> | Mengelola konfigurasi label, sub-deskripsi, dan metadata formulir input untuk setiap jenis poster/layanan. |
-| **Manajemen API Keys Gemini** | <img src="assets/demo/Cuplikan layar 2026-07-18 211509.png" width="350"/> | Mengelola kolam (*pool*) API Key Gemini dengan sistem enkripsi, deteksi status kesehatan, prioritas rotasi, dan pencatatan riwayat pemakaian. |
-| **Log Audit & Detektor Error** | <img src="assets/demo/Cuplikan layar 2026-07-18 211517.png" width="350"/> | Sistem monitoring log audit real-time untuk mendeteksi error integrasi AI, aktivitas user, dan performa backend. |
-| **Katalog Template Prompt AI** | <img src="assets/demo/Cuplikan layar 2026-07-18 211523.png" width="350"/> | Daftar template prompt yang dapat disesuaikan oleh admin untuk menentukan formula pembuatan prompt AI yang viral. |
-| **Pembuat & Editor Template** | <img src="assets/demo/Cuplikan layar 2026-07-18 211529.png" width="350"/> | Editor interaktif untuk membuat struktur template prompt baru lengkap dengan variabel dinamis, hook viral, dan analisis AI. |
-| **Manajemen Karakter (Character Bible)** | <img src="assets/demo/Cuplikan layar 2026-07-18 211534.png" width="350"/> | Database karakter yang menyimpan profil konsistensi prompt, Master Prompt, Positive/Negative Prompts, dan aset gambar referensi. |
+### 🔑 1. Halaman Masuk (Login Screen)
+![Login Screen](assets/demo/01_login.png)
+*Halaman masuk untuk otentikasi akun pengguna.*
+
+### 📱 2. Dashboard Utama (Dashboard Screen)
+![Dashboard Screen](assets/demo/02_dashboard.png)
+*Menu utama untuk memilih kategori studio konten AI.*
+
+### 📝 3. Formulir Pembuatan Poster (Poster Form)
+![Poster Form](assets/demo/03_poster_form.png)
+*Formulir input topik poster utama serta fitur opsional untuk mengunggah gambar referensi.*
+
+### ⚙️ 4. Parameter Visual Tambahan (Visual Parameters)
+![Visual Parameters](assets/demo/04_poster_parameters.png)
+*Konfigurasi lanjutan untuk gaya desain, tata letak, ukuran rasio, dan palet warna poster.*
+
+### 📜 5. Riwayat Eksekusi (Execution History)
+![Execution History](assets/demo/05_history.png)
+*Daftar riwayat pembuatan prompt AI lengkap dengan skor viralitas dan kategori konten.*
+
+### 📂 6. Katalog Templat (Templates Library)
+![Templates Library](assets/demo/06_templates.png)
+*Halaman pemilihan templat prompt poster pemasaran visual yang siap dipakai.*
+
+### 👤 7. Profil Pengguna & Token (User Profile)
+![User Profile](assets/demo/07_profile.png)
+*Informasi profil akun, sisa token/kredit, dan pengaturan kunci ImageKit pribadi.*
+
+### 🛠️ 8. Pengaturan Aplikasi & Bahasa (App Settings)
+![App Settings](assets/demo/08_settings.png)
+*Halaman preferensi bahasa sistem (Indonesia/Inggris) dan fitur pembersih memori cache.*
 
 ---
 

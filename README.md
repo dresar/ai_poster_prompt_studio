@@ -13,37 +13,16 @@
 
 Berikut adalah alur tampilan antarmuka utama pada aplikasi klien (**Flutter App**):
 
-### 🔑 1. Halaman Masuk (Login Screen)
-![Login Screen](assets/demo/01_login.png)
-*Halaman masuk untuk otentikasi akun pengguna.*
-
-### 📱 2. Dashboard Utama (Dashboard Screen)
-![Dashboard Screen](assets/demo/02_dashboard.png)
-*Menu utama untuk memilih kategori studio konten AI.*
-
-### 📝 3. Formulir Pembuatan Poster (Poster Form)
-![Poster Form](assets/demo/03_poster_form.png)
-*Formulir input topik poster utama serta fitur opsional untuk mengunggah gambar referensi.*
-
-### ⚙️ 4. Parameter Visual Tambahan (Visual Parameters)
-![Visual Parameters](assets/demo/04_poster_parameters.png)
-*Konfigurasi lanjutan untuk gaya desain, tata letak, ukuran rasio, dan palet warna poster.*
-
-### 📜 5. Riwayat Eksekusi (Execution History)
-![Execution History](assets/demo/05_history.png)
-*Daftar riwayat pembuatan prompt AI lengkap dengan skor viralitas dan kategori konten.*
-
-### 📂 6. Katalog Templat (Templates Library)
-![Templates Library](assets/demo/06_templates.png)
-*Halaman pemilihan templat prompt poster pemasaran visual yang siap dipakai.*
-
-### 👤 7. Profil Pengguna & Token (User Profile)
-![User Profile](assets/demo/07_profile.png)
-*Informasi profil akun, sisa token/kredit, dan pengaturan kunci ImageKit pribadi.*
-
-### 🛠️ 8. Pengaturan Aplikasi & Bahasa (App Settings)
-![App Settings](assets/demo/08_settings.png)
-*Halaman preferensi bahasa sistem (Indonesia/Inggris) dan fitur pembersih memori cache.*
+| Fitur | Cuplikan Layar (Portrait) | Deskripsi |
+| :--- | :---: | :--- |
+| **🔑 Halaman Masuk** | <img src="assets/demo/01_login.png" width="220"/> | Halaman masuk untuk otentikasi akun pengguna. |
+| **📱 Dashboard Utama** | <img src="assets/demo/02_dashboard.png" width="220"/> | Menu utama untuk memilih kategori studio konten AI. |
+| **📝 Formulir Pembuatan Poster** | <img src="assets/demo/03_poster_form.png" width="220"/> | Formulir input topik poster utama serta fitur opsional untuk mengunggah gambar referensi. |
+| **⚙️ Parameter Visual Tambahan** | <img src="assets/demo/04_poster_parameters.png" width="220"/> | Konfigurasi lanjutan untuk gaya desain, tata letak, ukuran rasio, dan palet warna poster. |
+| **📜 Riwayat Eksekusi** | <img src="assets/demo/05_history.png" width="220"/> | Daftar riwayat pembuatan prompt AI lengkap dengan skor viralitas dan kategori konten. |
+| **📂 Katalog Templat** | <img src="assets/demo/06_templates.png" width="220"/> | Halaman pemilihan templat prompt poster pemasaran visual yang siap dipakai. |
+| **👤 Profil Pengguna & Token** | <img src="assets/demo/07_profile.png" width="220"/> | Informasi profil akun, sisa token/kredit, dan pengaturan kunci ImageKit pribadi. |
+| **🛠️ Pengaturan Aplikasi** | <img src="assets/demo/08_settings.png" width="220"/> | Halaman preferensi bahasa sistem (Indonesia/Inggris) dan fitur pembersih memori cache. |
 
 ---
 

@@ -47,3 +47,10 @@ app.*.map.json
 # Portfolio Project File (Local Only)
 project.md
 
+# Environment Variables
+.env
+*.env
+backend/.env
+promtingfrontend/.env
+uploads/
+

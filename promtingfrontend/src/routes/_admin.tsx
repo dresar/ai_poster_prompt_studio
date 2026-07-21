@@ -17,9 +17,11 @@ import {
   FileText,
   Bell,
   Check,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CloudinaryManagerModal } from "@/components/CloudinaryManagerModal";
+import { StorageCdnModal } from "@/components/StorageCdnModal";
 
 export const Route = createFileRoute("/_admin")({
   component: AdminLayout,
@@ -27,6 +29,7 @@ export const Route = createFileRoute("/_admin")({
 
 const tabs = [
   { to: "/dashboard", label: "Ringkasan", icon: LayoutDashboard, color: "bg-[var(--nb-yellow)] text-black" },
+  { to: "/media", label: "Media CDN", icon: ImageIcon, color: "bg-indigo-500 text-white" },
   { to: "/users", label: "Kelola User", icon: Users, color: "bg-[var(--nb-pink)] text-white" },
   { to: "/keys", label: "Kunci & API", icon: KeyRound, color: "bg-[var(--nb-blue)] text-white" },
   { to: "/styles", label: "Pustaka Gaya", icon: Palette, color: "bg-[var(--nb-pink)] text-white" },
@@ -130,7 +133,10 @@ function AdminLayout() {
               <p className="text-[9px] md:text-[10px] font-mono text-muted-foreground mt-0.5">CONSOLE PANEL</p>
             </div>
           </div>
-          <NotificationBell />
+          <div className="flex items-center gap-1.5">
+            <StorageCdnModal />
+            <NotificationBell />
+          </div>
         </div>
 
         {/* User Card */}
@@ -192,6 +198,7 @@ function AdminLayout() {
             </div>
           </div>
           <div className="flex items-center gap-1.5 md:gap-2">
+            <StorageCdnModal />
             <CloudinaryManagerModal />
             <NotificationBell />
             <button

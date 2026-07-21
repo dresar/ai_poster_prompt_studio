@@ -17,6 +17,7 @@ import { Route as AdminUsersRouteImport } from './routes/_admin.users'
 import { Route as AdminTemplatesRouteImport } from './routes/_admin.templates'
 import { Route as AdminStylesRouteImport } from './routes/_admin.styles'
 import { Route as AdminSettingsRouteImport } from './routes/_admin.settings'
+import { Route as AdminMediaRouteImport } from './routes/_admin.media'
 import { Route as AdminLogsRouteImport } from './routes/_admin.logs'
 import { Route as AdminKeysRouteImport } from './routes/_admin.keys'
 import { Route as AdminFormInfosRouteImport } from './routes/_admin.form-infos'
@@ -75,6 +76,11 @@ const AdminStylesRoute = AdminStylesRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMediaRoute = AdminMediaRouteImport.update({
+  id: '/media',
+  path: '/media',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminLogsRoute = AdminLogsRouteImport.update({
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/form-infos': typeof AdminFormInfosRoute
   '/keys': typeof AdminKeysRoute
   '/logs': typeof AdminLogsRoute
+  '/media': typeof AdminMediaRoute
   '/settings': typeof AdminSettingsRoute
   '/styles': typeof AdminStylesRouteWithChildren
   '/templates': typeof AdminTemplatesRouteWithChildren
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/form-infos': typeof AdminFormInfosRoute
   '/keys': typeof AdminKeysRoute
   '/logs': typeof AdminLogsRoute
+  '/media': typeof AdminMediaRoute
   '/settings': typeof AdminSettingsRoute
   '/vouchers': typeof AdminVouchersRoute
   '/characters/new': typeof AdminCharactersNewRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/_admin/form-infos': typeof AdminFormInfosRoute
   '/_admin/keys': typeof AdminKeysRoute
   '/_admin/logs': typeof AdminLogsRoute
+  '/_admin/media': typeof AdminMediaRoute
   '/_admin/settings': typeof AdminSettingsRoute
   '/_admin/styles': typeof AdminStylesRouteWithChildren
   '/_admin/templates': typeof AdminTemplatesRouteWithChildren
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/form-infos'
     | '/keys'
     | '/logs'
+    | '/media'
     | '/settings'
     | '/styles'
     | '/templates'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/form-infos'
     | '/keys'
     | '/logs'
+    | '/media'
     | '/settings'
     | '/vouchers'
     | '/characters/new'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/_admin/form-infos'
     | '/_admin/keys'
     | '/_admin/logs'
+    | '/_admin/media'
     | '/_admin/settings'
     | '/_admin/styles'
     | '/_admin/templates'
@@ -415,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/media': {
+      id: '/_admin/media'
+      path: '/media'
+      fullPath: '/media'
+      preLoaderRoute: typeof AdminMediaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/logs': {
@@ -635,6 +654,7 @@ interface AdminRouteChildren {
   AdminFormInfosRoute: typeof AdminFormInfosRoute
   AdminKeysRoute: typeof AdminKeysRoute
   AdminLogsRoute: typeof AdminLogsRoute
+  AdminMediaRoute: typeof AdminMediaRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStylesRoute: typeof AdminStylesRouteWithChildren
   AdminTemplatesRoute: typeof AdminTemplatesRouteWithChildren
@@ -649,6 +669,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminFormInfosRoute: AdminFormInfosRoute,
   AdminKeysRoute: AdminKeysRoute,
   AdminLogsRoute: AdminLogsRoute,
+  AdminMediaRoute: AdminMediaRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStylesRoute: AdminStylesRouteWithChildren,
   AdminTemplatesRoute: AdminTemplatesRouteWithChildren,

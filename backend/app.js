@@ -67333,6 +67333,12 @@ var uploadMultiImages = async (req, res, next) => {
 };
 async function performUpload(image, fileName, userId, req) {
   try {
+    const url = await uploadToCloudinary(image, fileName);
+    return { url, isFallback: false, storageType: "user_imagekit" };
+  } catch (cloudinaryErr) {
+    logger.warn(`Storage CDN Gateway (Cloudinary) upload failed: ${cloudinaryErr.message}`);
+  }
+  try {
     const userArr = await db.select({
       imagekitPublicKey: users.imagekitPublicKey,
       imagekitPrivateKey: users.imagekitPrivateKey,
@@ -67393,6 +67399,33 @@ async function performUpload(image, fileName, userId, req) {
       "UPLOAD_FAILED"
     );
   }
+}
+async function uploadToCloudinary(base64File, fileName) {
+  let cleanBase64 = base64File;
+  if (!base64File.startsWith("data:")) {
+    cleanBase64 = `data:image/png;base64,${base64File}`;
+  }
+  const gatewayKey = process.env.STORAGE_GATEWAY_KEY || "AR_4c9b2435_929a80d916261b15c582db6fe3e41e52";
+  const baseUrl = process.env.STORAGE_GATEWAY_BASE_URL || "https://one.apprentice.cyou/v1";
+  const postData = JSON.stringify({
+    file: cleanBase64,
+    file_name: fileName || "poster.png",
+    auto_rotate: true,
+    provider: "cloudinary"
+  });
+  const response = await fetch(`${baseUrl}/storage/upload`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${gatewayKey}`
+    },
+    body: postData
+  });
+  const data = await response.json();
+  if (response.ok && data.success && data.file?.url) {
+    return data.file.url;
+  }
+  throw new Error(data.message || data.error?.message || "Storage CDN Gateway upload failed");
 }
 function uploadToImageKit(base64File, fileName, config) {
   return new Promise((resolve, reject) => {

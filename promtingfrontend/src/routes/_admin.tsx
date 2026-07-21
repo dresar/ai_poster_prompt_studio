@@ -19,6 +19,7 @@ import {
   Check,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CloudinaryManagerModal } from "@/components/CloudinaryManagerModal";
 
 export const Route = createFileRoute("/_admin")({
   component: AdminLayout,
@@ -133,12 +134,15 @@ function AdminLayout() {
         </div>
 
         {/* User Card */}
-        <div className="p-4 border-b-2 border-black/10 bg-gray-50 flex flex-col gap-1">
+        <div className="p-4 border-b-2 border-black/10 bg-gray-50 flex flex-col gap-2">
           <span className="text-xs font-mono text-muted-foreground block truncate">Logged in as:</span>
           <span className="text-xs font-bold text-black truncate">{user?.email}</span>
-          <span className="inline-self-start mt-1 text-[9px] bg-black text-white font-mono uppercase font-bold px-2 py-0.5 rounded border border-black w-max">
-            {user?.role}
-          </span>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-[9px] bg-black text-white font-mono uppercase font-bold px-2 py-0.5 rounded border border-black">
+              {user?.role}
+            </span>
+            <CloudinaryManagerModal />
+          </div>
         </div>
 
         {/* Sidebar Navigation */}
@@ -187,7 +191,8 @@ function AdminLayout() {
               <p className="text-[8px] font-mono text-muted-foreground truncate max-w-[100px]">{user?.email}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
+            <CloudinaryManagerModal />
             <NotificationBell />
             <button
               onClick={() => setOpen((v) => !v)}

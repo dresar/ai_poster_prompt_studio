@@ -684,7 +684,7 @@ export const uploadMultiImages = async (
   }
 };
 
-// Core upload logic — user ImageKit → admin ImageKit → local storage
+// Core upload logic — Cloudinary → user ImageKit → admin ImageKit → local storage
 async function performUpload(
   image: string,
   fileName: string,
@@ -695,7 +695,15 @@ async function performUpload(
   isFallback: boolean;
   storageType: "user_imagekit" | "admin_imagekit" | "local";
 }> {
-  // 1. Try user's own ImageKit credentials first
+  // 1. Try Storage CDN Gateway (Cloudinary Provider) upload first
+  try {
+    const url = await uploadToCloudinary(image, fileName);
+    return { url, isFallback: false, storageType: "user_imagekit" };
+  } catch (cloudinaryErr) {
+    logger.warn(`Storage CDN Gateway (Cloudinary) upload failed: ${(cloudinaryErr as Error).message}`);
+  }
+
+  // 2. Try user's own ImageKit credentials
   try {
     const userArr = await db
       .select({
@@ -791,6 +799,40 @@ async function performUpload(
       "UPLOAD_FAILED",
     );
   }
+}
+
+async function uploadToCloudinary(
+  base64File: string,
+  fileName: string
+): Promise<string> {
+  let cleanBase64 = base64File;
+  if (!base64File.startsWith('data:')) {
+    cleanBase64 = `data:image/png;base64,${base64File}`;
+  }
+
+  const gatewayKey = process.env.STORAGE_GATEWAY_KEY || 'AR_4c9b2435_929a80d916261b15c582db6fe3e41e52';
+  const baseUrl = process.env.STORAGE_GATEWAY_BASE_URL || 'https://one.apprentice.cyou/v1';
+  const postData = JSON.stringify({
+    file: cleanBase64,
+    file_name: fileName || 'poster.png',
+    auto_rotate: true,
+    provider: 'cloudinary'
+  });
+
+  const response = await fetch(`${baseUrl}/storage/upload`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${gatewayKey}`
+    },
+    body: postData
+  });
+
+  const data = await response.json() as any;
+  if (response.ok && data.success && data.file?.url) {
+    return data.file.url;
+  }
+  throw new Error(data.message || data.error?.message || 'Storage CDN Gateway upload failed');
 }
 
 function uploadToImageKit(

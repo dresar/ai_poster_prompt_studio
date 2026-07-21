@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd promtingfrontend && npm install && npm run build",
+  "outputDirectory": "promtingfrontend/.output/public",
+  "framework": null
+}

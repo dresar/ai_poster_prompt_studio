@@ -20,7 +20,14 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CloudinaryManagerModal } from "@/components/CloudinaryManagerModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { StorageCdnModal } from "@/components/StorageCdnModal";
 
 export const Route = createFileRoute("/_admin")({
@@ -42,46 +49,209 @@ const tabs = [
   { to: "/logs", label: "Audit Log", short: "Log", icon: ScrollText, color: "bg-black text-white" },
 ] as const;
 
+import {
+  getStoredNotifications,
+  saveStoredNotifications,
+  requestNotificationPermission,
+  getBrowserNotificationPermission,
+  triggerAppNotification,
+  AppNotificationItem,
+} from "@/lib/browserNotifications";
+
 function NotificationBell() {
-  const [unread] = useState(3);
-  
+  const [notifications, setNotifications] = useState<AppNotificationItem[]>([]);
+  const [permission, setPermission] = useState<NotificationPermission>("default");
+
+  const refreshNotifs = () => {
+    setNotifications(getStoredNotifications());
+    setPermission(getBrowserNotificationPermission());
+  };
+
+  useEffect(() => {
+    refreshNotifs();
+    const handleUpdate = () => refreshNotifs();
+    window.addEventListener("notifications_updated", handleUpdate);
+    return () => window.removeEventListener("notifications_updated", handleUpdate);
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const handleEnableBrowserNotif = async () => {
+    const perm = await requestNotificationPermission();
+    setPermission(perm);
+  };
+
+  const handleMarkAllRead = () => {
+    const updated = notifications.map((n) => ({ ...n, isRead: true }));
+    saveStoredNotifications(updated);
+    setNotifications(updated);
+  };
+
+  const handleClearAll = () => {
+    saveStoredNotifications([]);
+    setNotifications([]);
+  };
+
+  const formatRelativeTime = (isoString: string) => {
+    try {
+      const diffMs = Date.now() - new Date(isoString).getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return "Baru saja";
+      if (diffMins < 60) return `${diffMins} mnt yang lalu`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours} jam yang lalu`;
+      return new Date(isoString).toLocaleDateString("id-ID");
+    } catch (_) {
+      return "Baru saja";
+    }
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button className="relative nb-border nb-shadow-sm rounded-[var(--radius)] bg-white p-1.5 md:p-2 nb-press transition-transform">
-          <Bell className="w-4 h-4 md:w-5 md:h-5" />
-          {unread > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] md:text-[10px] font-bold w-4 h-4 md:w-5 md:h-5 flex items-center justify-center rounded-full nb-border">
-              {unread}
+          <Bell className="w-4 h-4 md:w-4 md:h-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] md:text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full nb-border animate-pulse">
+              {unreadCount}
             </span>
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 md:w-80 p-0 nb-border shadow-[4px_4px_0_0_rgba(0,0,0,1)] rounded-[var(--radius)]" align="end" sideOffset={8}>
+      <PopoverContent className="w-80 md:w-96 p-0 nb-border shadow-[4px_4px_0_0_rgba(0,0,0,1)] rounded-[var(--radius)]" align="end" sideOffset={8}>
+        {/* Header */}
         <div className="flex items-center justify-between p-3 border-b-2 border-black bg-[var(--nb-yellow)] rounded-t-[calc(var(--radius)-2px)]">
-          <h3 className="font-bold text-xs md:text-sm uppercase">Notifikasi</h3>
-          <button className="text-[10px] font-mono hover:underline flex items-center gap-1"><Check className="w-3 h-3"/> Tandai dibaca</button>
+          <div className="flex items-center gap-2">
+            <Bell className="w-4 h-4 text-black" />
+            <h3 className="font-bold text-xs md:text-sm uppercase">Notifikasi Sistem</h3>
+          </div>
+          {notifications.length > 0 && (
+            <button
+              onClick={handleMarkAllRead}
+              className="text-[10px] font-mono font-bold hover:underline flex items-center gap-1 text-black"
+            >
+              <Check className="w-3 h-3" /> Tandai Dibaca
+            </button>
+          )}
         </div>
-        <div className="max-h-64 overflow-y-auto bg-white flex flex-col">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="p-3 border-b-2 border-black/10 hover:bg-gray-50 transition-colors flex gap-3 items-start last:border-b-0">
-              <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0 border border-black" />
-              <div>
-                <p className="text-xs md:text-sm font-bold leading-tight">Pengguna baru mendaftar</p>
-                <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 leading-tight">user_{i}@example.com telah bergabung ke platform.</p>
-                <span className="text-[8px] md:text-[10px] font-mono text-muted-foreground mt-1 block">2 menit yang lalu</span>
-              </div>
+
+        {/* Browser Permission Banner */}
+        {permission !== "granted" && (
+          <div className="p-2.5 bg-blue-50 border-b-2 border-black flex items-center justify-between gap-2">
+            <div className="text-[10px] font-mono text-blue-900 leading-tight">
+              Aktifkan <strong>Notifikasi Browser</strong> untuk menerima alert real-time.
             </div>
-          ))}
+            <button
+              onClick={handleEnableBrowserNotif}
+              className="nb-border bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-[9px] font-bold uppercase rounded shrink-0"
+            >
+              Izinkan
+            </button>
+          </div>
+        )}
+
+        {/* Notification List */}
+        <div className="max-h-72 overflow-y-auto bg-white flex flex-col divide-y divide-gray-100">
+          {notifications.length === 0 ? (
+            <div className="p-8 text-center font-mono text-xs text-gray-500 flex flex-col items-center gap-2">
+              <Bell className="w-6 h-6 text-gray-300" />
+              <span>Tidak ada notifikasi</span>
+            </div>
+          ) : (
+            notifications.map((item) => (
+              <div
+                key={item.id}
+                className={`p-3 hover:bg-gray-50 transition-colors flex gap-2.5 items-start ${
+                  !item.isRead ? "bg-yellow-50/60" : ""
+                }`}
+              >
+                <div
+                  className={`w-2 h-2 rounded-full mt-1.5 shrink-0 border border-black ${
+                    item.type === "success"
+                      ? "bg-green-500"
+                      : item.type === "error"
+                      ? "bg-red-500"
+                      : item.type === "warning"
+                      ? "bg-orange-500"
+                      : "bg-blue-500"
+                  }`}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-xs font-bold truncate text-black">{item.title}</p>
+                    <span className="text-[9px] font-mono text-gray-400 shrink-0">
+                      {formatRelativeTime(item.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-[10px] font-mono text-gray-600 mt-0.5 leading-snug break-words">
+                    {item.message}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-        <div className="p-2 border-t-2 border-black bg-gray-50 rounded-b-[calc(var(--radius)-2px)] text-center">
-          <button className="text-[10px] md:text-xs font-bold uppercase hover:underline">Lihat Semua</button>
-        </div>
+
+        {/* Footer */}
+        {notifications.length > 0 && (
+          <div className="p-2 border-t-2 border-black bg-gray-50 rounded-b-[calc(var(--radius)-2px)] flex items-center justify-between px-3">
+            <span className="text-[9px] font-mono text-gray-500">
+              Browser Web Notification API
+            </span>
+            <button
+              onClick={handleClearAll}
+              className="text-[10px] font-mono text-red-600 font-bold hover:underline"
+            >
+              Hapus Semua
+            </button>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );
 }
 
+function UserProfileDropdown({ user, logout }: { user: any; logout: () => void }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="nb-border nb-shadow-sm bg-[var(--nb-yellow)] hover:bg-yellow-400 p-1.5 md:p-2 rounded-[var(--radius)] flex items-center gap-2 nb-press cursor-pointer">
+          <div className="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center font-bold text-[10px]">
+            {user?.email?.[0]?.toUpperCase() || "A"}
+          </div>
+          <span className="hidden lg:inline text-xs font-bold font-mono text-black max-w-[120px] truncate">
+            {user?.email?.split("@")[0] || "Admin"}
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" sideOffset={6} className="w-56 p-2 nb-border shadow-[4px_4px_0_0_#000] bg-white rounded-[var(--radius)] font-mono text-xs space-y-1">
+        <DropdownMenuLabel className="p-2 bg-gray-50 border-b border-black/10 rounded">
+          <p className="font-bold text-black truncate">{user?.email}</p>
+          <span className="inline-block mt-1 bg-black text-white text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-black">
+            {user?.role}
+          </span>
+        </DropdownMenuLabel>
+        <DropdownMenuItem asChild className="p-2 cursor-pointer rounded hover:bg-yellow-100 flex items-center gap-2 font-bold">
+          <Link to="/settings">
+            <Settings className="w-3.5 h-3.5" /> Pengaturan Studio
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="p-2 cursor-pointer rounded hover:bg-pink-100 flex items-center gap-2 font-bold">
+          <Link to="/users">
+            <Users className="w-3.5 h-3.5" /> Kelola User
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="my-1 border-t border-black/10" />
+        <DropdownMenuItem
+          onClick={logout}
+          className="p-2 cursor-pointer rounded bg-red-500 hover:bg-red-600 text-white font-bold flex items-center gap-2"
+        >
+          <LogOut className="w-3.5 h-3.5" /> Keluar Console
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 function AdminLayout() {
   const navigate = useNavigate();
@@ -121,38 +291,22 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-[var(--nb-bg)] flex flex-col md:flex-row">
       {/* 1. DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex w-72 bg-white border-r-[3px] border-black flex-col sticky top-0 h-screen shadow-[4px_0_0_0_#000] z-20">
+      <aside className="hidden md:flex w-64 bg-white border-r-[3px] border-black flex-col sticky top-0 h-screen shadow-[4px_0_0_0_#000] z-20">
         {/* Sidebar Header / Logo */}
-        <div className="p-4 md:p-5 border-b-[3px] border-black flex items-center justify-between bg-[var(--nb-yellow)]">
-          <div className="flex items-center gap-3">
-            <div className="nb-border bg-white rounded-[var(--radius)] p-1.5 md:p-2 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-              <Palette className="w-5 h-5 md:w-6 md:h-6 text-black" strokeWidth={2.5} />
+        <div className="p-4 border-b-[3px] border-black flex items-center justify-between bg-[var(--nb-yellow)]">
+          <div className="flex items-center gap-2.5">
+            <div className="nb-border bg-white rounded-[var(--radius)] p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+              <Palette className="w-5 h-5 text-black" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="font-bold text-xs md:text-sm uppercase tracking-wider leading-none">Studio Admin</h1>
-              <p className="text-[9px] md:text-[10px] font-mono text-muted-foreground mt-0.5">CONSOLE PANEL</p>
+              <h1 className="font-bold text-xs uppercase tracking-wider leading-none">Studio Admin</h1>
+              <p className="text-[9px] font-mono text-muted-foreground mt-0.5">CONSOLE PANEL</p>
             </div>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <StorageCdnModal />
-            <NotificationBell />
-          </div>
-        </div>
-
-        {/* User Card */}
-        <div className="p-4 border-b-2 border-black/10 bg-gray-50 flex flex-col gap-2">
-          <span className="text-xs font-mono text-muted-foreground block truncate">Logged in as:</span>
-          <span className="text-xs font-bold text-black truncate">{user?.email}</span>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-[9px] bg-black text-white font-mono uppercase font-bold px-2 py-0.5 rounded border border-black">
-              {user?.role}
-            </span>
-            <CloudinaryManagerModal />
           </div>
         </div>
 
         {/* Sidebar Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-2.5">
+        <nav className="flex-1 overflow-y-auto p-3 space-y-2">
           {tabs.map((t) => {
             const active = location.pathname === t.to;
             const Icon = t.icon;
@@ -161,7 +315,7 @@ function AdminLayout() {
                 key={t.to}
                 to={t.to}
                 className={[
-                  "w-full nb-border nb-press nb-press-hover rounded-[var(--radius)] px-4 py-2.5 font-bold uppercase text-xs flex items-center gap-3 transition-all",
+                  "w-full nb-border nb-press rounded-[var(--radius)] px-3 py-2 font-bold uppercase text-xs flex items-center gap-2.5 transition-all",
                   active
                     ? "nb-shadow bg-black text-white border-black"
                     : `nb-shadow-sm ${t.color} hover:translate-x-1`,
@@ -175,10 +329,10 @@ function AdminLayout() {
         </nav>
 
         {/* Sidebar Logout Footer */}
-        <div className="p-4 border-t-[3px] border-black bg-gray-50">
+        <div className="p-3 border-t-[3px] border-black bg-gray-50">
           <button
             onClick={logout}
-            className="w-full nb-border nb-shadow-sm nb-press nb-press-hover rounded-[var(--radius)] bg-red-500 text-white px-4 py-2.5 font-bold uppercase text-xs flex items-center justify-center gap-2"
+            className="w-full nb-border nb-shadow-sm nb-press rounded-[var(--radius)] bg-red-500 text-white px-3 py-2 font-bold uppercase text-xs flex items-center justify-center gap-2"
           >
             <LogOut className="w-4 h-4" /> Keluar Console
           </button>
@@ -192,14 +346,19 @@ function AdminLayout() {
             <div className="nb-border bg-[var(--nb-yellow)] rounded-[var(--radius)] p-1 shadow-[1.5px_1.5px_0_0_rgba(0,0,0,1)]">
               <Palette className="w-3.5 h-3.5" strokeWidth={2.5} />
             </div>
-            <div className="flex flex-col">
-              <h1 className="text-[11px] font-bold uppercase tracking-wider leading-none">Admin</h1>
-              <p className="text-[8px] font-mono text-muted-foreground truncate max-w-[100px]">{user?.email}</p>
-            </div>
+            <h1 className="text-[11px] font-bold uppercase tracking-wider leading-none">Admin</h1>
           </div>
-          <div className="flex items-center gap-1.5 md:gap-2">
-            <StorageCdnModal />
-            <CloudinaryManagerModal />
+
+          <div className="flex items-center gap-2">
+            <StorageCdnModal
+              triggerBtn={
+                <button className="nb-border nb-shadow-sm rounded-[var(--radius)] bg-indigo-500 text-white px-2 py-1 font-bold uppercase text-xs flex items-center gap-1">
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  <span className="text-[10px]">Media</span>
+                </button>
+              }
+            />
+            <UserProfileDropdown user={user} logout={logout} />
             <NotificationBell />
             <button
               onClick={() => setOpen((v) => !v)}
@@ -242,11 +401,6 @@ function AdminLayout() {
           </button>
         </div>
 
-        <div className="p-3 border-b-2 border-black/10 bg-gray-50 flex flex-col">
-          <span className="text-[10px] font-mono text-muted-foreground">Logged in as:</span>
-          <span className="text-[11px] font-bold text-black truncate">{user?.email}</span>
-        </div>
-
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {(tabs as readonly any[]).map((t) => {
             const active = location.pathname === t.to;
@@ -280,8 +434,35 @@ function AdminLayout() {
         </div>
       </div>
 
-      {/* 3. MAIN CONTENT CONTAINER */}
+      {/* 3. MAIN CONTENT CONTAINER WITH TOP DESKTOP HEADER */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* DESKTOP TOP HEADER */}
+        <header className="hidden md:flex items-center justify-between px-6 py-3 bg-white border-b-[3px] border-black shadow-[0_3px_0_0_#000] sticky top-0 z-10">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-xs uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded border border-black">
+              CONSOLE
+            </span>
+            <span className="text-xs font-bold uppercase font-mono text-gray-700">Studio Admin Panel</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Quick Access Media CDN Modal Button */}
+            <StorageCdnModal
+              triggerBtn={
+                <button className="nb-border nb-shadow-sm rounded-[var(--radius)] bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 font-bold uppercase text-xs flex items-center gap-1.5 nb-press">
+                  <ImageIcon className="w-3.5 h-3.5 text-white" />
+                  <span>Media CDN</span>
+                </button>
+              }
+            />
+
+            {/* Profile Avatar & Dropdown Menu */}
+            <UserProfileDropdown user={user} logout={logout} />
+
+            <NotificationBell />
+          </div>
+        </header>
+
         <main className="p-3 sm:p-5 md:p-8 flex-1 w-full max-w-7xl mx-auto overflow-x-hidden">
           <Outlet />
         </main>

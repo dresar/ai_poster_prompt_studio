@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io' as io;
-import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +6,7 @@ import '../../core/theme/neo_theme.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/services/local_db_service.dart';
 import '../../shared/widgets/neo_buttons.dart';
+import '../../core/utils/file_directory_helper.dart';
 import '../saved_codes/saved_codes_screen.dart';
 
 
@@ -406,12 +405,6 @@ class _TemplateDetailSheetState extends State<_TemplateDetailSheet> {
 
   Future<void> _downloadActiveFile() async {
     try {
-      final dir = await getApplicationDocumentsDirectory();
-      final appDir = io.Directory('${dir.path}/AIPosterStudio');
-      if (!await appDir.exists()) {
-        await appDir.create(recursive: true);
-      }
-
       final dateStr = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       String content = '';
       String ext = 'txt';
@@ -431,16 +424,23 @@ class _TemplateDetailSheetState extends State<_TemplateDetailSheet> {
       }
 
       final fileName = '${prefix}_$dateStr.$ext';
-      final file = io.File('${appDir.path}/$fileName');
-      await file.writeAsString(content);
+      final saveResult = await FileDirectoryHelper.saveFile(
+        fileName: fileName,
+        content: content,
+      );
+
+      if (!saveResult.isSuccess) {
+        throw Exception(saveResult.errorMessage ?? 'Gagal menyimpan file');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('File disimpan: $fileName'),
+            duration: const Duration(seconds: 5),
+            content: Text('⚡ Terdownload ke: ${saveResult.displayLocation}/$fileName'),
             backgroundColor: NeoTheme.accentGreen,
             action: SnackBarAction(
-              label: 'Buka',
+              label: 'Lihat',
               textColor: Colors.white,
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const SavedCodesScreen()));

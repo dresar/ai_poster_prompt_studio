@@ -23,7 +23,13 @@ Tulis respons hanya dalam format JSON yang valid, gunakan bahasa Indonesia.`;
         const response = await this.groqClient.post(apiKey, {
           model: 'llama-3.3-70b-versatile',
           response_format: { type: 'json_object' },
-          messages: [{ role: 'user', content: prompt }],
+          messages: [
+            {
+              role: 'system',
+              content: 'Kamu adalah analis konten media sosial dan content strategist profesional. Kembalikan respons HANYA dalam format JSON valid sesuai skema yang diminta, tanpa komentar atau teks tambahan.'
+            },
+            { role: 'user', content: prompt }
+          ],
         });
         const text = response.choices[0]?.message?.content || '{}';
         return JSON.parse(this.groqClient.sanitizeJson(text));
@@ -48,16 +54,27 @@ Output wajib berformat JSON array of string seperti ini:
 
     if (provider === 'groq') {
       return this.groqClient.executeWithKey(async (apiKey) => {
+        const wrappedPrompt = `Hasilkan 4 variasi hook (kalimat pemikat/judul viral) dalam bahasa Indonesia untuk poster dengan topik: "${topic}".
+Hook harus dirancang untuk media sosial (menarik rasa penasaran, relevan, atau kontroversial secara positif).
+Output wajib berformat JSON object dengan key "hooks" berisi array string:
+{"hooks": ["Hook Variasi 1", "Hook Variasi 2", "Hook Variasi 3", "Hook Variasi 4"]}`;
         const response = await this.groqClient.post(apiKey, {
           model: 'llama-3.3-70b-versatile',
           response_format: { type: 'json_object' },
-          messages: [{ role: 'user', content: prompt }],
+          messages: [
+            {
+              role: 'system',
+              content: 'Kamu adalah copywriter viral media sosial profesional. Kembalikan respons HANYA dalam format JSON valid dengan key "hooks" berisi array string hook yang menarik.'
+            },
+            { role: 'user', content: wrappedPrompt }
+          ],
         });
         const text = response.choices[0]?.message?.content || '{}';
         const parsed = JSON.parse(this.groqClient.sanitizeJson(text));
         if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed.hooks)) return parsed.hooks;
         for (const val of Object.values(parsed)) {
-          if (Array.isArray(val)) return val;
+          if (Array.isArray(val)) return val as string[];
         }
         return [];
       });

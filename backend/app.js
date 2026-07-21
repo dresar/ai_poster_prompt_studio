@@ -58860,7 +58860,7 @@ init_logger();
 
 // src/middlewares/errorHandler.ts
 init_logger();
-var AppError2 = class extends Error {
+var AppError = class extends Error {
   statusCode;
   code;
   data;
@@ -58939,7 +58939,7 @@ var AuthService = class {
     const existingUsers = await db.select().from(users).where(eq(users.email, email)).limit(1);
     const existingUser = existingUsers[0];
     if (existingUser) {
-      throw new AppError2("Email already registered", 400, "EMAIL_EXISTS");
+      throw new AppError("Email already registered", 400, "EMAIL_EXISTS");
     }
     const salt = await import_bcryptjs.default.genSalt(10);
     const hashedPassword = await import_bcryptjs.default.hash(passwordHash, salt);
@@ -58976,11 +58976,11 @@ var AuthService = class {
     const foundUsers = await db.select().from(users).where(eq(users.email, email)).limit(1);
     const user = foundUsers[0];
     if (!user) {
-      throw new AppError2("Invalid email or password", 401, "INVALID_CREDENTIALS");
+      throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
     }
     const isMatch = await import_bcryptjs.default.compare(passwordHash, user.passwordHash);
     if (!isMatch) {
-      throw new AppError2("Invalid email or password", 401, "INVALID_CREDENTIALS");
+      throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
     }
     await db.insert(logs).values({
       id: import_crypto.default.randomUUID(),
@@ -59010,7 +59010,7 @@ var AuthService = class {
       const foundUsers = await db.select().from(users).where(eq(users.id, decoded.id)).limit(1);
       const user = foundUsers[0];
       if (!user) {
-        throw new AppError2("User not found", 401, "UNAUTHORIZED");
+        throw new AppError("User not found", 401, "UNAUTHORIZED");
       }
       const accessToken = this.generateAccessToken(user);
       const newRefreshToken = this.generateRefreshToken(user);
@@ -59019,21 +59019,21 @@ var AuthService = class {
         refreshToken: newRefreshToken
       };
     } catch (error) {
-      throw new AppError2("Invalid or expired refresh token", 401, "INVALID_REFRESH_TOKEN");
+      throw new AppError("Invalid or expired refresh token", 401, "INVALID_REFRESH_TOKEN");
     }
   }
   async changePassword(userId, oldPassword, newPassword) {
     const foundUsers = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     const user = foundUsers[0];
     if (!user) {
-      throw new AppError2("User not found", 404, "USER_NOT_FOUND");
+      throw new AppError("User not found", 404, "USER_NOT_FOUND");
     }
     const isMatch = await import_bcryptjs.default.compare(oldPassword, user.passwordHash);
     if (!isMatch) {
-      throw new AppError2("Password lama salah", 400, "INCORRECT_OLD_PASSWORD");
+      throw new AppError("Password lama salah", 400, "INCORRECT_OLD_PASSWORD");
     }
     if (newPassword.length < 6) {
-      throw new AppError2("Password baru minimal 6 karakter", 400, "WEAK_PASSWORD");
+      throw new AppError("Password baru minimal 6 karakter", 400, "WEAK_PASSWORD");
     }
     const salt = await import_bcryptjs.default.genSalt(10);
     const hashedPassword = await import_bcryptjs.default.hash(newPassword, salt);
@@ -63318,7 +63318,7 @@ var validate = (schema) => {
           field: err.path.join("."),
           message: err.message
         }));
-        next(new AppError2("Validation failed", 400, "VALIDATION_ERROR", errorMessages));
+        next(new AppError("Validation failed", 400, "VALIDATION_ERROR", errorMessages));
       } else {
         next(error);
       }
@@ -63334,7 +63334,7 @@ var authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new AppError2("Authentication token missing or invalid", 401, "UNAUTHORIZED");
+      throw new AppError("Authentication token missing or invalid", 401, "UNAUTHORIZED");
     }
     const token = authHeader.split(" ")[1];
     const decoded = import_jsonwebtoken2.default.verify(token, env.JWT_SECRET);
@@ -63346,10 +63346,10 @@ var authenticate = async (req, res, next) => {
     }).from(users).where(eq(users.id, decoded.id)).limit(1);
     const user = userRecords[0];
     if (!user) {
-      throw new AppError2("User no longer exists", 401, "UNAUTHORIZED");
+      throw new AppError("User no longer exists", 401, "UNAUTHORIZED");
     }
     if (user.subscriptionStatus === "BLOCKED") {
-      throw new AppError2("Akun Anda telah ditangguhkan/diblokir oleh sistem karena aktivitas mencurigakan atau spam API.", 403, "BLOCKED");
+      throw new AppError("Akun Anda telah ditangguhkan/diblokir oleh sistem karena aktivitas mencurigakan atau spam API.", 403, "BLOCKED");
     }
     req.user = {
       id: user.id,
@@ -63359,9 +63359,9 @@ var authenticate = async (req, res, next) => {
     next();
   } catch (error) {
     if (error instanceof import_jsonwebtoken2.default.TokenExpiredError) {
-      next(new AppError2("Token has expired", 401, "TOKEN_EXPIRED"));
+      next(new AppError("Token has expired", 401, "TOKEN_EXPIRED"));
     } else if (error instanceof import_jsonwebtoken2.default.JsonWebTokenError) {
-      next(new AppError2("Invalid token", 401, "INVALID_TOKEN"));
+      next(new AppError("Invalid token", 401, "INVALID_TOKEN"));
     } else {
       next(error);
     }
@@ -63370,10 +63370,10 @@ var authenticate = async (req, res, next) => {
 var requireRole = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return next(new AppError2("Authentication required", 401, "UNAUTHORIZED"));
+      return next(new AppError("Authentication required", 401, "UNAUTHORIZED"));
     }
     if (!roles.includes(req.user.role)) {
-      return next(new AppError2("Forbidden: Insufficient privileges", 403, "FORBIDDEN"));
+      return next(new AppError("Forbidden: Insufficient privileges", 403, "FORBIDDEN"));
     }
     next();
   };
@@ -64421,7 +64421,7 @@ var GeminiClient = class {
       });
     }
     if (keyPool.length === 0) {
-      throw new AppError2("Terjadi kendala koneksi dengan server AI. Silakan coba lagi nanti.", 500, "NO_API_KEYS");
+      throw new AppError("Terjadi kendala koneksi dengan server AI. Silakan coba lagi nanti.", 500, "NO_API_KEYS");
     }
     let lastError = null;
     for (const keyObj of keyPool) {
@@ -64472,7 +64472,7 @@ var GeminiClient = class {
       }
     }
     const cleanErr = lastError?.message || String(lastError);
-    throw new AppError2(
+    throw new AppError(
       `Gagal memproses permintaan Anda. Kendala: ${formatGeminiError(cleanErr)}`,
       502,
       "AI_SERVICE_ERROR"
@@ -64505,7 +64505,7 @@ var GroqClient = class {
   async executeWithKey(fn) {
     const keyPool = await this.getHealthyKeys();
     if (keyPool.length === 0) {
-      throw new AppError2("Terjadi kendala koneksi dengan server AI. Silakan coba lagi nanti.", 500, "NO_API_KEYS");
+      throw new AppError("Terjadi kendala koneksi dengan server AI. Silakan coba lagi nanti.", 500, "NO_API_KEYS");
     }
     let lastError = null;
     for (const keyObj of keyPool) {
@@ -64554,7 +64554,7 @@ var GroqClient = class {
       }
     }
     const cleanErr = lastError?.message || String(lastError);
-    throw new AppError2(
+    throw new AppError(
       `Gagal memproses permintaan Anda. Kendala: ${formatAiError(cleanErr, "groq")}`,
       502,
       "AI_SERVICE_ERROR"
@@ -64701,7 +64701,13 @@ Tulis respons hanya dalam format JSON yang valid, gunakan bahasa Indonesia.`;
         const response = await this.groqClient.post(apiKey, {
           model: "llama-3.3-70b-versatile",
           response_format: { type: "json_object" },
-          messages: [{ role: "user", content: prompt }]
+          messages: [
+            {
+              role: "system",
+              content: "Kamu adalah analis konten media sosial dan content strategist profesional. Kembalikan respons HANYA dalam format JSON valid sesuai skema yang diminta, tanpa komentar atau teks tambahan."
+            },
+            { role: "user", content: prompt }
+          ]
         });
         const text2 = response.choices[0]?.message?.content || "{}";
         return JSON.parse(this.groqClient.sanitizeJson(text2));
@@ -64724,14 +64730,25 @@ Output wajib berformat JSON array of string seperti ini:
 ["Hook Variasi 1", "Hook Variasi 2", "Hook Variasi 3", "Hook Variasi 4"]`;
     if (provider === "groq") {
       return this.groqClient.executeWithKey(async (apiKey) => {
+        const wrappedPrompt = `Hasilkan 4 variasi hook (kalimat pemikat/judul viral) dalam bahasa Indonesia untuk poster dengan topik: "${topic}".
+Hook harus dirancang untuk media sosial (menarik rasa penasaran, relevan, atau kontroversial secara positif).
+Output wajib berformat JSON object dengan key "hooks" berisi array string:
+{"hooks": ["Hook Variasi 1", "Hook Variasi 2", "Hook Variasi 3", "Hook Variasi 4"]}`;
         const response = await this.groqClient.post(apiKey, {
           model: "llama-3.3-70b-versatile",
           response_format: { type: "json_object" },
-          messages: [{ role: "user", content: prompt }]
+          messages: [
+            {
+              role: "system",
+              content: 'Kamu adalah copywriter viral media sosial profesional. Kembalikan respons HANYA dalam format JSON valid dengan key "hooks" berisi array string hook yang menarik.'
+            },
+            { role: "user", content: wrappedPrompt }
+          ]
         });
         const text2 = response.choices[0]?.message?.content || "{}";
         const parsed = JSON.parse(this.groqClient.sanitizeJson(text2));
         if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed.hooks)) return parsed.hooks;
         for (const val of Object.values(parsed)) {
           if (Array.isArray(val)) return val;
         }
@@ -64750,6 +64767,130 @@ Output wajib berformat JSON array of string seperti ini:
           if (Array.isArray(val)) return val;
         }
         return [];
+      });
+    }
+  }
+  async generateStoryboard(topic, duration, provider) {
+    const segmentCount = Math.ceil((duration || 30) / 10);
+    const prompt = `Buatkan storyboard video sinematik profesional yang utuh dan terperinci untuk topik/ide berikut: "${topic}".
+Video ini berdurasi ${duration} detik dan dibagi menjadi ${segmentCount} segmen masing-masing tepat 10 detik.
+
+Kembalikan respons HANYA dalam format JSON yang valid dengan struktur data berikut (Gunakan Bahasa Indonesia):
+{
+  "projectSummary": {
+    "title": "Judul Storyboard Video",
+    "totalDuration": ${duration},
+    "description": "Deskripsi alur cerita video secara keseluruhan."
+  },
+  "storyBible": {
+    "storyType": "Narrative / Edukasi / Commercial / dll",
+    "narrative": "Penjelasan narasi video...",
+    "conflict": "Konflik utama cerita...",
+    "resolution": "Resolusi konflik...",
+    "ending": "Ending...",
+    "emotionalArc": "Perkembangan emosi (misal: penasaran -> tegang -> lega)"
+  },
+  "characterBible": [
+    {
+      "name": "Karakter Utama (misal: Alex)",
+      "age": "Umur",
+      "height": "Tinggi badan",
+      "face": "Deskripsi wajah",
+      "skin": "Warna kulit",
+      "eyes": "Warna/bentuk mata",
+      "hair": "Gaya rambut",
+      "clothes": "Pakaian permanen sepanjang scene",
+      "accessories": "Aksesoris",
+      "expressionDefault": "Ekspresi utama",
+      "walkStyle": "Cara berjalan",
+      "gesture": "Gestur khas",
+      "habits": "Kebiasaan",
+      "personality": "Kepribadian",
+      "voiceTone": "Tone suara"
+    }
+  ],
+  "environmentBible": [
+    {
+      "location": "Nama Lokasi Utama",
+      "season": "Musim",
+      "weather": "Cuaca",
+      "time": "Waktu (Siang/Malam/dll)",
+      "colors": "Skema warna dominan",
+      "materials": "Material dominan",
+      "atmosphere": "Atmosfer/suasana",
+      "objectDensity": "Kepadatan objek",
+      "fog": "Ada/tidak",
+      "rain": "Ada/tidak",
+      "wind": "Ada/tidak",
+      "lighting": "Pencahayaan"
+    }
+  ],
+  "cameraBible": {
+    "shotSize": "Medium Shot / Close Up / dll",
+    "movement": "Pan / Tilt / Orbit / dll",
+    "focalLength": "35mm / 50mm / dll",
+    "lens": "Anamorphic / Prime / dll",
+    "depthOfField": "Shallow / Deep",
+    "cameraSpeed": "Normal / Slow-motion / Fast",
+    "stabilization": "Gimbal / Handheld",
+    "cameraDirection": "Horizontal panning"
+  },
+  "motionBible": {
+    "characterMovement": "Gerakan karakter utama",
+    "objectMovement": "Gerakan objek di sekitar",
+    "gazeDirection": "Arah pandang karakter",
+    "speedRhythm": "Kecepatan dan ritme"
+  },
+  "sceneBreakdown": [
+    {
+      "sceneNumber": 1,
+      "title": "Judul Scene 1 (00:00 - 00:10)",
+      "goal": "Tujuan dramatis scene ini",
+      "duration": 10,
+      "mainSubject": "Karakter Utama",
+      "action": "Aksi detail subjek utama",
+      "emotion": "Emosi subjek",
+      "camera": "Pengaturan kamera khusus scene ini",
+      "lighting": "Pencahayaan khusus scene ini",
+      "environment": "Latar lokasi scene ini",
+      "transition": "Transisi visual ke scene berikutnya",
+      "dialogue": "Dialog atau Voice-Over (jika ada)",
+      "soundEffect": "Efek suara",
+      "musicMood": "Nuansa musik pengiring",
+      "timelineBreakdown": [
+        { "timeRange": "0-3 detik", "action": "Aksi di detik awal" },
+        { "timeRange": "3-7 detik", "action": "Aksi di pertengahan" },
+        { "timeRange": "7-10 detik", "action": "Aksi di akhir" }
+      ],
+      "continuity": {
+        "startingState": "Kondisi fisik/posisi awal subjek",
+        "endingState": "Kondisi fisik/posisi akhir subjek",
+        "rules": "Aturan konsistensi (posisi, pakaian, lighting)"
+      }
+    }
+  ],
+  "continuityRules": "Aturan konsistensi antar-segmen (misalnya: pakaian dan lighting tidak boleh berubah mendadak)",
+  "negativePrompt": "flicker, character morphing, clothing color change, sudden lighting shifts, bad anatomy, double heads, text watermarks"
+}
+Tulis respons HANYA berupa JSON valid. Jangan beri penjelasan lain.`;
+    if (provider === "groq") {
+      return this.groqClient.executeWithKey(async (apiKey) => {
+        const response = await this.groqClient.post(apiKey, {
+          model: "llama-3.3-70b-versatile",
+          response_format: { type: "json_object" },
+          messages: [{ role: "user", content: prompt }]
+        });
+        const text2 = response.choices[0]?.message?.content || "{}";
+        return JSON.parse(this.groqClient.sanitizeJson(text2));
+      });
+    } else {
+      return this.geminiClient.executeWithKey(async (genAI) => {
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-pro",
+          generationConfig: { responseMimeType: "application/json" }
+        });
+        const response = await model.generateContent(prompt);
+        return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
       });
     }
   }
@@ -64812,7 +64953,7 @@ function enrichSlidePrompt(slide, payload, characterFocusPrompt) {
   const camera = "flat graphic front-facing perspective, orthographic camera angle, clean eye-level view, 0-degree tilt";
   const materials = "premium matte paper texture, smooth vector lines, flat color fills, clean non-reflective surfaces";
   const parts = [
-    `- Communication Goal: Render Slide ${slide.slideNumber} with strong visual clarity and storytelling`,
+    `- Slide Render Directive: Render Slide ${slide.slideNumber} as a single final high-resolution fullscreen artwork with strong visual clarity and storytelling impact`,
     `- Visual Style: ${payload.visualBlueprint.coreVisualStyle}`,
     `- Layout & Grid: ${payload.designSystem.gridStructure} utilizing ${payload.designSystem.whitespaceRatio}`,
     `- Main Subject: ${subjectStr}`,
@@ -64917,6 +65058,138 @@ ${negative}`,
   ];
   const finalCompiledPrompt = promptParts.join("\n").trim();
   return optimizeFinalPrompt(finalCompiledPrompt, targetModel);
+}
+function compileEdukasiMasterPrompt(payload, fullFormState, styleTemplate, characterFocusPrompt, dropdownSpecs, watermarkInstruction) {
+  validateAndHealPayload(payload);
+  const slides = payload.slidesContent || [];
+  const slidesCount = slides.length || fullFormState.slideCount || 5;
+  const topic = fullFormState.topic || payload.contentPayload?.topic || "Edukasi";
+  const masterPromptObj = {
+    judul_project: `${topic} - Carousel Edukasi ${slidesCount} Slide`,
+    instruksi_cara_kerja_ai: `PERINTAH UTAMA \u2014 BACA DAN INGAT SELAMA SESI INI BERLANGSUNG:
+Ini adalah satu paket prompt master untuk membuat ${slidesCount} gambar carousel edukasi secara berurutan. JANGAN generate semua ${slidesCount} gambar sekaligus. Ikuti alur kerja berikut:
+
+1. KONFIRMASI: Setelah membaca prompt ini, berikan rangkuman singkat bahwa kamu paham aturan global, gaya visual, dan daftar ${slidesCount} slide, lalu TUNGGU perintah 'lanjut'.
+2. EKSEKUSI PER SLIDE: Setiap user mengetik 'lanjut' atau 'next', generate SATU gambar untuk slide berikutnya sesuai urutan.
+3. KONSISTENSI KARAKTER & VISUAL (FITUR WAJIB): Simpan metadata visual (warna dominan, ciri fisik karakter, pakaian, jenis lighting, environment/background) di ingatanmu. Gunakan seed atau deskripsi referensi yang identik di setiap prompt gambar selanjutnya untuk mempertahankan konsistensi identitas.
+4. VARIASI ANGLE & KOMPOSISI: Selalu bandingkan rencana komposisi slide baru dengan slide sebelumnya. Variasikan angle kamera (close-up, medium shot, wide shot, top-down) dan posisi objek utama agar tidak repetitif, NAMUN tetap 100% patuh pada 'gaya_visual_global'.
+5. KONSISTENSI UI/OVERLAY: Pastikan elemen UI seperti nomor slide, CTA follow, dan footer diletakkan pada posisi pixel yang identik di setiap gambar.
+6. ATURAN LATAR/BACKGROUND: WAJIB gunakan latar belakang dengan nuansa Putih Bersih di seluruh slide.
+7. PROGRESS TRACKING: Jika ditanya 'sudah sampai mana', berikan laporan progres dari total ${slidesCount} slide.`,
+    aturan_global: {
+      platform_target: "Instagram Carousel Post",
+      peran: "Kamu adalah Senior Graphic Designer & Art Director yang mengetahui kombinasi warna, tipografi, dan estetika visual premium.",
+      target_audiens: payload.contentPayload?.targetAudience || fullFormState.targetAudience || "Pelajar & Mahasiswa",
+      level_kesulitan_konten: "Pemula total, asumsikan audiens belum pernah lihat materi ini sebelumnya. Gunakan analogi sehari-hari dan jangan terlalu teknis.",
+      jenis_konten: "Edukasi Instagram",
+      catatan_render_kode: "TIDAK BOLEH generate teks sintaks kode presisi (<p>, <a>, dll) sebagai teks asli dalam gambar. AI cukup membuat ilustrasi visual yang menyerupai blok kode dengan syntax highlighting (tanpa teks presisi) untuk diedit manual nantinya.",
+      bahasa_teks_overlay: "Non-formal, santai, dan asik. Bicara seperti kakak/teman yang berbagi ilmu, BUKAN seperti buku pelajaran atau artikel jurnal.",
+      batas_teks: "Maksimal 10 kata per elemen teks (headline, subtext, detail, microTip). Ringkas, padat, cepat dibaca.",
+      satu_poin_per_slide: "Satu slide = satu insight/tips/fakta yang disampaikan jelas dan mudah dicerna.",
+      terminologi_wajib_diselipkan: [
+        "fakta menarik",
+        "tahukah kamu",
+        "tips praktis",
+        "jangan sampai salah",
+        "insight penting",
+        "studi menunjukkan",
+        "cara mudah",
+        "langkah simpel",
+        "bukti nyata",
+        "ternyata begini",
+        "coba deh",
+        "bisa langsung dipraktekin"
+      ],
+      larangan: "DILARANG KERAS menyebut harga, diskon, promo produk, atau jualan apapun dalam konten edukasi ini.",
+      call_to_action_variatif: fullFormState.callToAction || fullFormState.cta || 'Selain save/share/follow, variasikan ajakan: misal ajak komentar ("Tag temanmu"), atau praktik agar lebih interaktif.'
+    },
+    gaya_visual_global: {
+      gaya_visual_wajib: styleTemplate || payload.visualBlueprint?.coreVisualStyle || "Create a premium minimalist branding presentation background...",
+      gaya_dominan: `${fullFormState.style || "Minimalist visual style"} dengan perpaduan elemen profesional.`,
+      rasio_komposisi: "70% area ilustrasi/kode visual, 30% area teks (whitespace luas) agar AI tidak menginterpretasi bebas proporsi tiap slide.",
+      tata_letak_hierarki: payload.designSystem?.gridStructure || "Struktur grid yang rapi, rapi, dan teratur. Whitespace luas, margin seimbang, penataan informasi yang efisien.",
+      elemen_pendukung: "Garis tipis pembatas, ikon pendukung minimalis, elemen visual yang sesuai dengan gaya visual utama.",
+      gaya_ikon_konsisten: "Flat line icon, duotone, stroke 2px, sudut membulat. Konsisten satu sistem di seluruh slide.",
+      palet_warna: {
+        dasar_netral: [
+          dropdownSpecs || payload.designSystem?.colorPalette || "Deep Navy Blue (#0F2D52), Charcoal Gray (#4B5563), Off-White (#FAFAFA), Putih Bersih"
+        ],
+        aksen: [
+          "Steel Blue (#3B82F6)",
+          "Subtle Silver (#E5E7EB)"
+        ]
+      },
+      tipografi: "Sans-serif premium. Headline bold ukuran besar, subtext/detail teks rapi dan teratur dengan kontras tinggi.",
+      tipografi_kode: "Font khusus untuk elemen menyerupai kode program: Fira Code / JetBrains Mono, monospace, dengan warna syntax-highlight (keyword biru, string hijau, tag oranye).",
+      variasi_wajib_per_slide: "Harus memiliki variasi angle kamera, rotasi posisi ilustrasi (kiri/kanan), dan variasi warna aksen dominan per slide untuk menghindari kebosanan.",
+      referensi_visual_brand: 'Desain harus memiliki identitas visual "Series Edukasi" yang ajeg, sehingga konten-konten lain selanjutnya memiliki benang merah yang sama.',
+      pencahayaan_kamera: "Clean studio lighting, pencahayaan merata dan netral, sudut kamera lurus (eye-level) atau top-down datar.",
+      kedalaman_visual: "Layering berlapis tipis, margin bersih, bayangan drop-shadow yang sangat halus.",
+      dimensi_canvas: `Canvas 1080x1440px, Aspect Ratio ${fullFormState.aspectRatio || "3:4"} (--ar ${fullFormState.aspectRatio || "3:4"})`,
+      negative_prompt: payload.renderingBlueprint?.negativePrompt || "watermark, blur, teks berantakan, kualitas buruk, anatomi aneh, font aneh, terlalu ramai"
+    },
+    layout_media_sosial_global: {
+      pojok_kiri_atas: `Overlay kotak berwarna biru berisi nomor slide (format 'X/${slidesCount}'), sesuaikan angka per slide.`,
+      pojok_kanan_atas: "Overlay warna konsisten berisi teks ajakan follow: 'Jangan lupa follow!'.",
+      tengah_atas_footer: "Ikon atau teks navigasi swipe ('Swipe right' / panah kanan) untuk ajak audiens geser slide.",
+      footer_bawah: watermarkInstruction || "Terpusat, minimalis, tanpa label teks pengantar (ikon langsung diikuti teks)"
+    },
+    daftar_slide: slides.map((slide, idx) => {
+      const num = slide.slideNumber || idx + 1;
+      let role = `POIN EDUKASI #${num - 1}`;
+      let urutan = `Step ${num} dari ${slidesCount}: Penjelasan Materi`;
+      if (num === 1) {
+        role = "HOOK & COVER EDUKASI (Slide Pembuka)";
+        urutan = `Step 1 dari ${slidesCount}: Pengenalan & Hook`;
+      } else if (num === slidesCount) {
+        role = "PENUTUP & AJAK INTERAKSI (Slide Terakhir)";
+        urutan = `Step ${slidesCount} dari ${slidesCount}: Kesimpulan & CTA`;
+      }
+      let visualObj = slide.subject || "";
+      if (slide.sceneDescription) {
+        visualObj += visualObj ? `, ${slide.sceneDescription}` : slide.sceneDescription;
+      }
+      if (characterFocusPrompt) {
+        visualObj += ` [Visual Character Consistency: ${characterFocusPrompt}]`;
+      }
+      return {
+        slideNumber: num,
+        role,
+        urutan_alur_belajar: urutan,
+        objek_visual: visualObj,
+        teks_dalam_gambar: {
+          headline: slide.headline || "",
+          subtext: slide.description || "",
+          detail: slide.keyPoints && slide.keyPoints.length > 0 ? slide.keyPoints.join(". ") : slide.educationalObjective || "",
+          microTip: slide.calloutSuggestions && slide.calloutSuggestions.length > 0 ? slide.calloutSuggestions[0] : ""
+        }
+      };
+    })
+  };
+  return JSON.stringify(masterPromptObj, null, 2);
+}
+function compileFinalVideoPrompt(payload, activeSegmentNumber, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel = "veo") {
+  const segments = payload.segmentsContent || [];
+  const segment = segments.find((s) => s.segmentNumber === activeSegmentNumber) || (segments.length > 0 ? segments[0] : null);
+  if (!segment) return "";
+  const visualStyle = styleTemplate || payload.videoStyle?.coreVisualStyle || "cinematic portrait style";
+  const colorPalette = payload.videoStyle?.colorPalette || "natural cinematic colors";
+  const cameraMovement = payload.videoStyle?.cameraMovementStyle || "smooth tracking shot";
+  const visualPrompt = segment.visualPrompt || "";
+  const motionPrompt = segment.motionPrompt || "";
+  const transitionPrompt = segment.transitionPrompt || "";
+  const negative = payload.renderingBlueprint?.negativePrompt || "";
+  const promptParts = [
+    `[SCENE CONTENT]: ${visualPrompt}`,
+    characterFocusPrompt ? `[SUBJECT CONSISTENCY]: ${characterFocusPrompt}` : "",
+    `[MOTION PATH]: ${motionPrompt}. Camera movement style: ${cameraMovement}`,
+    `[VISUAL STYLE & ENVIRONMENT]: ${visualStyle} look. Color theme: ${colorPalette}`,
+    `[TRANSITION DIRECTIVE]: ${transitionPrompt}`,
+    `[QUALITY BLUEPRINT]: ${payload.renderingBlueprint?.renderStyle || "High fidelity video"}, ${payload.renderingBlueprint?.qualityParameters || "ultra-sharp details, high resolution"}`,
+    `[NEGATIVE FILTERS]: Avoid: ${negative}`
+  ];
+  const rawPrompt = promptParts.filter(Boolean).join("\n");
+  return rawPrompt;
 }
 
 // src/modules/ai-gateway/features/prompt-generator.service.ts
@@ -65094,7 +65367,13 @@ OUTPUT WAJIB BERUPA SINGLE JSON DENGAN STRUKTUR BERIKUT:
     "analysisShortcomings": "Analisis singkat kelemahan visual",
     "hooks": ["hook 1", "hook 2"],
     "logoExplanation": "Penjelasan peletakan logo/branding",
-    "socialMediaCaption": "Caption media sosial lengkap untuk carousel ini"
+    "socialMediaCaption": "Caption media sosial lengkap untuk carousel ini",
+    "promptScore": 85,
+    "detailScore": 80,
+    "creativityScore": 90,
+    "compositionScore": 85,
+    "promptImprovement": "Saran perbaikan copywriting dan penempatan elemen agar lebih balance",
+    "aiSuggestions": ["Tambahkan watermark kontras", "Gunakan warna komplemen dominan"]
   }
 }
 
@@ -65111,7 +65390,13 @@ ${previousError}
       const response = await this.groqClient.post(apiKey, {
         model: "llama-3.3-70b-versatile",
         response_format: { type: "json_object" },
-        messages: [{ role: "user", content: finalPrompt }]
+        messages: [
+          {
+            role: "system",
+            content: "Kamu adalah Content Strategist dan Art Director profesional. Selalu kembalikan respons dalam format JSON valid yang lengkap dan terstruktur sesuai skema yang diminta. Jangan tambahkan komentar atau penjelasan di luar JSON."
+          },
+          { role: "user", content: finalPrompt }
+        ]
       });
       const text2 = response.choices[0]?.message?.content || "{}";
       const finalPayloadRaw = JSON.parse(this.groqClient.sanitizeJson(text2));
@@ -65121,7 +65406,8 @@ ${previousError}
       const dropdownSpecs = fullFormState.dropdownSpecs || "";
       const targetModel = fullFormState.imageGenerator || fullFormState.targetModel || "flux";
       this.injectDatabaseBlueprints(finalPayloadJson, fullFormState, styleTemplate, brandingInstruction, watermarkInstruction);
-      const finalPromptFinal = compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
+      const isEdukasi = fullFormState.feature === "edukasi" || fullFormState.mode === "edukasi" || fullFormState.category === "edukasi";
+      const finalPromptFinal = isEdukasi ? compileEdukasiMasterPrompt(finalPayloadJson, fullFormState, styleTemplate, characterFocusPrompt, dropdownSpecs, watermarkInstruction) : compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
       if (finalPayloadJson.slidesContent) {
         finalPayloadJson.slidesContent = finalPayloadJson.slidesContent.map((s) => ({
           ...s,
@@ -65192,9 +65478,15 @@ ${previousError}
               analysisShortcomings: { type: SchemaType.STRING },
               hooks: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
               logoExplanation: { type: SchemaType.STRING },
-              socialMediaCaption: { type: SchemaType.STRING }
+              socialMediaCaption: { type: SchemaType.STRING },
+              promptScore: { type: SchemaType.INTEGER },
+              detailScore: { type: SchemaType.INTEGER },
+              creativityScore: { type: SchemaType.INTEGER },
+              compositionScore: { type: SchemaType.INTEGER },
+              promptImprovement: { type: SchemaType.STRING },
+              aiSuggestions: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
             },
-            required: ["viralScore", "analysisShortcomings", "hooks", "logoExplanation", "socialMediaCaption"]
+            required: ["viralScore", "analysisShortcomings", "hooks", "logoExplanation", "socialMediaCaption", "promptScore", "detailScore", "creativityScore", "compositionScore", "promptImprovement", "aiSuggestions"]
           }
         },
         required: [
@@ -65228,6 +65520,13 @@ DESAIN SISTEM KONTEN YANG WAJIB DIATUR:
    - subject: Deskripsi karakter/subjek utama pada slide ini secara singkat dan jelas.
    - sceneDescription: Deskripsi latar belakang, aksi, dan suasana khusus pada slide ini.
    - visualEmphasis: Elemen fokus utama atau penekanan visual pada slide ini.
+3. Quality Evaluation -> Analisis kualitas draf input dan berikan nilai numeric:
+   - promptScore (0-100)
+   - detailScore (0-100)
+   - creativityScore (0-100)
+   - compositionScore (0-100)
+   - promptImprovement: Deskripsi singkat perbaikan visual yang Anda sarankan.
+   - aiSuggestions: Array 3 rekomendasi draf visual tambahan.
 
 OUTPUT HANYA BLOK JSON VALID SESUAI SKEMA.`;
       let finalPrompt = prompt;
@@ -65257,7 +65556,8 @@ ${previousError}
       const dropdownSpecs = fullFormState.dropdownSpecs || "";
       const targetModel = fullFormState.imageGenerator || fullFormState.targetModel || "flux";
       this.injectDatabaseBlueprints(finalPayloadJson, fullFormState, styleTemplate, brandingInstruction, watermarkInstruction);
-      const finalPromptFinal = compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
+      const isEdukasi = fullFormState.feature === "edukasi" || fullFormState.mode === "edukasi" || fullFormState.category === "edukasi";
+      const finalPromptFinal = isEdukasi ? compileEdukasiMasterPrompt(finalPayloadJson, fullFormState, styleTemplate, characterFocusPrompt, dropdownSpecs, watermarkInstruction) : compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
       if (finalPayloadJson.slidesContent) {
         finalPayloadJson.slidesContent = finalPayloadJson.slidesContent.map((s) => ({
           ...s,
@@ -65275,10 +65575,332 @@ ${previousError}
     });
   }
   async generatePrompt(fullFormState, previousError, provider) {
+    if (fullFormState.feature === "video") {
+      if (provider === "groq") {
+        return this.generateVideoPromptGroq(fullFormState, previousError);
+      }
+      return this.generateVideoPromptGemini(fullFormState, previousError);
+    }
+    if (fullFormState.feature === "advanced_video") {
+      if (provider === "groq") {
+        return this.generateAdvancedVideoPromptGroq(fullFormState, previousError);
+      }
+      return this.generateAdvancedVideoPromptGemini(fullFormState, previousError);
+    }
     if (provider === "groq") {
       return this.generatePromptGroq(fullFormState, previousError);
     }
     return this.generatePromptGemini(fullFormState, previousError);
+  }
+  // --- VIDEO CONTENT INTELLIGENCE ---
+  buildVideoContentIntelligence(fullFormState) {
+    const duration = Number(fullFormState.duration || 10);
+    const segmentCount = Math.ceil(duration / 10);
+    let strategy = `
+[STRATEGI KONTEN VIDEO: ${duration} DETIK (${segmentCount} SEGMEN @10 DETIK)]
+- Output adalah video berdurasi ${duration} detik yang dibagi menjadi ${segmentCount} segmen masing-masing tepat 10 detik.
+- Setiap segmen harus memiliki transisi yang mulus ke segmen berikutnya agar menjaga kesinambungan visual (visual continuity).
+- Alur Cerita (Storytelling Flow):
+  * Segmen 1 (00:00 - 00:10): Hook pembuka yang sangat menarik secara visual untuk menahan audiens dalam 3 detik pertama.
+  * Segmen 2 s.d ${segmentCount - 1} (jika ada): Pengembangan materi, demonstrasi, atau penjelasan alur cerita utama secara logis.
+  * Segmen Terakhir: Rangkuman, klimaks cerita, atau Call to Action (CTA) yang jelas.
+`;
+    if (fullFormState.characterFocusObj) {
+      const charObj = fullFormState.characterFocusObj;
+      strategy += `
+
+[ATURAN KARAKTER WAJIB: ${charObj.name}]
+- Gunakan karakter ini sebagai subjek di setiap segmen video.
+- Karakter harus terlihat hidup dan bergerak secara dinamis di setiap segmen.
+- Deskripsi Konsistensi Visual: ${fullFormState.characterFocusPrompt || ""}
+- Dilarang menyebutkan deskripsi warna, fisik, atau pakaian secara mendetail pada subject. Cukup panggil nama karakter dan posenya saja (contoh: "${charObj.name} sedang berlari kaget" atau "${charObj.name} tersenyum lebar").`;
+    }
+    return strategy;
+  }
+  // --- GEMINI VIDEO PROMPT GENERATOR ---
+  async generateVideoPromptGemini(fullFormState, previousError) {
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const duration = Number(fullFormState.duration || 10);
+      const segmentCount = Math.ceil(duration / 10);
+      const { watermarkInstruction } = this.buildPromptVariables(fullFormState);
+      const contentIntelligence = this.buildVideoContentIntelligence(fullFormState);
+      const isStrict = env.USE_STRICT_PAYLOAD_SCHEMA === "true";
+      const strictVideoSchema = {
+        type: SchemaType.OBJECT,
+        properties: {
+          SYSTEM_INIT: {
+            type: SchemaType.OBJECT,
+            properties: {
+              MISSION: { type: SchemaType.STRING }
+            },
+            required: ["MISSION"]
+          },
+          RULE_ENGINE: { type: SchemaType.OBJECT },
+          CONTENT_PAYLOAD: {
+            type: SchemaType.OBJECT,
+            properties: {
+              TOPIC: { type: SchemaType.STRING },
+              TARGET_AUDIENCE: { type: SchemaType.STRING },
+              EMOTIONAL_TRIGGER: { type: SchemaType.STRING }
+            },
+            required: ["TOPIC", "TARGET_AUDIENCE", "EMOTIONAL_TRIGGER"]
+          },
+          videoStyle: {
+            type: SchemaType.OBJECT,
+            properties: {
+              coreVisualStyle: { type: SchemaType.STRING },
+              colorPalette: { type: SchemaType.STRING },
+              cameraMovementStyle: { type: SchemaType.STRING }
+            },
+            required: ["coreVisualStyle", "colorPalette", "cameraMovementStyle"]
+          },
+          renderingBlueprint: {
+            type: SchemaType.OBJECT,
+            properties: {
+              renderStyle: { type: SchemaType.STRING },
+              qualityParameters: { type: SchemaType.STRING },
+              negativePrompt: { type: SchemaType.STRING }
+            },
+            required: ["renderStyle", "qualityParameters", "negativePrompt"]
+          },
+          brandingEngine: {
+            type: SchemaType.OBJECT,
+            properties: {
+              watermarkFooter: { type: SchemaType.STRING }
+            },
+            required: ["watermarkFooter"]
+          },
+          segmentsContent: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                segmentNumber: { type: SchemaType.INTEGER },
+                timestamp: { type: SchemaType.STRING },
+                headline: { type: SchemaType.STRING },
+                description: { type: SchemaType.STRING },
+                visualPrompt: { type: SchemaType.STRING },
+                motionPrompt: { type: SchemaType.STRING },
+                transitionPrompt: { type: SchemaType.STRING },
+                textOverlay: { type: SchemaType.STRING },
+                audioSuggestion: { type: SchemaType.STRING }
+              },
+              required: ["segmentNumber", "timestamp", "visualPrompt", "motionPrompt", "transitionPrompt"]
+            }
+          },
+          output: {
+            type: SchemaType.OBJECT,
+            properties: {
+              viralScore: { type: SchemaType.INTEGER },
+              analysisShortcomings: { type: SchemaType.STRING },
+              hooks: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              socialMediaCaption: { type: SchemaType.STRING }
+            },
+            required: ["viralScore", "analysisShortcomings", "hooks", "socialMediaCaption"]
+          }
+        },
+        required: [
+          "SYSTEM_INIT",
+          "RULE_ENGINE",
+          "CONTENT_PAYLOAD",
+          "videoStyle",
+          "renderingBlueprint",
+          "brandingEngine",
+          "segmentsContent",
+          "output"
+        ]
+      };
+      const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
+      if (isStrict) generationConfig.responseSchema = strictVideoSchema;
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro", generationConfig });
+      const parts = [];
+      const prompt = `Kamu adalah Video Content Strategist, Art Director & AI Video Prompt Architect profesional.
+Tugasmu adalah menganalisis input form user dan menyusun arsitektur data konten video berdurasi ${duration} detik ke dalam format JSON yang bersih dan representatif.
+
+Kamu WAJIB membagi video ini menjadi tepat ${segmentCount} segmen, masing-masing berdurasi 10 detik.
+Untuk setiap segmen, kamu harus merinci:
+1. segmentNumber (1, 2, dst)
+2. timestamp (misalnya "00:00 - 00:10", "00:10 - 00:20", dst)
+3. visualPrompt: Deskripsi visual yang sangat detail dalam Bahasa Inggris untuk generator video AI (seperti Google Veo/Runway). Sebutkan aksi subjek, pencahayaan, detail scene, dan pastikan konsistensi visual dengan segmen lain.
+4. motionPrompt: Pergerakan kamera dan dinamika aksi subjek secara detail dalam Bahasa Inggris (misal: "A slow dramatic zoom in on the subject's expression...").
+5. transitionPrompt: Deskripsi transisi visual ke segmen berikutnya agar video terlihat kontinu tanpa patahan kasar dalam Bahasa Inggris (misal: "Match cut of the hand movement...", "Seamless pan transition...").
+6. textOverlay: Kalimat teks/subtitles bahasa Indonesia yang muncul di layar untuk segmen ini (opsional).
+7. audioSuggestion: Rekomendasi efek suara atau suasana musik untuk segmen ini (opsional).
+
+STRATEGI KONTEN VIDEO DARI CONTENT INTELLIGENCE ENGINE:
+${contentIntelligence}
+
+INPUT USER:
+${JSON.stringify(fullFormState, null, 2)}
+
+OUTPUT HANYA BLOK JSON VALID SESUAI SKEMA.`;
+      let finalPrompt = prompt;
+      if (previousError) {
+        finalPrompt += `
+
+=======================================================
+\u{1F525} WARNING: SCHEMA ERROR PREVIOUSLY \u{1F525}
+${previousError}
+=======================================================`;
+      }
+      parts.push(finalPrompt);
+      if (fullFormState.referenceImage?.url) {
+        try {
+          const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(fullFormState.referenceImage.url);
+          parts.push(imagePart);
+        } catch (err) {
+          logger.warn(`Could not fetch reference image for video prompt generation: ${err?.message}`);
+        }
+      }
+      const response = await model.generateContent(parts);
+      const text2 = response.response.text();
+      const finalPayloadRaw = JSON.parse(this.geminiClient.sanitizeJson(text2));
+      const finalPayloadJson = this.deepCamelizeKeys(finalPayloadRaw);
+      const styleTemplate = fullFormState.styleTemplate || "";
+      const characterFocusPrompt = fullFormState.characterFocusPrompt || "";
+      const dropdownSpecs = fullFormState.dropdownSpecs || "";
+      const targetModel = fullFormState.videoGenerator || fullFormState.targetModel || "veo";
+      finalPayloadJson.brandingEngine = {
+        watermarkFooter: watermarkInstruction
+      };
+      if (finalPayloadJson.segmentsContent) {
+        finalPayloadJson.segmentsContent = finalPayloadJson.segmentsContent.map((s) => ({
+          ...s,
+          prompt: compileFinalVideoPrompt(finalPayloadJson, s.segmentNumber, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel)
+        }));
+      }
+      if (finalPayloadJson.segmentsContent) {
+        if (!finalPayloadJson.output) finalPayloadJson.output = {};
+        finalPayloadJson.output.segments = finalPayloadJson.segmentsContent.map((s) => ({
+          segmentNumber: s.segmentNumber,
+          prompt: s.prompt
+        }));
+      }
+      const promptFinal = compileFinalVideoPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
+      return { payloadJson: finalPayloadJson, promptFinal };
+    });
+  }
+  // --- GROQ VIDEO PROMPT GENERATOR ---
+  async generateVideoPromptGroq(fullFormState, previousError) {
+    return this.groqClient.executeWithKey(async (apiKey) => {
+      const duration = Number(fullFormState.duration || 10);
+      const segmentCount = Math.ceil(duration / 10);
+      const { watermarkInstruction } = this.buildPromptVariables(fullFormState);
+      const contentIntelligence = this.buildVideoContentIntelligence(fullFormState);
+      const prompt = `Kamu adalah Video Content Strategist, Art Director & AI Video Prompt Architect profesional.
+Tugasmu adalah menganalisis input form user dan menyusun arsitektur data konten video berdurasi ${duration} detik ke dalam format JSON yang bersih dan representatif.
+
+Kamu WAJIB membagi video ini menjadi tepat ${segmentCount} segmen, masing-masing berdurasi 10 detik.
+Untuk setiap segmen, kamu harus merinci:
+1. segmentNumber (1, 2, dst)
+2. timestamp (misalnya "00:00 - 00:10", "00:10 - 00:20", dst)
+3. visualPrompt: Deskripsi visual yang sangat detail dalam Bahasa Inggris untuk generator video AI (seperti Google Veo/Runway). Sebutkan aksi subjek, pencahayaan, detail scene, dan pastikan konsistensi visual dengan segmen lain.
+4. motionPrompt: Pergerakan kamera dan dinamika aksi subjek secara detail dalam Bahasa Inggris (misal: "A slow dramatic zoom in on the subject's expression...").
+5. transitionPrompt: Deskripsi transisi visual ke segmen berikutnya agar video terlihat kontinu tanpa patahan kasar dalam Bahasa Inggris (misal: "Match cut of the hand movement...", "Seamless pan transition...").
+6. textOverlay: Kalimat teks/subtitles bahasa Indonesia yang muncul di layar untuk segmen ini (opsional).
+7. audioSuggestion: Rekomendasi efek suara atau suasana musik untuk segmen ini (opsional).
+
+STRATEGI KONTEN VIDEO DARI CONTENT INTELLIGENCE ENGINE:
+${contentIntelligence}
+
+INPUT USER:
+${JSON.stringify(fullFormState, null, 2)}
+
+OUTPUT WAJIB BERUPA SINGLE JSON DENGAN STRUKTUR BERIKUT:
+{
+  "SYSTEM_INIT": {
+    "MISSION": "Deskripsi misi pembuatan materi video"
+  },
+  "RULE_ENGINE": {
+    "RULE_1": "Aturan konsistensi visual",
+    "RULE_2": "Aturan kesinambungan cerita"
+  },
+  "CONTENT_PAYLOAD": {
+    "TOPIC": "Topik utama",
+    "TARGET_AUDIENCE": "Target audiens",
+    "EMOTIONAL_TRIGGER": "Pemicu emosi"
+  },
+  "videoStyle": {
+    "coreVisualStyle": "Gaya visual video",
+    "colorPalette": "Skema warna",
+    "cameraMovementStyle": "Gaya gerakan kamera"
+  },
+  "renderingBlueprint": {
+    "renderStyle": "Gaya render video",
+    "qualityParameters": "Parameter kualitas",
+    "negativePrompt": "Hal yang dihindari"
+  },
+  "brandingEngine": {
+    "watermarkFooter": "Instruksi watermark"
+  },
+  "segmentsContent": [
+    {
+      "segmentNumber": 1,
+      "timestamp": "00:00 - 00:10",
+      "headline": "Headline segmen 1 (opsional)",
+      "description": "Rincian segmen 1 (opsional)",
+      "visualPrompt": "Visual prompt detail segmen 1 dalam Bahasa Inggris",
+      "motionPrompt": "Motion prompt detail segmen 1 dalam Bahasa Inggris",
+      "transitionPrompt": "Transition prompt detail segmen 1 dalam Bahasa Inggris",
+      "textOverlay": "Teks subtitle Indonesia segmen 1",
+      "audioSuggestion": "Audio suggestion segmen 1"
+    }
+  ],
+  "output": {
+    "viralScore": 85,
+    "analysisShortcomings": "Analisis kekurangan video",
+    "hooks": ["hook 1", "hook 2"],
+    "socialMediaCaption": "Caption media sosial untuk video ini"
+  }
+}
+
+OUTPUT HANYA BLOK JSON VALID. JANGAN TULIS PENJELASAN LAIN.`;
+      let finalPrompt = prompt;
+      if (previousError) {
+        finalPrompt += `
+
+=======================================================
+\u{1F525} WARNING: SCHEMA ERROR PREVIOUSLY \u{1F525}
+${previousError}
+=======================================================`;
+      }
+      const response = await this.groqClient.post(apiKey, {
+        model: "llama-3.3-70b-versatile",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content: "Kamu adalah Video Content Strategist dan AI Video Prompt Architect profesional. Selalu kembalikan respons dalam format JSON valid yang lengkap sesuai skema yang diminta. Jangan tambahkan komentar di luar JSON."
+          },
+          { role: "user", content: finalPrompt }
+        ]
+      });
+      const text2 = response.choices[0]?.message?.content || "{}";
+      const finalPayloadRaw = JSON.parse(this.groqClient.sanitizeJson(text2));
+      const finalPayloadJson = this.deepCamelizeKeys(finalPayloadRaw);
+      const styleTemplate = fullFormState.styleTemplate || "";
+      const characterFocusPrompt = fullFormState.characterFocusPrompt || "";
+      const dropdownSpecs = fullFormState.dropdownSpecs || "";
+      const targetModel = fullFormState.videoGenerator || fullFormState.targetModel || "veo";
+      finalPayloadJson.brandingEngine = {
+        watermarkFooter: watermarkInstruction
+      };
+      if (finalPayloadJson.segmentsContent) {
+        finalPayloadJson.segmentsContent = finalPayloadJson.segmentsContent.map((s) => ({
+          ...s,
+          prompt: compileFinalVideoPrompt(finalPayloadJson, s.segmentNumber, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel)
+        }));
+      }
+      if (finalPayloadJson.segmentsContent) {
+        if (!finalPayloadJson.output) finalPayloadJson.output = {};
+        finalPayloadJson.output.segments = finalPayloadJson.segmentsContent.map((s) => ({
+          segmentNumber: s.segmentNumber,
+          prompt: s.prompt
+        }));
+      }
+      const promptFinal = compileFinalVideoPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
+      return { payloadJson: finalPayloadJson, promptFinal };
+    });
   }
   // --- ENHANCE PROMPT ---
   async generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes, provider) {
@@ -65425,21 +66047,309 @@ Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
   }
   // --- IMPROVE PROMPT ---
   async improvePrompt(promptDraft, provider) {
-    const prompt = `Perbaiki dan tingkatkan kualitas draft prompt gambar berikut agar menjadi lebih menarik, detail, dan fotorealistis/artistik untuk AI image generator (Stable Diffusion/Midjourney/DALL-E 3).
-Draft: "${promptDraft}"
-Berikan hasil perbaikan langsung dalam Bahasa Inggris sebagai output teks tanpa tambahan komentar pembuka atau penutup.`;
+    const systemInstruction = "You are a professional AI image prompt engineer. Your ONLY job is to rewrite and enhance image prompts. ALWAYS output ONLY the improved prompt text in English \u2014 no introduction, no explanation, no markdown, just the raw improved prompt text.";
+    const userPrompt = `Improve and enhance the following image prompt draft to be more detailed, photorealistic/artistic, and effective for AI image generators (Stable Diffusion, Midjourney, DALL-E 3, Flux, Imagen):
+
+"${promptDraft}"
+
+Output ONLY the improved English prompt text directly.`;
     if (provider === "groq") {
       return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, { model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }] });
+        const response = await this.groqClient.post(apiKey, {
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: userPrompt }
+          ]
+        });
         return (response.choices[0]?.message?.content || "").trim();
       });
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const response = await model.generateContent(prompt);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          systemInstruction
+        });
+        const response = await model.generateContent(userPrompt);
         return response.response.text().trim();
       });
     }
+  }
+  // --- ADVANCED VIDEO PROMPT GENERATOR (GEMINI) ---
+  async generateAdvancedVideoPromptGemini(fullFormState, previousError) {
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const isStrict = env.USE_STRICT_PAYLOAD_SCHEMA === "true";
+      const strictSchema = {
+        type: SchemaType.OBJECT,
+        properties: {
+          projectSummary: {
+            type: SchemaType.OBJECT,
+            properties: {
+              title: { type: SchemaType.STRING },
+              totalDuration: { type: SchemaType.INTEGER },
+              description: { type: SchemaType.STRING }
+            },
+            required: ["title", "totalDuration", "description"]
+          },
+          storyBible: {
+            type: SchemaType.OBJECT,
+            properties: {
+              storyType: { type: SchemaType.STRING },
+              narrative: { type: SchemaType.STRING },
+              conflict: { type: SchemaType.STRING },
+              resolution: { type: SchemaType.STRING },
+              ending: { type: SchemaType.STRING },
+              emotionalArc: { type: SchemaType.STRING }
+            },
+            required: ["storyType", "narrative", "conflict", "resolution", "ending", "emotionalArc"]
+          },
+          characterBible: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                name: { type: SchemaType.STRING },
+                age: { type: SchemaType.STRING },
+                height: { type: SchemaType.STRING },
+                face: { type: SchemaType.STRING },
+                skin: { type: SchemaType.STRING },
+                eyes: { type: SchemaType.STRING },
+                hair: { type: SchemaType.STRING },
+                clothes: { type: SchemaType.STRING },
+                accessories: { type: SchemaType.STRING },
+                expressionDefault: { type: SchemaType.STRING },
+                walkStyle: { type: SchemaType.STRING },
+                gesture: { type: SchemaType.STRING },
+                habits: { type: SchemaType.STRING },
+                personality: { type: SchemaType.STRING },
+                voiceTone: { type: SchemaType.STRING }
+              },
+              required: ["name"]
+            }
+          },
+          environmentBible: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                location: { type: SchemaType.STRING },
+                season: { type: SchemaType.STRING },
+                weather: { type: SchemaType.STRING },
+                time: { type: SchemaType.STRING },
+                colors: { type: SchemaType.STRING },
+                materials: { type: SchemaType.STRING },
+                atmosphere: { type: SchemaType.STRING },
+                objectDensity: { type: SchemaType.STRING },
+                fog: { type: SchemaType.STRING },
+                rain: { type: SchemaType.STRING },
+                wind: { type: SchemaType.STRING },
+                lighting: { type: SchemaType.STRING }
+              },
+              required: ["location"]
+            }
+          },
+          cameraBible: {
+            type: SchemaType.OBJECT,
+            properties: {
+              shotSize: { type: SchemaType.STRING },
+              movement: { type: SchemaType.STRING },
+              focalLength: { type: SchemaType.STRING },
+              lens: { type: SchemaType.STRING },
+              depthOfField: { type: SchemaType.STRING },
+              cameraSpeed: { type: SchemaType.STRING },
+              stabilization: { type: SchemaType.STRING },
+              cameraDirection: { type: SchemaType.STRING }
+            },
+            required: ["shotSize", "movement"]
+          },
+          motionBible: {
+            type: SchemaType.OBJECT,
+            properties: {
+              characterMovement: { type: SchemaType.STRING },
+              objectMovement: { type: SchemaType.STRING },
+              gazeDirection: { type: SchemaType.STRING },
+              speedRhythm: { type: SchemaType.STRING }
+            },
+            required: ["characterMovement", "objectMovement"]
+          },
+          sceneBreakdown: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                sceneNumber: { type: SchemaType.INTEGER },
+                title: { type: SchemaType.STRING },
+                goal: { type: SchemaType.STRING },
+                duration: { type: SchemaType.INTEGER },
+                mainSubject: { type: SchemaType.STRING },
+                action: { type: SchemaType.STRING },
+                emotion: { type: SchemaType.STRING },
+                camera: { type: SchemaType.STRING },
+                lighting: { type: SchemaType.STRING },
+                environment: { type: SchemaType.STRING },
+                transition: { type: SchemaType.STRING },
+                dialogue: { type: SchemaType.STRING },
+                soundEffect: { type: SchemaType.STRING },
+                musicMood: { type: SchemaType.STRING },
+                timelineBreakdown: {
+                  type: SchemaType.ARRAY,
+                  items: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                      timeRange: { type: SchemaType.STRING },
+                      action: { type: SchemaType.STRING }
+                    },
+                    required: ["timeRange", "action"]
+                  }
+                },
+                continuity: {
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    startingState: { type: SchemaType.STRING },
+                    endingState: { type: SchemaType.STRING },
+                    rules: { type: SchemaType.STRING }
+                  },
+                  required: ["startingState", "endingState", "rules"]
+                }
+              },
+              required: ["sceneNumber", "title", "goal", "duration", "mainSubject", "action", "camera", "transition"]
+            }
+          },
+          continuityRules: { type: SchemaType.STRING },
+          negativePrompt: { type: SchemaType.STRING },
+          finalMasterPrompt: { type: SchemaType.STRING },
+          optimizedPrompts: {
+            type: SchemaType.OBJECT,
+            properties: {
+              geminiVeo: { type: SchemaType.STRING },
+              kling: { type: SchemaType.STRING },
+              runway: { type: SchemaType.STRING },
+              pika: { type: SchemaType.STRING },
+              hailuo: { type: SchemaType.STRING }
+            },
+            required: ["geminiVeo", "kling", "runway", "pika", "hailuo"]
+          },
+          analyzerReport: {
+            type: SchemaType.OBJECT,
+            properties: {
+              characterConsistency: { type: SchemaType.STRING },
+              storyLogic: { type: SchemaType.STRING },
+              cameraFlow: { type: SchemaType.STRING },
+              lightingConsistency: { type: SchemaType.STRING },
+              continuityEvaluation: { type: SchemaType.STRING },
+              instructionConflicts: { type: SchemaType.STRING },
+              qualityGrade: { type: SchemaType.STRING },
+              recommendations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+            },
+            required: ["characterConsistency", "storyLogic", "cameraFlow", "lightingConsistency", "continuityEvaluation", "qualityGrade", "recommendations"]
+          }
+        },
+        required: ["projectSummary", "storyBible", "characterBible", "environmentBible", "cameraBible", "motionBible", "sceneBreakdown", "continuityRules", "negativePrompt", "finalMasterPrompt", "optimizedPrompts", "analyzerReport"]
+      };
+      const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
+      if (isStrict) generationConfig.responseSchema = strictSchema;
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro", generationConfig });
+      const prompt = `Kamu adalah Production Director, Storyboard Supervisor, dan AI Video Prompt Engineer profesional.
+Tugasmu adalah menganalisis input data proyek video, mengauditnya menggunakan Smart AI Analyzer, merumuskan final prompts untuk generator video AI (Kling, Runway, Pika, Hailuo, Gemini Veo), serta merapikan kesinambungan (continuity) visual antarsegmen.
+
+Silakan audit dan optimalkan data proyek storyboard berikut menjadi JSON yang lengkap dan valid.
+Pastikan:
+1. 'sceneBreakdown.visualPrompt' ditulis dalam Bahasa Inggris sinematik detail (gaya artistik, lighting, background, subjek).
+2. 'sceneBreakdown.motionPrompt' berisi instruksi gerakan kamera dan gerakan karakter detail dalam Bahasa Inggris.
+3. 'sceneBreakdown.transitionPrompt' berisi transisi mulus ke scene berikutnya dalam Bahasa Inggris.
+4. 'sceneBreakdown.timelineBreakdown' merinci pembagian detik aksi per scene secara presisi.
+5. 'optimizedPrompts' berisi prompt siap salin khusus untuk masing-masing platform:
+   - geminiVeo: Format detail sinematik tinggi.
+   - kling: Kalimat naratif visual dengan penekanan aksi.
+   - runway: Kalimat kompresi visual dengan petunjuk kamera spesifik.
+   - pika: Prompt dengan struktur parameter yang disukai Pika.
+   - hailuo: Fokus pada deskripsi alur dramatis.
+6. 'analyzerReport' merinci audit logis atas konsistensi karakter, perpindahan kamera, kecocokan lighting, evaluasi kontinuitas fisik, konflik instruksi, dan saran peningkatan.
+
+INPUT DATA PROYEK STORYBOARD:
+${JSON.stringify(fullFormState, null, 2)}
+
+OUTPUT HANYA BLOK JSON VALID SESUAI SKEMA.`;
+      const response = await model.generateContent(prompt);
+      const text2 = response.response.text();
+      const finalPayloadRaw = JSON.parse(this.geminiClient.sanitizeJson(text2));
+      const finalPayloadJson = this.deepCamelizeKeys(finalPayloadRaw);
+      if (!finalPayloadJson.meta) finalPayloadJson.meta = {};
+      finalPayloadJson.meta.mode = "advanced_video";
+      finalPayloadJson.meta.duration = Number(fullFormState.duration || 30);
+      const promptFinal = finalPayloadJson.finalMasterPrompt || "";
+      return { payloadJson: finalPayloadJson, promptFinal };
+    });
+  }
+  // --- ADVANCED VIDEO PROMPT GENERATOR (GROQ) ---
+  async generateAdvancedVideoPromptGroq(fullFormState, previousError) {
+    return this.groqClient.executeWithKey(async (apiKey) => {
+      const prompt = `Kamu adalah Production Director, Storyboard Supervisor, dan AI Video Prompt Engineer profesional.
+Tugasmu adalah menganalisis input data proyek video, mengauditnya menggunakan Smart AI Analyzer, merumuskan final prompts untuk generator video AI (Kling, Runway, Pika, Hailuo, Gemini Veo), serta merapikan kesinambungan (continuity) visual antarsegmen.
+
+Silakan audit dan optimalkan data proyek storyboard berikut menjadi JSON yang lengkap dan valid.
+Pastikan:
+1. 'sceneBreakdown.visualPrompt' ditulis dalam Bahasa Inggris sinematik detail (gaya artistik, lighting, background, subjek).
+2. 'sceneBreakdown.motionPrompt' berisi instruksi gerakan kamera dan gerakan karakter detail dalam Bahasa Inggris.
+3. 'sceneBreakdown.transitionPrompt' berisi transisi mulus ke scene berikutnya dalam Bahasa Inggris.
+4. 'sceneBreakdown.timelineBreakdown' merinci pembagian detik aksi per scene secara presisi.
+5. 'optimizedPrompts' berisi prompt siap salin khusus untuk masing-masing platform (geminiVeo, kling, runway, pika, hailuo).
+6. 'analyzerReport' merinci audit logis atas konsistensi karakter, perpindahan kamera, kecocokan lighting, evaluasi kontinuitas fisik, konflik instruksi, dan saran peningkatan.
+
+INPUT DATA PROYEK STORYBOARD:
+${JSON.stringify(fullFormState, null, 2)}
+
+Kembalikan respons HANYA berupa JSON valid dengan struktur:
+{
+  "projectSummary": { "title": "...", "totalDuration": 30, "description": "..." },
+  "storyBible": { "storyType": "...", "narrative": "...", "conflict": "...", "resolution": "...", "ending": "...", "emotionalArc": "..." },
+  "characterBible": [{ "name": "...", "age": "..." }],
+  "environmentBible": [{ "location": "...", "atmosphere": "..." }],
+  "cameraBible": { "shotSize": "...", "movement": "..." },
+  "motionBible": { "characterMovement": "...", "objectMovement": "..." },
+  "sceneBreakdown": [{
+    "sceneNumber": 1,
+    "title": "...",
+    "goal": "...",
+    "duration": 10,
+    "mainSubject": "...",
+    "action": "...",
+    "camera": "...",
+    "lighting": "...",
+    "environment": "...",
+    "transition": "...",
+    "dialogue": "...",
+    "soundEffect": "...",
+    "musicMood": "...",
+    "timelineBreakdown": [{ "timeRange": "0-3 seconds", "action": "..." }],
+    "continuity": { "startingState": "...", "endingState": "...", "rules": "..." }
+  }],
+  "continuityRules": "...",
+  "negativePrompt": "...",
+  "finalMasterPrompt": "...",
+  "optimizedPrompts": { "geminiVeo": "...", "kling": "...", "runway": "...", "pika": "...", "hailuo": "..." },
+  "analyzerReport": { "characterConsistency": "...", "storyLogic": "...", "cameraFlow": "...", "lightingConsistency": "...", "continuityEvaluation": "...", "instructionConflicts": "...", "qualityGrade": "A", "recommendations": [] }
+}
+Tulis respons HANYA berupa JSON valid tanpa komentar lain.`;
+      const response = await this.groqClient.post(apiKey, {
+        model: "llama-3.3-70b-versatile",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content: "Kamu adalah Production Director, Storyboard Supervisor, dan AI Video Prompt Engineer profesional. Kembalikan respons HANYA dalam format JSON valid sesuai skema yang diminta. Tidak ada komentar atau teks di luar JSON."
+          },
+          { role: "user", content: prompt }
+        ]
+      });
+      const text2 = response.choices[0]?.message?.content || "{}";
+      const finalPayloadJson = JSON.parse(this.groqClient.sanitizeJson(text2));
+      if (!finalPayloadJson.meta) finalPayloadJson.meta = {};
+      finalPayloadJson.meta.mode = "advanced_video";
+      finalPayloadJson.meta.duration = Number(fullFormState.duration || 30);
+      const promptFinal = finalPayloadJson.finalMasterPrompt || "";
+      return { payloadJson: finalPayloadJson, promptFinal };
+    });
   }
 };
 
@@ -65618,6 +66528,16 @@ var AIGatewayService = class {
       return await this.topicAnalyzer.analyzeTopic(topic, fallback);
     }
   }
+  async analyzeStoryboard(topic, duration) {
+    const provider = await this.getProvider();
+    try {
+      return await this.topicAnalyzer.generateStoryboard(topic, duration, provider);
+    } catch (e) {
+      console.error(`${provider} failed, falling back:`, e);
+      const fallback = provider === "groq" ? "gemini" : "groq";
+      return await this.topicAnalyzer.generateStoryboard(topic, duration, fallback);
+    }
+  }
   async generatePrompt(fullFormState, previousError) {
     const provider = await this.getProvider();
     try {
@@ -65763,8 +66683,174 @@ var PayloadSchema = external_exports.object({
     slides: external_exports.array(external_exports.object({
       slideNumber: external_exports.number().int(),
       prompt: external_exports.string().optional()
+    })).optional(),
+    promptScore: external_exports.number().optional(),
+    detailScore: external_exports.number().optional(),
+    creativityScore: external_exports.number().optional(),
+    compositionScore: external_exports.number().optional(),
+    promptImprovement: external_exports.string().optional(),
+    aiSuggestions: external_exports.array(external_exports.string()).optional()
+  })
+});
+var VideoPayloadSchema = external_exports.object({
+  meta: external_exports.object({
+    mode: external_exports.string(),
+    duration: external_exports.number().int().min(1)
+  }).optional(),
+  systemInit: external_exports.object({
+    mission: external_exports.string()
+  }),
+  ruleEngine: external_exports.record(external_exports.string()).optional(),
+  contentPayload: external_exports.object({
+    topic: external_exports.string(),
+    targetAudience: external_exports.string(),
+    emotionalTrigger: external_exports.string()
+  }),
+  videoStyle: external_exports.object({
+    coreVisualStyle: external_exports.string(),
+    colorPalette: external_exports.string(),
+    cameraMovementStyle: external_exports.string()
+  }),
+  renderingBlueprint: external_exports.object({
+    renderStyle: external_exports.string(),
+    qualityParameters: external_exports.string(),
+    negativePrompt: external_exports.string()
+  }),
+  brandingEngine: external_exports.object({
+    watermarkFooter: external_exports.string()
+  }),
+  segmentsContent: external_exports.array(external_exports.object({
+    segmentNumber: external_exports.number().int(),
+    timestamp: external_exports.string(),
+    headline: external_exports.string().optional(),
+    description: external_exports.string().optional(),
+    visualPrompt: external_exports.string(),
+    motionPrompt: external_exports.string(),
+    transitionPrompt: external_exports.string(),
+    textOverlay: external_exports.string().optional(),
+    audioSuggestion: external_exports.string().optional()
+  })),
+  output: external_exports.object({
+    viralScore: external_exports.number(),
+    analysisShortcomings: external_exports.string(),
+    hooks: external_exports.array(external_exports.string()),
+    socialMediaCaption: external_exports.string(),
+    segments: external_exports.array(external_exports.object({
+      segmentNumber: external_exports.number().int(),
+      prompt: external_exports.string().optional()
     })).optional()
   })
+});
+var AdvancedVideoPayloadSchema = external_exports.object({
+  meta: external_exports.object({
+    mode: external_exports.string(),
+    duration: external_exports.number().int().min(1)
+  }).optional(),
+  projectSummary: external_exports.object({
+    title: external_exports.string(),
+    totalDuration: external_exports.number(),
+    description: external_exports.string()
+  }),
+  storyBible: external_exports.object({
+    storyType: external_exports.string(),
+    narrative: external_exports.string(),
+    conflict: external_exports.string(),
+    resolution: external_exports.string(),
+    ending: external_exports.string(),
+    emotionalArc: external_exports.string()
+  }),
+  characterBible: external_exports.array(external_exports.object({
+    name: external_exports.string(),
+    age: external_exports.string().optional(),
+    height: external_exports.string().optional(),
+    face: external_exports.string().optional(),
+    skin: external_exports.string().optional(),
+    eyes: external_exports.string().optional(),
+    hair: external_exports.string().optional(),
+    clothes: external_exports.string().optional(),
+    accessories: external_exports.string().optional(),
+    expressionDefault: external_exports.string().optional(),
+    walkStyle: external_exports.string().optional(),
+    gesture: external_exports.string().optional(),
+    habits: external_exports.string().optional(),
+    personality: external_exports.string().optional(),
+    voiceTone: external_exports.string().optional()
+  })),
+  environmentBible: external_exports.array(external_exports.object({
+    location: external_exports.string(),
+    season: external_exports.string().optional(),
+    weather: external_exports.string().optional(),
+    time: external_exports.string().optional(),
+    colors: external_exports.string().optional(),
+    materials: external_exports.string().optional(),
+    atmosphere: external_exports.string().optional(),
+    objectDensity: external_exports.string().optional(),
+    fog: external_exports.string().optional(),
+    rain: external_exports.string().optional(),
+    wind: external_exports.string().optional(),
+    lighting: external_exports.string().optional()
+  })),
+  cameraBible: external_exports.object({
+    shotSize: external_exports.string(),
+    movement: external_exports.string(),
+    focalLength: external_exports.string().optional(),
+    lens: external_exports.string().optional(),
+    depthOfField: external_exports.string().optional(),
+    cameraSpeed: external_exports.string().optional(),
+    stabilization: external_exports.string().optional(),
+    cameraDirection: external_exports.string().optional()
+  }),
+  motionBible: external_exports.object({
+    characterMovement: external_exports.string(),
+    objectMovement: external_exports.string(),
+    gazeDirection: external_exports.string().optional(),
+    speedRhythm: external_exports.string().optional()
+  }),
+  sceneBreakdown: external_exports.array(external_exports.object({
+    sceneNumber: external_exports.number().int(),
+    title: external_exports.string(),
+    goal: external_exports.string(),
+    duration: external_exports.number(),
+    mainSubject: external_exports.string(),
+    action: external_exports.string(),
+    emotion: external_exports.string(),
+    camera: external_exports.string(),
+    lighting: external_exports.string(),
+    environment: external_exports.string(),
+    transition: external_exports.string(),
+    dialogue: external_exports.string().optional(),
+    soundEffect: external_exports.string().optional(),
+    musicMood: external_exports.string().optional(),
+    timelineBreakdown: external_exports.array(external_exports.object({
+      timeRange: external_exports.string(),
+      action: external_exports.string()
+    })).optional(),
+    continuity: external_exports.object({
+      startingState: external_exports.string(),
+      endingState: external_exports.string(),
+      rules: external_exports.string()
+    }).optional()
+  })),
+  continuityRules: external_exports.string(),
+  negativePrompt: external_exports.string(),
+  finalMasterPrompt: external_exports.string(),
+  optimizedPrompts: external_exports.object({
+    geminiVeo: external_exports.string(),
+    kling: external_exports.string(),
+    runway: external_exports.string(),
+    pika: external_exports.string(),
+    hailuo: external_exports.string()
+  }),
+  analyzerReport: external_exports.object({
+    characterConsistency: external_exports.string(),
+    storyLogic: external_exports.string(),
+    cameraFlow: external_exports.string(),
+    lightingConsistency: external_exports.string(),
+    continuityEvaluation: external_exports.string(),
+    instructionConflicts: external_exports.string(),
+    qualityGrade: external_exports.string(),
+    recommendations: external_exports.array(external_exports.string())
+  }).optional()
 });
 
 // src/modules/poster/poster.controller.ts
@@ -65777,7 +66863,7 @@ async function checkQuota(userId) {
   const foundUsers = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   const user = foundUsers[0];
   if (!user) {
-    throw new AppError2("Pengguna tidak ditemukan.", 404, "NOT_FOUND");
+    throw new AppError("Pengguna tidak ditemukan.", 404, "NOT_FOUND");
   }
   return;
 }
@@ -65913,7 +66999,10 @@ var generatePoster = async (req, res, next) => {
       const result = await aiService.generatePrompt(payloadState);
       payloadJson = result.payloadJson;
       if (isStrict) {
-        const parsedData = PayloadSchema.safeParse(payloadJson);
+        let schema = PayloadSchema;
+        if (formState.feature === "video") schema = VideoPayloadSchema;
+        else if (formState.feature === "advanced_video") schema = AdvancedVideoPayloadSchema;
+        const parsedData = schema.safeParse(payloadJson);
         if (!parsedData.success) {
           logger.error(
             `AI generated payload failed schema validation: ${parsedData.error.message}. Retrying once...`
@@ -65923,12 +67012,12 @@ var generatePoster = async (req, res, next) => {
             parsedData.error.message
           );
           payloadJson = retryResult.payloadJson;
-          const parsedRetry = PayloadSchema.safeParse(payloadJson);
+          const parsedRetry = schema.safeParse(payloadJson);
           if (!parsedRetry.success) {
             logger.error(
               `Retry failed schema validation: ${parsedRetry.error.message}`
             );
-            throw new AppError2(
+            throw new AppError(
               "AI_SCHEMA_MISMATCH",
               502,
               "Failed to generate valid strict payload structure from AI."
@@ -65946,7 +67035,7 @@ var generatePoster = async (req, res, next) => {
       if (e.name === "AppError" || e.statusCode === 502) {
         throw e;
       }
-      throw new AppError2(`Prompt generation failed: ${e.message}`, 500);
+      throw new AppError(`Prompt generation failed: ${e.message}`, 500);
     }
     const viralData = await aiService.scoreViral(promptFinal);
     const generatedHooks = payloadJson.output?.hooks || [];
@@ -66002,7 +67091,7 @@ var generateEnhance = async (req, res, next) => {
     await checkQuota(userId);
     const { imageUrl, enhanceStyle, changeLevel, notes } = req.body;
     if (!imageUrl) {
-      throw new AppError2(
+      throw new AppError(
         "imageUrl is required for photo enhancement",
         400,
         "BAD_REQUEST"
@@ -66149,14 +67238,14 @@ var activateLicense = async (req, res, next) => {
     const licenseArr = await db.select().from(licenseKeys).where(eq(licenseKeys.key, finalKey || "")).limit(1);
     const license = licenseArr[0];
     if (!license) {
-      throw new AppError2(
+      throw new AppError(
         "Lisensi tidak valid atau tidak ditemukan",
         404,
         "NOT_FOUND"
       );
     }
     if (license.isUsed) {
-      throw new AppError2(
+      throw new AppError(
         "Lisensi ini sudah pernah diaktifkan",
         400,
         "ALREADY_USED"
@@ -66190,7 +67279,7 @@ var uploadImage = async (req, res, next) => {
   try {
     const { image, fileName } = req.body;
     if (!image) {
-      throw new AppError2("Image data is required", 400, "BAD_REQUEST");
+      throw new AppError("Image data is required", 400, "BAD_REQUEST");
     }
     const userId = req.user.id;
     const result = await performUpload(
@@ -66213,10 +67302,10 @@ var uploadMultiImages = async (req, res, next) => {
   try {
     const { images } = req.body;
     if (!images || !Array.isArray(images) || images.length === 0) {
-      throw new AppError2("Array gambar tidak boleh kosong", 400, "BAD_REQUEST");
+      throw new AppError("Array gambar tidak boleh kosong", 400, "BAD_REQUEST");
     }
     if (images.length > 10) {
-      throw new AppError2(
+      throw new AppError(
         "Maksimal 10 gambar sekaligus",
         400,
         "TOO_MANY_IMAGES"
@@ -66298,7 +67387,7 @@ async function performUpload(image, fileName, userId, req) {
     const url = `${protocol}://${host}/uploads/${localFileName}`;
     return { url, isFallback: true, storageType: "local" };
   } catch (localError) {
-    throw new AppError2(
+    throw new AppError(
       `Semua metode penyimpanan gagal: ${localError.message}`,
       500,
       "UPLOAD_FAILED"
@@ -66359,12 +67448,24 @@ var chat = async (req, res, next) => {
   try {
     const { message, history } = req.body;
     if (!message) {
-      throw new AppError2("Pesan tidak boleh kosong", 400, "BAD_REQUEST");
+      throw new AppError("Pesan tidak boleh kosong", 400, "BAD_REQUEST");
     }
     const reply = await aiService.chat(message, history || []);
     res.status(200).json({
       success: true,
       data: { reply }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+var analyzeStoryboard = async (req, res, next) => {
+  try {
+    const { topic, duration } = req.body;
+    const storyboard = await aiService.analyzeStoryboard(topic, duration || 30);
+    res.status(200).json({
+      success: true,
+      data: storyboard
     });
   } catch (error) {
     next(error);
@@ -66390,6 +67491,10 @@ var generatePosterSchema = external_exports.object({
   mood: external_exports.string().optional(),
   watermark: external_exports.string().optional(),
   referenceImageUrl: external_exports.string().optional(),
+  duration: external_exports.number().optional(),
+  cameraMovement: external_exports.string().optional(),
+  useManualLogo: external_exports.boolean().optional(),
+  includeCaption: external_exports.boolean().optional(),
   // Extra collapsed settings
   typography: external_exports.string().optional(),
   targetAudience: external_exports.string().optional(),
@@ -66419,6 +67524,10 @@ var getHooksSchema = external_exports.object({
 });
 var improvePromptSchema = external_exports.object({
   promptDraft: external_exports.string().min(1, "Prompt draft is required")
+});
+var analyzeStoryboardSchema = external_exports.object({
+  topic: external_exports.string().min(1, "Topic is required"),
+  duration: external_exports.number().optional()
 });
 
 // src/middlewares/spamBlocker.ts
@@ -66460,14 +67569,14 @@ var spamBlocker = async (req, res, next) => {
       }
     });
     delete requestTracker[userId];
-    throw new AppError2(
+    throw new AppError(
       "Akun Anda telah DIBLOKIR otomatis oleh sistem karena terdeteksi melakukan spamming API secara intensif.",
       403,
       "USER_BLOCKED"
     );
   }
   if (requestCount >= softLimit) {
-    throw new AppError2(
+    throw new AppError(
       "Aktivitas Anda terlalu cepat. Silakan tunggu 30 detik untuk menghindari pemblokiran akun otomatis.",
       429,
       "TOO_MANY_REQUESTS"
@@ -66481,6 +67590,7 @@ var router2 = (0, import_express2.Router)();
 router2.use(authenticate);
 router2.use(spamBlocker);
 router2.post("/analyze-topic", validate({ body: analyzeTopicSchema }), analyzeTopic);
+router2.post("/analyze-storyboard", validate({ body: analyzeStoryboardSchema }), analyzeStoryboard);
 router2.post("/generate", validate({ body: generatePosterSchema }), generatePoster);
 router2.post("/enhance", validate({ body: generateEnhanceSchema }), generateEnhance);
 router2.post("/upload", uploadImage);
@@ -66547,7 +67657,7 @@ var toggleFavorite = async (req, res, next) => {
     const promptArr = await db.select().from(prompts).where(and(eq(prompts.id, id), eq(prompts.userId, userId))).limit(1);
     const prompt = promptArr[0];
     if (!prompt) {
-      throw new AppError2("Prompt not found", 404, "NOT_FOUND");
+      throw new AppError("Prompt not found", 404, "NOT_FOUND");
     }
     const [updated] = await db.update(prompts).set({ isFavorite: !prompt.isFavorite }).where(eq(prompts.id, id)).returning();
     res.status(200).json({
@@ -66566,7 +67676,7 @@ var duplicatePrompt = async (req, res, next) => {
     const promptArr = await db.select().from(prompts).where(and(eq(prompts.id, id), eq(prompts.userId, userId))).limit(1);
     const prompt = promptArr[0];
     if (!prompt) {
-      throw new AppError2("Prompt not found", 404, "NOT_FOUND");
+      throw new AppError("Prompt not found", 404, "NOT_FOUND");
     }
     const [cloned] = await db.insert(prompts).values({
       id: import_crypto7.default.randomUUID(),
@@ -66596,7 +67706,7 @@ var deletePrompt = async (req, res, next) => {
     const promptArr = await db.select().from(prompts).where(and(eq(prompts.id, id), eq(prompts.userId, userId))).limit(1);
     const prompt = promptArr[0];
     if (!prompt) {
-      throw new AppError2("Prompt not found", 404, "NOT_FOUND");
+      throw new AppError("Prompt not found", 404, "NOT_FOUND");
     }
     const { deleteLocalFileByUrl: deleteLocalFileByUrl2 } = await Promise.resolve().then(() => (init_image_cleanup(), image_cleanup_exports));
     deleteLocalFileByUrl2(prompt.referenceImageUrl);
@@ -66619,7 +67729,7 @@ var toggleSharePrompt = async (req, res, next) => {
     const promptArr = await db.select().from(prompts).where(and(eq(prompts.id, id), eq(prompts.userId, userId))).limit(1);
     const prompt = promptArr[0];
     if (!prompt) {
-      throw new AppError2("Prompt not found", 404, "NOT_FOUND");
+      throw new AppError("Prompt not found", 404, "NOT_FOUND");
     }
     const [updated] = await db.update(prompts).set({ isShared: !prompt.isShared }).where(eq(prompts.id, id)).returning();
     res.status(200).json({
@@ -66680,11 +67790,11 @@ var updatePromptImage = async (req, res, next) => {
     const { id } = req.params;
     const { imageUrl } = req.body;
     if (!imageUrl || typeof imageUrl !== "string") {
-      throw new AppError2("URL gambar tidak boleh kosong", 400, "BAD_REQUEST");
+      throw new AppError("URL gambar tidak boleh kosong", 400, "BAD_REQUEST");
     }
     const promptArr = await db.select().from(prompts).where(and(eq(prompts.id, id), eq(prompts.userId, userId))).limit(1);
     if (!promptArr[0]) {
-      throw new AppError2("Prompt tidak ditemukan", 404, "NOT_FOUND");
+      throw new AppError("Prompt tidak ditemukan", 404, "NOT_FOUND");
     }
     const [updated] = await db.update(prompts).set({ referenceImageUrl: imageUrl }).where(eq(prompts.id, id)).returning();
     res.status(200).json({
@@ -66702,13 +67812,13 @@ var updatePromptImages = async (req, res, next) => {
     const { id } = req.params;
     const { imageUrls } = req.body;
     if (!Array.isArray(imageUrls)) {
-      throw new AppError2("imageUrls harus berupa array", 400, "BAD_REQUEST");
+      throw new AppError("imageUrls harus berupa array", 400, "BAD_REQUEST");
     }
     if (imageUrls.length > 10) {
-      throw new AppError2("Maksimal 10 gambar", 400, "TOO_MANY_IMAGES");
+      throw new AppError("Maksimal 10 gambar", 400, "TOO_MANY_IMAGES");
     }
     const promptArr = await db.select().from(prompts).where(and(eq(prompts.id, id), eq(prompts.userId, userId))).limit(1);
-    if (!promptArr[0]) throw new AppError2("Prompt tidak ditemukan", 404, "NOT_FOUND");
+    if (!promptArr[0]) throw new AppError("Prompt tidak ditemukan", 404, "NOT_FOUND");
     const [updated] = await db.update(prompts).set({
       referenceImageUrls: imageUrls,
       referenceImageUrl: imageUrls[0] || null
@@ -66750,24 +67860,44 @@ var import_crypto8 = __toESM(require("crypto"));
 var getDropdownOptions = async (req, res, next) => {
   try {
     const { groupKey } = req.query;
+    const groupKeyStr = groupKey ? String(groupKey) : void 0;
     const conditions = [eq(dropdownOptions.isActive, true)];
-    if (groupKey) {
-      conditions.push(eq(dropdownOptions.groupKey, String(groupKey)));
+    if (groupKeyStr) {
+      conditions.push(eq(dropdownOptions.groupKey, groupKeyStr));
     }
     const options = await db.select().from(dropdownOptions).where(and(...conditions)).orderBy(asc(dropdownOptions.sortOrder));
-    if (!groupKey || groupKey === "fokus_karakter_poster") {
+    const isCharacterGroup = !groupKeyStr || groupKeyStr === "fokus_karakter_poster" || groupKeyStr === "fokus_karakter_video";
+    if (isCharacterGroup) {
       const activeCharacters = await db.select().from(characters).where(eq(characters.isActive, true)).orderBy(asc(characters.name));
-      const characterOptions = activeCharacters.map((c) => ({
-        id: c.id,
-        groupKey: "fokus_karakter_poster",
-        label: c.name,
-        value: c.id,
-        helperText: c.description,
-        icon: c.imageUrl,
+      const groups = groupKeyStr ? [groupKeyStr] : ["fokus_karakter_poster", "fokus_karakter_video"];
+      for (const grp of groups) {
+        const characterOptions = activeCharacters.map((c) => ({
+          id: `char_${grp}_${c.id}`,
+          groupKey: grp,
+          label: c.name,
+          value: c.id,
+          helperText: c.description,
+          icon: c.imageUrl,
+          isActive: true,
+          sortOrder: 100
+        }));
+        options.push(...characterOptions);
+      }
+    }
+    const isVisualStyleGroup = !groupKeyStr || groupKeyStr === "gaya_visual_video";
+    if (isVisualStyleGroup) {
+      const activeStyles = await db.select().from(visualStyles).where(eq(visualStyles.isActive, true)).orderBy(asc(visualStyles.name));
+      const styleOptions = activeStyles.map((s, idx) => ({
+        id: `vs_${s.id}`,
+        groupKey: "gaya_visual_video",
+        label: s.name,
+        value: s.id,
+        helperText: s.promptTemplate.substring(0, 80),
+        icon: s.previewImageUrl,
         isActive: true,
-        sortOrder: 100
+        sortOrder: idx
       }));
-      options.push(...characterOptions);
+      options.push(...styleOptions);
     }
     res.status(200).json({
       success: true,
@@ -66814,7 +67944,7 @@ var updateDropdownOption = async (req, res, next) => {
     const optionsArr = await db.select().from(dropdownOptions).where(eq(dropdownOptions.id, id)).limit(1);
     const option = optionsArr[0];
     if (!option) {
-      throw new AppError2("Dropdown option not found", 404, "NOT_FOUND");
+      throw new AppError("Dropdown option not found", 404, "NOT_FOUND");
     }
     const [updated] = await db.update(dropdownOptions).set(updateData).where(eq(dropdownOptions.id, id)).returning();
     if (req.user?.id) {
@@ -66840,7 +67970,7 @@ var deleteDropdownOption = async (req, res, next) => {
     const optionsArr = await db.select().from(dropdownOptions).where(eq(dropdownOptions.id, id)).limit(1);
     const option = optionsArr[0];
     if (!option) {
-      throw new AppError2("Dropdown option not found", 404, "NOT_FOUND");
+      throw new AppError("Dropdown option not found", 404, "NOT_FOUND");
     }
     await db.delete(dropdownOptions).where(eq(dropdownOptions.id, id));
     if (req.user?.id) {
@@ -66994,7 +68124,7 @@ var createGeminiKey = async (req, res, next) => {
     const provider = (req.body.provider || "gemini").toLowerCase();
     const existing = await db.select().from(geminiApiKeys).where(and(eq(geminiApiKeys.provider, provider), eq(geminiApiKeys.priority, priority))).limit(1);
     if (existing.length > 0) {
-      throw new AppError2(`Prioritas ${priority} sudah digunakan untuk provider ${provider.toUpperCase()}. Harap gunakan angka prioritas lain.`, 400, "DUPLICATE_PRIORITY");
+      throw new AppError(`Prioritas ${priority} sudah digunakan untuk provider ${provider.toUpperCase()}. Harap gunakan angka prioritas lain.`, 400, "DUPLICATE_PRIORITY");
     }
     const encryptionKey = getEncryptionKey();
     const shouldEncrypt = !!encryptionKey;
@@ -67035,7 +68165,7 @@ var updateGeminiKey = async (req, res, next) => {
         const keyProvider = (provider || currentKey.provider).toLowerCase();
         const existing = await db.select().from(geminiApiKeys).where(and(eq(geminiApiKeys.provider, keyProvider), eq(geminiApiKeys.priority, priority))).limit(1);
         if (existing.length > 0 && existing[0].id !== id) {
-          throw new AppError2(`Prioritas ${priority} sudah digunakan untuk provider ${keyProvider.toUpperCase()}. Harap gunakan angka prioritas lain.`, 400, "DUPLICATE_PRIORITY");
+          throw new AppError(`Prioritas ${priority} sudah digunakan untuk provider ${keyProvider.toUpperCase()}. Harap gunakan angka prioritas lain.`, 400, "DUPLICATE_PRIORITY");
         }
       }
     }
@@ -67044,7 +68174,7 @@ var updateGeminiKey = async (req, res, next) => {
       ...isActive !== void 0 ? { isActive } : {},
       ...healthStatus !== void 0 ? { healthStatus } : {}
     }).where(eq(geminiApiKeys.id, id)).returning();
-    if (!updated) throw new AppError2("Gemini Key not found", 404, "NOT_FOUND");
+    if (!updated) throw new AppError("Gemini Key not found", 404, "NOT_FOUND");
     if (req.user?.id) {
       await db.insert(logs).values({
         id: import_crypto9.default.randomUUID(),
@@ -67062,7 +68192,7 @@ var deleteGeminiKey = async (req, res, next) => {
   try {
     const { id } = req.params;
     const [deleted] = await db.delete(geminiApiKeys).where(eq(geminiApiKeys.id, id)).returning();
-    if (!deleted) throw new AppError2("Gemini Key not found", 404, "NOT_FOUND");
+    if (!deleted) throw new AppError("Gemini Key not found", 404, "NOT_FOUND");
     if (req.user?.id) {
       await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "delete_gemini_key", detail: { keyId: id } });
     }
@@ -67076,7 +68206,7 @@ var encryptOldKey = async (req, res, next) => {
     const { id } = req.params;
     const keyRecords = await db.select().from(geminiApiKeys).where(eq(geminiApiKeys.id, id)).limit(1);
     if (keyRecords.length === 0) {
-      throw new AppError2("Key not found", 404, "KEY_NOT_FOUND");
+      throw new AppError("Key not found", 404, "KEY_NOT_FOUND");
     }
     const keyObj = keyRecords[0];
     if (keyObj.isEncrypted) {
@@ -67084,7 +68214,7 @@ var encryptOldKey = async (req, res, next) => {
     }
     const encryptionKey = getEncryptionKey();
     if (!encryptionKey) {
-      throw new AppError2("ENCRYPTION_KEY not configured", 500, "NO_ENCRYPTION_KEY");
+      throw new AppError("ENCRYPTION_KEY not configured", 500, "NO_ENCRYPTION_KEY");
     }
     const encryptedText = encrypt(keyObj.keyEncrypted);
     await db.update(geminiApiKeys).set({
@@ -67184,7 +68314,7 @@ var updateUserSubscription = async (req, res, next) => {
       subscriptionExpiresAt: subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : null,
       credits: credits !== void 0 ? Number(credits) : void 0
     }).where(eq(users.id, id)).returning();
-    if (!updated) throw new AppError2("User not found", 404, "NOT_FOUND");
+    if (!updated) throw new AppError("User not found", 404, "NOT_FOUND");
     if (req.user?.id) {
       await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_user_subscription", detail: { targetUserId: id, subscriptionStatus, subscriptionExpiresAt } });
     }
@@ -67198,7 +68328,7 @@ var updateUserRole = async (req, res, next) => {
     const { id } = req.params;
     const { role } = req.body;
     const [updated] = await db.update(users).set({ role }).where(eq(users.id, id)).returning();
-    if (!updated) throw new AppError2("User not found", 404, "NOT_FOUND");
+    if (!updated) throw new AppError("User not found", 404, "NOT_FOUND");
     if (req.user?.id) {
       await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_user_role", detail: { targetUserId: id, newRole: role } });
     }
@@ -67356,7 +68486,7 @@ var testGeminiKey = async (req, res, next) => {
     const { id } = req.params;
     const keyRecords = await db.select().from(geminiApiKeys).where(eq(geminiApiKeys.id, id)).limit(1);
     const keyRecord = keyRecords[0];
-    if (!keyRecord) throw new AppError2("Gemini Key not found", 404, "NOT_FOUND");
+    if (!keyRecord) throw new AppError("Gemini Key not found", 404, "NOT_FOUND");
     let success = false;
     let errorMessage = "";
     try {
@@ -67463,7 +68593,7 @@ var testAllGeminiKeys = async (req, res, next) => {
 };
 var getDeveloperKeys = async (req, res, next) => {
   try {
-    if (!req.user?.id) throw new AppError2("Unauthorized", 401, "UNAUTHORIZED");
+    if (!req.user?.id) throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     const keys = await db.select().from(developerApiKeys).where(eq(developerApiKeys.userId, req.user.id)).orderBy(desc(developerApiKeys.createdAt));
     res.status(200).json({ success: true, data: keys });
   } catch (error) {
@@ -67474,7 +68604,7 @@ var createDeveloperKey = async (req, res, next) => {
   try {
     const { name } = req.body;
     const userId = req.user?.id;
-    if (!userId) throw new AppError2("Unauthorized", 401, "UNAUTHORIZED");
+    if (!userId) throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     const secureToken = import_crypto9.default.randomBytes(20).toString("hex");
     const apiKey = `ps_live_${secureToken}`;
     const [newKey] = await db.insert(developerApiKeys).values({
@@ -67494,9 +68624,9 @@ var deleteDeveloperKey = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
-    if (!userId) throw new AppError2("Unauthorized", 401, "UNAUTHORIZED");
+    if (!userId) throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     const [deleted] = await db.delete(developerApiKeys).where(and(eq(developerApiKeys.id, id), eq(developerApiKeys.userId, userId))).returning();
-    if (!deleted) throw new AppError2("Key not found", 404, "NOT_FOUND");
+    if (!deleted) throw new AppError("Key not found", 404, "NOT_FOUND");
     await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId, action: "delete_developer_key", detail: { keyId: id, name: deleted.name } });
     res.status(200).json({ success: true, message: "Key deleted" });
   } catch (error) {
@@ -67507,12 +68637,12 @@ var transferCreditsDirectly = async (req, res, next) => {
   try {
     const { email, credits } = req.body;
     const adminId = req.user?.id;
-    if (!email || credits === void 0) throw new AppError2("Email dan jumlah kredit wajib diisi", 400, "BAD_REQUEST");
+    if (!email || credits === void 0) throw new AppError("Email dan jumlah kredit wajib diisi", 400, "BAD_REQUEST");
     const targetCredits = Number(credits);
-    if (isNaN(targetCredits) || targetCredits <= 0) throw new AppError2("Jumlah kredit harus berupa angka positif", 400, "BAD_REQUEST");
+    if (isNaN(targetCredits) || targetCredits <= 0) throw new AppError("Jumlah kredit harus berupa angka positif", 400, "BAD_REQUEST");
     const userRecords = await db.select().from(users).where(eq(users.email, email.trim())).limit(1);
     const user = userRecords[0];
-    if (!user) throw new AppError2("Pengguna dengan email tersebut tidak ditemukan", 404, "NOT_FOUND");
+    if (!user) throw new AppError("Pengguna dengan email tersebut tidak ditemukan", 404, "NOT_FOUND");
     const newCredits = (user.credits || 0) + targetCredits;
     const [updated] = await db.update(users).set({
       credits: newCredits,
@@ -67543,7 +68673,7 @@ var createCharacter = async (req, res, next) => {
   try {
     const { name, description, imageUrl, promptConsistency, category, characterBible, positivePrompt, negativePrompt, masterPrompt } = req.body;
     if (!name || !description || !promptConsistency) {
-      throw new AppError2("Nama, deskripsi, dan prompt konsistensi wajib diisi", 400, "BAD_REQUEST");
+      throw new AppError("Nama, deskripsi, dan prompt konsistensi wajib diisi", 400, "BAD_REQUEST");
     }
     const [newChar] = await db.insert(characters).values({
       id: import_crypto9.default.randomUUID(),
@@ -67585,7 +68715,7 @@ var updateCharacter = async (req, res, next) => {
       ...masterPrompt !== void 0 ? { masterPrompt } : {},
       updatedAt: /* @__PURE__ */ new Date()
     }).where(eq(characters.id, id)).returning();
-    if (!updated) throw new AppError2("Karakter tidak ditemukan", 404, "NOT_FOUND");
+    if (!updated) throw new AppError("Karakter tidak ditemukan", 404, "NOT_FOUND");
     if (oldChar && imageUrl !== void 0 && oldChar.imageUrl !== imageUrl) {
       const { deleteLocalFileByUrl: deleteLocalFileByUrl2 } = await Promise.resolve().then(() => (init_image_cleanup(), image_cleanup_exports));
       deleteLocalFileByUrl2(oldChar.imageUrl);
@@ -67602,7 +68732,7 @@ var deleteCharacter = async (req, res, next) => {
   try {
     const { id } = req.params;
     const [deleted] = await db.delete(characters).where(eq(characters.id, id)).returning();
-    if (!deleted) throw new AppError2("Karakter tidak ditemukan", 404, "NOT_FOUND");
+    if (!deleted) throw new AppError("Karakter tidak ditemukan", 404, "NOT_FOUND");
     const { deleteLocalFileByUrl: deleteLocalFileByUrl2 } = await Promise.resolve().then(() => (init_image_cleanup(), image_cleanup_exports));
     deleteLocalFileByUrl2(deleted.imageUrl);
     if (req.user?.id) {
@@ -67625,7 +68755,7 @@ var createPromptTemplate = async (req, res, next) => {
   try {
     const { category, template, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
     if (!category || !template) {
-      throw new AppError2("Kategori dan template wajib diisi", 400, "BAD_REQUEST");
+      throw new AppError("Kategori dan template wajib diisi", 400, "BAD_REQUEST");
     }
     const [newTpl] = await db.insert(promptTemplates).values({
       id: import_crypto9.default.randomUUID(),
@@ -67662,7 +68792,7 @@ var updatePromptTemplate = async (req, res, next) => {
       ...hooks !== void 0 ? { hooks } : {},
       ...analysis !== void 0 ? { analysis } : {}
     }).where(eq(promptTemplates.id, id)).returning();
-    if (!updated) throw new AppError2("Template tidak ditemukan", 404, "NOT_FOUND");
+    if (!updated) throw new AppError("Template tidak ditemukan", 404, "NOT_FOUND");
     if (req.user?.id) {
       await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_prompt_template", detail: { templateId: id, category } });
     }
@@ -67687,7 +68817,7 @@ var generateSuggestedTemplate = async (req, res, next) => {
   try {
     const { category, idea } = req.body;
     if (!category || !idea) {
-      throw new AppError2("Kategori dan ide wajib diisi", 400, "BAD_REQUEST");
+      throw new AppError("Kategori dan ide wajib diisi", 400, "BAD_REQUEST");
     }
     const aiService2 = new AIGatewayService();
     const result = await aiService2.generatePromptTemplate(category, idea);
@@ -67748,7 +68878,7 @@ var authenticateDeveloperKey = async (req, res, next) => {
   try {
     const apiKey = req.headers["x-api-key"] || req.query.apiKey;
     if (!apiKey || typeof apiKey !== "string") {
-      throw new AppError2("Developer API Key missing (x-api-key header or apiKey query parameter required)", 401, "UNAUTHORIZED");
+      throw new AppError("Developer API Key missing (x-api-key header or apiKey query parameter required)", 401, "UNAUTHORIZED");
     }
     const keyRecords = await db.select({
       key: developerApiKeys,
@@ -67756,7 +68886,7 @@ var authenticateDeveloperKey = async (req, res, next) => {
     }).from(developerApiKeys).innerJoin(users, eq(developerApiKeys.userId, users.id)).where(and(eq(developerApiKeys.apiKey, apiKey), eq(developerApiKeys.isActive, true))).limit(1);
     const record = keyRecords[0];
     if (!record) {
-      throw new AppError2("Invalid or inactive Developer API Key", 401, "UNAUTHORIZED");
+      throw new AppError("Invalid or inactive Developer API Key", 401, "UNAUTHORIZED");
     }
     req.user = {
       id: record.user.id,

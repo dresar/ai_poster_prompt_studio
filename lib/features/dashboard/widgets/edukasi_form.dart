@@ -39,17 +39,19 @@ class _EdukasiFormState extends State<EdukasiForm> {
   final _topicController = TextEditingController();
   final _descController = TextEditingController();
   final _extraController = TextEditingController();
+  final _ctaController = TextEditingController();
   String _watermarkText = '';
 
   NeoDropdownOption? _selectedStyle;
   NeoDropdownOption? _selectedLayout;
   NeoDropdownOption? _selectedRatio;
   NeoDropdownOption? _selectedColor;
+  NeoDropdownOption? _selectedMood;
+  NeoDropdownOption? _selectedTextRule;
   NeoDropdownOption? _selectedCharFocus;
-  
-  int _slideCount = 1;
-  bool _useManualLogo = false; // Default 3 slides for educational content
-  bool _includeCaption = false;
+
+  int _slideCount = 3; // Default 3 slides for educational content
+  bool _useManualLogo = false;
   bool _showAdvanced = false;
 
   @override
@@ -57,6 +59,7 @@ class _EdukasiFormState extends State<EdukasiForm> {
     _topicController.dispose();
     _descController.dispose();
     _extraController.dispose();
+    _ctaController.dispose();
     super.dispose();
   }
 
@@ -78,12 +81,15 @@ class _EdukasiFormState extends State<EdukasiForm> {
       'topic': _topicController.text.trim(),
       'description': _descController.text.trim(),
       'extraDetails': _extraController.text.trim(),
+      'callToAction': _ctaController.text.trim(),
       'watermark': _watermarkText,
       'referenceImage': _refImage,
       'style': _selectedStyle?.value ?? 'auto',
       'layout': _selectedLayout?.value ?? 'auto',
       'aspectRatio': _selectedRatio?.value ?? '9:16',
       'colorPalette': _selectedColor?.value ?? 'auto',
+      'mood': _selectedMood?.value ?? 'bright_cheerful',
+      'textRule': _selectedTextRule?.value ?? 'flexible',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
       'slideCount': _slideCount,
       'useManualLogo': _useManualLogo,
@@ -93,16 +99,22 @@ class _EdukasiFormState extends State<EdukasiForm> {
 
   @override
   Widget build(BuildContext context) {
+    // All options fetched from DB via dropdownProvider (SQLite-first cache)
     final styles = widget.dropdownState.groups['gaya_edukasi'] ?? [];
     final layouts = widget.dropdownState.groups['tata_letak_edukasi'] ?? [];
     final ratios = widget.dropdownState.groups['rasio_edukasi'] ?? [];
     final colors = widget.dropdownState.groups['palet_warna_edukasi'] ?? [];
+    // Reuse shared mood/textRule/charFocus from poster — sourced from DB
+    final moods = widget.dropdownState.groups['mood_poster'] ?? [];
+    final textRules = widget.dropdownState.groups['aturan_teks_poster'] ?? [];
     final charFocus = widget.dropdownState.groups['fokus_karakter_poster'] ?? [];
 
     if (_selectedStyle == null && styles.isNotEmpty) _selectedStyle = styles.first;
     if (_selectedLayout == null && layouts.isNotEmpty) _selectedLayout = layouts.first;
     if (_selectedRatio == null && ratios.isNotEmpty) _selectedRatio = ratios.first;
     if (_selectedColor == null && colors.isNotEmpty) _selectedColor = colors.first;
+    if (_selectedMood == null && moods.isNotEmpty) _selectedMood = moods.first;
+    if (_selectedTextRule == null && textRules.isNotEmpty) _selectedTextRule = textRules.first;
     if (_selectedCharFocus == null && charFocus.isNotEmpty) _selectedCharFocus = charFocus.first;
 
     return Column(
@@ -133,7 +145,7 @@ class _EdukasiFormState extends State<EdukasiForm> {
                 controller: _topicController,
               ),
               const SizedBox(height: 16),
-               Wrap(
+              Wrap(
                 alignment: WrapAlignment.end,
                 spacing: 10,
                 runSpacing: 10,
@@ -231,6 +243,7 @@ class _EdukasiFormState extends State<EdukasiForm> {
                 label: 'Gaya Visual Infografis',
                 leadingEmoji: '⭐',
                 selectedOption: _selectedStyle,
+                // dynamicVisualStyles = from DB (/poster/visual-styles)
                 options: widget.dynamicVisualStyles.isNotEmpty ? widget.dynamicVisualStyles : styles,
                 isLoading: widget.loadingVisualStyles || widget.dropdownState.isLoading,
                 onSelected: (opt) => setState(() => _selectedStyle = opt),
@@ -269,6 +282,13 @@ class _EdukasiFormState extends State<EdukasiForm> {
               ),
               if (_showAdvanced) ...[
                 const SizedBox(height: 16),
+                NeoTextField(
+                  label: 'Teks CTA / Ajakan (Opsional)',
+                  placeholder: 'Contoh: Simpan infografis ini! / Share ke temanmu',
+                  controller: _ctaController,
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 16),
                 NeoDropdownField(
                   label: 'Palet Warna Dominan',
                   leadingEmoji: '🌈',
@@ -279,9 +299,28 @@ class _EdukasiFormState extends State<EdukasiForm> {
                 ),
                 const SizedBox(height: 16),
                 NeoDropdownField(
+                  label: 'Nuansa (Mood)',
+                  leadingEmoji: '☀️',
+                  selectedOption: _selectedMood,
+                  options: moods,
+                  isLoading: widget.dropdownState.isLoading,
+                  onSelected: (opt) => setState(() => _selectedMood = opt),
+                ),
+                const SizedBox(height: 16),
+                NeoDropdownField(
+                  label: 'Aturan Teks',
+                  leadingEmoji: '🔒',
+                  selectedOption: _selectedTextRule,
+                  options: textRules,
+                  isLoading: widget.dropdownState.isLoading,
+                  onSelected: (opt) => setState(() => _selectedTextRule = opt),
+                ),
+                const SizedBox(height: 16),
+                NeoDropdownField(
                   label: 'Fokus Karakter',
                   leadingEmoji: '🎲',
                   selectedOption: _selectedCharFocus,
+                  // charFocus fetched from DB via dropdownProvider (group: fokus_karakter_poster)
                   options: charFocus,
                   isLoading: widget.dropdownState.isLoading,
                   onSelected: (opt) => setState(() => _selectedCharFocus = opt),
@@ -304,7 +343,7 @@ class _EdukasiFormState extends State<EdukasiForm> {
                 title: const Text('⚠️ Gunakan Logo (Upload Manual)', style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: const Text('Instruksi ke AI agar memberi tempat kosong untuk logo.', style: TextStyle(fontSize: 12)),
                 value: _useManualLogo,
-                activeColor: Colors.black,
+                activeThumbColor: Colors.black,
                 onChanged: (val) => setState(() => _useManualLogo = val),
               ),
               const SizedBox(height: 12),

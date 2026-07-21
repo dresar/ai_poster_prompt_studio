@@ -4,7 +4,7 @@ import { GroqClient } from '../core/groq-client';
 import { env } from '../../../config/env';
 import { logger } from '../../../config/logger';
 import { ImageAnalyzerService } from './image-analyzer.service';
-import { compileFinalPrompt, compileFinalVideoPrompt } from '../../poster/dslRenderer';
+import { compileFinalPrompt, compileFinalVideoPrompt, compileEdukasiMasterPrompt } from '../../poster/dslRenderer';
 
 export class PromptGeneratorService {
   constructor(
@@ -214,7 +214,13 @@ OUTPUT HANYA BLOK JSON VALID. JANGAN TULIS PENJELASAN LAIN.`;
       const response = await this.groqClient.post(apiKey, {
         model: 'llama-3.3-70b-versatile',
         response_format: { type: 'json_object' },
-        messages: [{ role: 'user', content: finalPrompt }],
+        messages: [
+          {
+            role: 'system',
+            content: 'Kamu adalah Content Strategist dan Art Director profesional. Selalu kembalikan respons dalam format JSON valid yang lengkap dan terstruktur sesuai skema yang diminta. Jangan tambahkan komentar atau penjelasan di luar JSON.'
+          },
+          { role: 'user', content: finalPrompt }
+        ],
       });
 
       const text = response.choices[0]?.message?.content || '{}';
@@ -230,7 +236,10 @@ OUTPUT HANYA BLOK JSON VALID. JANGAN TULIS PENJELASAN LAIN.`;
       this.injectDatabaseBlueprints(finalPayloadJson, fullFormState, styleTemplate, brandingInstruction, watermarkInstruction);
 
       // Kompilasi prompt akhir secara deterministik menggunakan compiler backend
-      const finalPromptFinal = compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
+      const isEdukasi = fullFormState.feature === 'edukasi' || fullFormState.mode === 'edukasi' || fullFormState.category === 'edukasi';
+      const finalPromptFinal = isEdukasi
+        ? compileEdukasiMasterPrompt(finalPayloadJson, fullFormState, styleTemplate, characterFocusPrompt, dropdownSpecs, watermarkInstruction)
+        : compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
 
       // Isi nilai prompt pada slidesContent secara dinamis
       if (finalPayloadJson.slidesContent) {
@@ -392,7 +401,10 @@ OUTPUT HANYA BLOK JSON VALID SESUAI SKEMA.`;
       this.injectDatabaseBlueprints(finalPayloadJson, fullFormState, styleTemplate, brandingInstruction, watermarkInstruction);
 
       // Kompilasi prompt akhir secara deterministik menggunakan compiler backend
-      const finalPromptFinal = compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
+      const isEdukasi = fullFormState.feature === 'edukasi' || fullFormState.mode === 'edukasi' || fullFormState.category === 'edukasi';
+      const finalPromptFinal = isEdukasi
+        ? compileEdukasiMasterPrompt(finalPayloadJson, fullFormState, styleTemplate, characterFocusPrompt, dropdownSpecs, watermarkInstruction)
+        : compileFinalPrompt(finalPayloadJson, 1, styleTemplate, characterFocusPrompt, dropdownSpecs, targetModel);
 
       // Isi nilai prompt pada slidesContent secara dinamis
       if (finalPayloadJson.slidesContent) {
@@ -720,7 +732,13 @@ OUTPUT HANYA BLOK JSON VALID. JANGAN TULIS PENJELASAN LAIN.`;
       const response = await this.groqClient.post(apiKey, {
         model: 'llama-3.3-70b-versatile',
         response_format: { type: 'json_object' },
-        messages: [{ role: 'user', content: finalPrompt }],
+        messages: [
+          {
+            role: 'system',
+            content: 'Kamu adalah Video Content Strategist dan AI Video Prompt Architect profesional. Selalu kembalikan respons dalam format JSON valid yang lengkap sesuai skema yang diminta. Jangan tambahkan komentar di luar JSON.'
+          },
+          { role: 'user', content: finalPrompt }
+        ],
       });
 
       const text = response.choices[0]?.message?.content || '{}';
@@ -854,19 +872,27 @@ Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
 
   // --- IMPROVE PROMPT ---
   async improvePrompt(promptDraft: string, provider: 'gemini' | 'groq'): Promise<string> {
-    const prompt = `Perbaiki dan tingkatkan kualitas draft prompt gambar berikut agar menjadi lebih menarik, detail, dan fotorealistis/artistik untuk AI image generator (Stable Diffusion/Midjourney/DALL-E 3).
-Draft: "${promptDraft}"
-Berikan hasil perbaikan langsung dalam Bahasa Inggris sebagai output teks tanpa tambahan komentar pembuka atau penutup.`;
+    const systemInstruction = 'You are a professional AI image prompt engineer. Your ONLY job is to rewrite and enhance image prompts. ALWAYS output ONLY the improved prompt text in English — no introduction, no explanation, no markdown, just the raw improved prompt text.';
+    const userPrompt = `Improve and enhance the following image prompt draft to be more detailed, photorealistic/artistic, and effective for AI image generators (Stable Diffusion, Midjourney, DALL-E 3, Flux, Imagen):\n\n"${promptDraft}"\n\nOutput ONLY the improved English prompt text directly.`;
 
     if (provider === 'groq') {
       return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, { model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }] });
+        const response = await this.groqClient.post(apiKey, {
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: userPrompt }
+          ]
+        });
         return (response.choices[0]?.message?.content || '').trim();
       });
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        const response = await model.generateContent(prompt);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          systemInstruction: systemInstruction
+        });
+        const response = await model.generateContent(userPrompt);
         return response.response.text().trim();
       });
     }
@@ -1140,7 +1166,13 @@ Tulis respons HANYA berupa JSON valid tanpa komentar lain.`;
       const response = await this.groqClient.post(apiKey, {
         model: 'llama-3.3-70b-versatile',
         response_format: { type: 'json_object' },
-        messages: [{ role: 'user', content: prompt }]
+        messages: [
+          {
+            role: 'system',
+            content: 'Kamu adalah Production Director, Storyboard Supervisor, dan AI Video Prompt Engineer profesional. Kembalikan respons HANYA dalam format JSON valid sesuai skema yang diminta. Tidak ada komentar atau teks di luar JSON.'
+          },
+          { role: 'user', content: prompt }
+        ]
       });
       const text = response.choices[0]?.message?.content || '{}';
       const finalPayloadJson = JSON.parse(this.groqClient.sanitizeJson(text));

@@ -132,7 +132,7 @@ function enrichSlidePrompt(
   const materials = "premium matte paper texture, smooth vector lines, flat color fills, clean non-reflective surfaces";
 
   const parts = [
-    `- Communication Goal: Render Slide ${slide.slideNumber} with strong visual clarity and storytelling`,
+    `- Slide Render Directive: Render Slide ${slide.slideNumber} as a single final high-resolution fullscreen artwork with strong visual clarity and storytelling impact`,
     `- Visual Style: ${payload.visualBlueprint.coreVisualStyle}`,
     `- Layout & Grid: ${payload.designSystem.gridStructure} utilizing ${payload.designSystem.whitespaceRatio}`,
     `- Main Subject: ${subjectStr}`,
@@ -293,6 +293,118 @@ Render slide ini sebagai satu artwork final beresolusi tinggi, fullscreen tungga
   // 5. Jalankan Prompt Optimizer & Model-Aware Rendering
   const finalCompiledPrompt = promptParts.join('\n').trim();
   return optimizeFinalPrompt(finalCompiledPrompt, targetModel);
+}
+
+export function compileEdukasiMasterPrompt(
+  payload: Payload,
+  fullFormState: any,
+  styleTemplate?: string,
+  characterFocusPrompt?: string,
+  dropdownSpecs?: string,
+  watermarkInstruction?: string
+): string {
+  validateAndHealPayload(payload);
+  const slides = payload.slidesContent || [];
+  const slidesCount = slides.length || fullFormState.slideCount || 5;
+  const topic = fullFormState.topic || payload.contentPayload?.topic || "Edukasi";
+
+  const masterPromptObj = {
+    judul_project: `${topic} - Carousel Edukasi ${slidesCount} Slide`,
+    instruksi_cara_kerja_ai: `PERINTAH UTAMA — BACA DAN INGAT SELAMA SESI INI BERLANGSUNG:\nIni adalah satu paket prompt master untuk membuat ${slidesCount} gambar carousel edukasi secara berurutan. JANGAN generate semua ${slidesCount} gambar sekaligus. Ikuti alur kerja berikut:\n\n1. KONFIRMASI: Setelah membaca prompt ini, berikan rangkuman singkat bahwa kamu paham aturan global, gaya visual, dan daftar ${slidesCount} slide, lalu TUNGGU perintah 'lanjut'.\n2. EKSEKUSI PER SLIDE: Setiap user mengetik 'lanjut' atau 'next', generate SATU gambar untuk slide berikutnya sesuai urutan.\n3. KONSISTENSI KARAKTER & VISUAL (FITUR WAJIB): Simpan metadata visual (warna dominan, ciri fisik karakter, pakaian, jenis lighting, environment/background) di ingatanmu. Gunakan seed atau deskripsi referensi yang identik di setiap prompt gambar selanjutnya untuk mempertahankan konsistensi identitas.\n4. VARIASI ANGLE & KOMPOSISI: Selalu bandingkan rencana komposisi slide baru dengan slide sebelumnya. Variasikan angle kamera (close-up, medium shot, wide shot, top-down) dan posisi objek utama agar tidak repetitif, NAMUN tetap 100% patuh pada 'gaya_visual_global'.\n5. KONSISTENSI UI/OVERLAY: Pastikan elemen UI seperti nomor slide, CTA follow, dan footer diletakkan pada posisi pixel yang identik di setiap gambar.\n6. ATURAN LATAR/BACKGROUND: WAJIB gunakan latar belakang dengan nuansa Putih Bersih di seluruh slide.\n7. PROGRESS TRACKING: Jika ditanya 'sudah sampai mana', berikan laporan progres dari total ${slidesCount} slide.`,
+    aturan_global: {
+      platform_target: "Instagram Carousel Post",
+      peran: "Kamu adalah Senior Graphic Designer & Art Director yang mengetahui kombinasi warna, tipografi, dan estetika visual premium.",
+      target_audiens: payload.contentPayload?.targetAudience || fullFormState.targetAudience || "Pelajar & Mahasiswa",
+      level_kesulitan_konten: "Pemula total, asumsikan audiens belum pernah lihat materi ini sebelumnya. Gunakan analogi sehari-hari dan jangan terlalu teknis.",
+      jenis_konten: "Edukasi Instagram",
+      catatan_render_kode: "TIDAK BOLEH generate teks sintaks kode presisi (<p>, <a>, dll) sebagai teks asli dalam gambar. AI cukup membuat ilustrasi visual yang menyerupai blok kode dengan syntax highlighting (tanpa teks presisi) untuk diedit manual nantinya.",
+      bahasa_teks_overlay: "Non-formal, santai, dan asik. Bicara seperti kakak/teman yang berbagi ilmu, BUKAN seperti buku pelajaran atau artikel jurnal.",
+      batas_teks: "Maksimal 10 kata per elemen teks (headline, subtext, detail, microTip). Ringkas, padat, cepat dibaca.",
+      satu_poin_per_slide: "Satu slide = satu insight/tips/fakta yang disampaikan jelas dan mudah dicerna.",
+      terminologi_wajib_diselipkan: [
+        "fakta menarik",
+        "tahukah kamu",
+        "tips praktis",
+        "jangan sampai salah",
+        "insight penting",
+        "studi menunjukkan",
+        "cara mudah",
+        "langkah simpel",
+        "bukti nyata",
+        "ternyata begini",
+        "coba deh",
+        "bisa langsung dipraktekin"
+      ],
+      larangan: "DILARANG KERAS menyebut harga, diskon, promo produk, atau jualan apapun dalam konten edukasi ini.",
+      call_to_action_variatif: fullFormState.callToAction || fullFormState.cta || 'Selain save/share/follow, variasikan ajakan: misal ajak komentar ("Tag temanmu"), atau praktik agar lebih interaktif.'
+    },
+    gaya_visual_global: {
+      gaya_visual_wajib: styleTemplate || payload.visualBlueprint?.coreVisualStyle || "Create a premium minimalist branding presentation background...",
+      gaya_dominan: `${fullFormState.style || 'Minimalist visual style'} dengan perpaduan elemen profesional.`,
+      rasio_komposisi: "70% area ilustrasi/kode visual, 30% area teks (whitespace luas) agar AI tidak menginterpretasi bebas proporsi tiap slide.",
+      tata_letak_hierarki: payload.designSystem?.gridStructure || "Struktur grid yang rapi, rapi, dan teratur. Whitespace luas, margin seimbang, penataan informasi yang efisien.",
+      elemen_pendukung: "Garis tipis pembatas, ikon pendukung minimalis, elemen visual yang sesuai dengan gaya visual utama.",
+      gaya_ikon_konsisten: "Flat line icon, duotone, stroke 2px, sudut membulat. Konsisten satu sistem di seluruh slide.",
+      palet_warna: {
+        dasar_netral: [
+          dropdownSpecs || payload.designSystem?.colorPalette || "Deep Navy Blue (#0F2D52), Charcoal Gray (#4B5563), Off-White (#FAFAFA), Putih Bersih"
+        ],
+        aksen: [
+          "Steel Blue (#3B82F6)",
+          "Subtle Silver (#E5E7EB)"
+        ]
+      },
+      tipografi: "Sans-serif premium. Headline bold ukuran besar, subtext/detail teks rapi dan teratur dengan kontras tinggi.",
+      tipografi_kode: "Font khusus untuk elemen menyerupai kode program: Fira Code / JetBrains Mono, monospace, dengan warna syntax-highlight (keyword biru, string hijau, tag oranye).",
+      variasi_wajib_per_slide: "Harus memiliki variasi angle kamera, rotasi posisi ilustrasi (kiri/kanan), dan variasi warna aksen dominan per slide untuk menghindari kebosanan.",
+      referensi_visual_brand: "Desain harus memiliki identitas visual \"Series Edukasi\" yang ajeg, sehingga konten-konten lain selanjutnya memiliki benang merah yang sama.",
+      pencahayaan_kamera: "Clean studio lighting, pencahayaan merata dan netral, sudut kamera lurus (eye-level) atau top-down datar.",
+      kedalaman_visual: "Layering berlapis tipis, margin bersih, bayangan drop-shadow yang sangat halus.",
+      dimensi_canvas: `Canvas 1080x1440px, Aspect Ratio ${fullFormState.aspectRatio || '3:4'} (--ar ${fullFormState.aspectRatio || '3:4'})`,
+      negative_prompt: payload.renderingBlueprint?.negativePrompt || "watermark, blur, teks berantakan, kualitas buruk, anatomi aneh, font aneh, terlalu ramai"
+    },
+    layout_media_sosial_global: {
+      pojok_kiri_atas: `Overlay kotak berwarna biru berisi nomor slide (format 'X/${slidesCount}'), sesuaikan angka per slide.`,
+      pojok_kanan_atas: "Overlay warna konsisten berisi teks ajakan follow: 'Jangan lupa follow!'.",
+      tengah_atas_footer: "Ikon atau teks navigasi swipe ('Swipe right' / panah kanan) untuk ajak audiens geser slide.",
+      footer_bawah: watermarkInstruction || "Terpusat, minimalis, tanpa label teks pengantar (ikon langsung diikuti teks)"
+    },
+    daftar_slide: slides.map((slide: any, idx: number) => {
+      const num = slide.slideNumber || (idx + 1);
+      let role = `POIN EDUKASI #${num - 1}`;
+      let urutan = `Step ${num} dari ${slidesCount}: Penjelasan Materi`;
+      if (num === 1) {
+        role = "HOOK & COVER EDUKASI (Slide Pembuka)";
+        urutan = `Step 1 dari ${slidesCount}: Pengenalan & Hook`;
+      } else if (num === slidesCount) {
+        role = "PENUTUP & AJAK INTERAKSI (Slide Terakhir)";
+        urutan = `Step ${slidesCount} dari ${slidesCount}: Kesimpulan & CTA`;
+      }
+
+      let visualObj = slide.subject || '';
+      if (slide.sceneDescription) {
+        visualObj += visualObj ? `, ${slide.sceneDescription}` : slide.sceneDescription;
+      }
+      if (characterFocusPrompt) {
+        visualObj += ` [Visual Character Consistency: ${characterFocusPrompt}]`;
+      }
+
+      return {
+        slideNumber: num,
+        role,
+        urutan_alur_belajar: urutan,
+        objek_visual: visualObj,
+        teks_dalam_gambar: {
+          headline: slide.headline || "",
+          subtext: slide.description || "",
+          detail: (slide.keyPoints && slide.keyPoints.length > 0) ? slide.keyPoints.join('. ') : (slide.educationalObjective || ""),
+          microTip: (slide.calloutSuggestions && slide.calloutSuggestions.length > 0) ? slide.calloutSuggestions[0] : ""
+        }
+      };
+    })
+  };
+
+  return JSON.stringify(masterPromptObj, null, 2);
 }
 
 export function renderVideoDSL(payload: VideoPayload): string {

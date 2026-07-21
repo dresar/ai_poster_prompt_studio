@@ -457,8 +457,6 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
 
   Future<void> _downloadActiveFile() async {
     try {
-      final appDir = await FileDirectoryHelper.getPublicDirectory();
-
       final dateStr = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       String content = '';
       String ext = 'txt';
@@ -489,16 +487,23 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
       }
 
       final fileName = '${prefix}_$dateStr.$ext';
-      final file = io.File('${appDir.path}/$fileName');
-      await file.writeAsString(content);
+      final saveResult = await FileDirectoryHelper.saveFile(
+        fileName: fileName,
+        content: content,
+      );
+
+      if (!saveResult.isSuccess) {
+        throw Exception(saveResult.errorMessage ?? 'Gagal menyimpan file');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('File disimpan: $fileName'),
+            duration: const Duration(seconds: 5),
+            content: Text('⚡ Terdownload ke: ${saveResult.displayLocation}/$fileName'),
             backgroundColor: NeoTheme.accentGreen,
             action: SnackBarAction(
-              label: 'Buka',
+              label: 'Lihat',
               textColor: Colors.white,
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const SavedCodesScreen()));

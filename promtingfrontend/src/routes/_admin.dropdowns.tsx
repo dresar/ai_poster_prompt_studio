@@ -89,6 +89,16 @@ const GROUP_META: Record<string, { label: string; color: string; dot: string; em
 
   enhance_style:         { label: "Enhance Style",         color: "bg-pink-50 border-pink-300",       dot: "bg-pink-300",     emoji: "✨" },
   change_level:          { label: "Tingkat Perubahan",     color: "bg-green-50 border-green-300",     dot: "bg-green-300",    emoji: "🌱" },
+
+  jenis_cerita_video:    { label: "Jenis Cerita Video",    color: "bg-orange-50 border-orange-400",   dot: "bg-orange-400",   emoji: "🎭" },
+  gaya_video:            { label: "Gaya Visual Video",     color: "bg-yellow-50 border-yellow-400",   dot: "bg-yellow-400",   emoji: "🎨" },
+  gerakan_kamera_video:  { label: "Gerakan Kamera Video",  color: "bg-blue-50 border-blue-400",       dot: "bg-blue-400",     emoji: "🎥" },
+  lokasi_video:          { label: "Setting Lokasi Video",  color: "bg-green-50 border-green-400",     dot: "bg-green-400",    emoji: "🌍" },
+  transisi_video:        { label: "Transisi Scene Video",  color: "bg-red-50 border-red-400",         dot: "bg-red-400",      emoji: "✂️" },
+  mood_audio_video:      { label: "Mood Audio Video",      color: "bg-indigo-50 border-indigo-400",   dot: "bg-indigo-400",   emoji: "🎵" },
+  rasio_video:           { label: "Rasio Video",           color: "bg-purple-50 border-purple-400",   dot: "bg-purple-400",   emoji: "📏" },
+  palet_warna_video:     { label: "Palet Warna Video",     color: "bg-pink-50 border-pink-400",       dot: "bg-pink-400",     emoji: "🌈" },
+  fokus_karakter_video:  { label: "Fokus Karakter Video",  color: "bg-emerald-50 border-emerald-400", dot: "bg-emerald-400",  emoji: "👤" },
 };
 
 const FEATURE_TABS = [
@@ -101,6 +111,7 @@ const FEATURE_TABS = [
   { id: "logo", label: "Logo", emoji: "💎", groups: ["gaya_logo", "palet_warna_logo", "aturan_teks_logo"] },
   { id: "quotes", label: "Quotes", emoji: "✍️", groups: ["gaya_quotes", "tema_quotes", "rasio_quotes", "palet_warna_quotes"] },
   { id: "enhance", label: "Percantik Foto", emoji: "✨", groups: ["enhance_style", "change_level"] },
+  { id: "video_prompt", label: "Video Prompt", emoji: "🎬", groups: ["jenis_cerita_video", "gaya_video", "gerakan_kamera_video", "lokasi_video", "transisi_video", "mood_audio_video", "rasio_video", "palet_warna_video", "fokus_karakter_video"] },
   { id: "all", label: "Semua", emoji: "📋", groups: [] },
 ];
 
@@ -553,7 +564,6 @@ function DropdownsPage() {
                       {activeFeatureTab !== "all" && (
                         <optgroup label={`Grup Khusus ${FEATURE_TABS.find(t => t.id === activeFeatureTab)?.label}`}>
                           {FEATURE_TABS.find(t => t.id === activeFeatureTab)?.groups
-                            .filter(g => allGroups.includes(g))
                             .map((g) => (
                               <option key={g} value={g}>
                                 {getMeta(g).emoji} {getMeta(g).label} ({g})

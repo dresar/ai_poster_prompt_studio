@@ -58839,6 +58839,8 @@ var import_fs3 = __toESM(require("fs"));
 var import_dotenv = __toESM(require_main());
 var import_path = __toESM(require("path"));
 import_dotenv.default.config({ path: import_path.default.resolve(process.cwd(), ".env") });
+import_dotenv.default.config({ path: import_path.default.resolve(__dirname, ".env") });
+import_dotenv.default.config({ path: import_path.default.resolve(__dirname, "../../.env") });
 var env = {
   NODE_ENV: process.env.NODE_ENV || "development",
   PORT: parseInt(process.env.PORT || "3000", 10),
@@ -58849,7 +58851,9 @@ var env = {
   IMAGEKIT_PUBLIC_KEY: process.env.IMAGEKIT_PUBLIC_KEY || "",
   IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY || "",
   IMAGEKIT_URL_ENDPOINT: process.env.IMAGEKIT_URL_ENDPOINT || "",
-  USE_STRICT_PAYLOAD_SCHEMA: process.env.USE_STRICT_PAYLOAD_SCHEMA || "false"
+  USE_STRICT_PAYLOAD_SCHEMA: process.env.USE_STRICT_PAYLOAD_SCHEMA || "false",
+  STORAGE_GATEWAY_KEY: process.env.STORAGE_GATEWAY_KEY || "AR_4c9b2435_929a80d916261b15c582db6fe3e41e52",
+  STORAGE_GATEWAY_BASE_URL: process.env.STORAGE_GATEWAY_BASE_URL || "https://one.apprentice.cyou/v1"
 };
 if (!env.DATABASE_URL) {
   console.warn("WARNING: DATABASE_URL is not set in environment variables!");
@@ -67334,7 +67338,7 @@ var uploadMultiImages = async (req, res, next) => {
 async function performUpload(image, fileName, userId, req) {
   try {
     const url = await uploadToCloudinary(image, fileName);
-    return { url, isFallback: false, storageType: "user_imagekit" };
+    return { url, isFallback: false, storageType: "storage_gateway" };
   } catch (cloudinaryErr) {
     logger.warn(`Storage CDN Gateway (Cloudinary) upload failed: ${cloudinaryErr.message}`);
   }
@@ -67400,32 +67404,64 @@ async function performUpload(image, fileName, userId, req) {
     );
   }
 }
-async function uploadToCloudinary(base64File, fileName) {
-  let cleanBase64 = base64File;
-  if (!base64File.startsWith("data:")) {
-    cleanBase64 = `data:image/png;base64,${base64File}`;
-  }
-  const gatewayKey = process.env.STORAGE_GATEWAY_KEY || "AR_4c9b2435_929a80d916261b15c582db6fe3e41e52";
-  const baseUrl = process.env.STORAGE_GATEWAY_BASE_URL || "https://one.apprentice.cyou/v1";
-  const postData = JSON.stringify({
-    file: cleanBase64,
-    file_name: fileName || "poster.png",
-    auto_rotate: true,
-    provider: "cloudinary"
+function uploadToCloudinary(base64File, fileName) {
+  return new Promise((resolve, reject) => {
+    let cleanBase64 = base64File;
+    if (!base64File.startsWith("data:")) {
+      cleanBase64 = `data:image/png;base64,${base64File}`;
+    }
+    const gatewayKey = env.STORAGE_GATEWAY_KEY;
+    const baseUrl = env.STORAGE_GATEWAY_BASE_URL;
+    const postData = JSON.stringify({
+      file: cleanBase64,
+      file_name: fileName || "poster.png",
+      auto_rotate: true,
+      provider: "cloudinary"
+    });
+    try {
+      const parsedUrl = new URL(`${baseUrl}/storage/upload`);
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || 443,
+        path: parsedUrl.pathname + parsedUrl.search,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(postData),
+          "Authorization": `Bearer ${gatewayKey}`
+        }
+      };
+      const req = import_https2.default.request(options, (res) => {
+        let responseBody = "";
+        res.on("data", (chunk) => {
+          responseBody += chunk;
+        });
+        res.on("end", () => {
+          try {
+            const data = JSON.parse(responseBody);
+            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+              if (data.success && data.file?.url) {
+                resolve(data.file.url);
+              } else {
+                reject(new Error(data.message || "Storage CDN Gateway upload failed"));
+              }
+            } else {
+              reject(new Error(data.message || `HTTP error ${res.statusCode}`));
+            }
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
+      req.on("error", (e) => {
+        reject(e);
+      });
+      req.write(postData);
+      req.end();
+    } catch (err) {
+      reject(err);
+    }
   });
-  const response = await fetch(`${baseUrl}/storage/upload`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${gatewayKey}`
-    },
-    body: postData
-  });
-  const data = await response.json();
-  if (response.ok && data.success && data.file?.url) {
-    return data.file.url;
-  }
-  throw new Error(data.message || data.error?.message || "Storage CDN Gateway upload failed");
 }
 function uploadToImageKit(base64File, fileName, config) {
   return new Promise((resolve, reject) => {

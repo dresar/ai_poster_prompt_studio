@@ -263,7 +263,8 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
             _pendingPickedFile = null;
           });
           final storageType = response.data['storageType'] ?? 'local';
-          final storageLabel = storageType == 'user_imagekit' ? '☁️ ImageKit pribadi Anda'
+          final storageLabel = storageType == 'storage_gateway' ? '☁️ Storage Gateway'
+              : storageType == 'user_imagekit' ? '☁️ ImageKit pribadi Anda'
               : storageType == 'admin_imagekit' ? '☁️ ImageKit server'
               : '💾 Server lokal';
           ScaffoldMessenger.of(context).showSnackBar(

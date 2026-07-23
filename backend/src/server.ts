@@ -22,6 +22,53 @@ import { syncPromptFilesToDisk } from './modules/prompts/prompts.controller';
 
 const app = express();
 
+// 🌐 UNRESTRICTED PUBLIC ACCESS FOR AI BOTS & CRAWLERS (ChatGPT, Claude, Midjourney, DALL-E, etc.)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/txt') || req.path.startsWith('/prompts') || req.path === '/robots.txt') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.setHeader('X-Robots-Tag', 'all');
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+  }
+  next();
+});
+
+// Serve robots.txt for AI Crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.)
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.status(200).send(`User-agent: *\nAllow: /\nAllow: /txt/\nAllow: /prompts/\nSitemap: https://porto.apprentice.cyou/sitemap.xml\n`);
+});
+
+// Serve static text files directly via express.static at root /txt and /prompts
+const basePromptsDir = path.join(process.cwd(), 'prompts');
+if (!fs.existsSync(basePromptsDir)) {
+  fs.mkdirSync(basePromptsDir, { recursive: true });
+}
+app.use('/txt', express.static(basePromptsDir, {
+  setHeaders: (res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+  }
+}));
+app.use('/prompts', express.static(basePromptsDir, {
+  setHeaders: (res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+  }
+}));
+
+// Mount dynamic prompt routes before restrictive CORS
+app.use('/txt', promptsRoutes);
+app.use('/prompts', promptsRoutes);
+
 // Middlewares
 const ALLOWED_ORIGINS = [
   'https://porto.apprentice.cyou',
@@ -34,12 +81,13 @@ const ALLOWED_ORIGINS = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, Postman)
+    // Allow requests with no origin (e.g. mobile apps, Postman, AI Crawlers)
     if (!origin) return callback(null, true);
     if (ALLOWED_ORIGINS.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+    // Allow external requests for public prompt files
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -48,6 +96,9 @@ app.use(cors({
 
 // Strict HTTP Security Headers
 app.use((req, res, next) => {
+  if (req.path.startsWith('/txt') || req.path.startsWith('/prompts') || req.path === '/robots.txt') {
+    return next();
+  }
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');

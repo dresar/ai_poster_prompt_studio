@@ -69275,6 +69275,14 @@ var charactersDir = import_path4.default.join(basePromptsDir, "characters");
     import_fs3.default.mkdirSync(dir, { recursive: true });
   }
 });
+function setAiCrawlerHeaders(res) {
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+  res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=86400");
+  res.setHeader("X-Robots-Tag", "all");
+}
 function slugify(str) {
   return str.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
 }
@@ -69285,6 +69293,7 @@ async function syncPromptFilesToDisk() {
       const styleSlug = slugify(style.name) || style.id;
       const fileName = `${styleSlug}.txt`;
       const filePath = import_path4.default.join(stylesDir, fileName);
+      const rootFilePath = import_path4.default.join(basePromptsDir, fileName);
       const content = `GAYA VISUAL REFERENSI: ${style.name}
 ID: ${style.id}
 TEMA WARNA & ESTETIKA: Tema Terang Putih & Abu-Abu Muda Clean minimalis
@@ -69293,8 +69302,10 @@ PANDUAN PROMPTING LENGKAP:
 ${style.promptTemplate}
 `;
       import_fs3.default.writeFileSync(filePath, content, "utf8");
+      import_fs3.default.writeFileSync(rootFilePath, content, "utf8");
     }
     const defaultStylePath = import_path4.default.join(stylesDir, "auto.txt");
+    const defaultRootStylePath = import_path4.default.join(basePromptsDir, "auto.txt");
     const defaultStyleContent = `GAYA VISUAL OTOMATIS: Lively Clean Light Theme
 TEMA WARNA BASE: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG TEMA GELAP / DARK MODE!
 WARNA AKSEN SEGAR: Wajib padukan 1-2 sentuhan warna aksen segar yang selaras (misal: soft pastel accent, warm highlight, sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.
@@ -69302,6 +69313,7 @@ ESTETIKA: Sederhana, bersih, tidak norak, jangan banyak warna yang bertabrakan, 
 KETERBACAAN: Tipografi Swiss grid modern, kontras tinggi, sangat profesional dan berkelas.
 `;
     import_fs3.default.writeFileSync(defaultStylePath, defaultStyleContent, "utf8");
+    import_fs3.default.writeFileSync(defaultRootStylePath, defaultStyleContent, "utf8");
     const activeChars = await db.select().from(characters).where(eq(characters.isActive, true));
     for (const char2 of activeChars) {
       const charSlug = slugify(char2.name) || char2.id;
@@ -69343,10 +69355,9 @@ var getStylePromptFile = async (req, res, next) => {
     let rawSlug = req.params.slug || "";
     rawSlug = rawSlug.replace(/\.txt$/i, "");
     const safeSlug = slugify(rawSlug);
+    setAiCrawlerHeaders(res);
     const filePath = import_path4.default.join(stylesDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(filePath)) {
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Access-Control-Allow-Origin", "*");
       return res.status(200).send(import_fs3.default.readFileSync(filePath, "utf8"));
     }
     const [style] = await db.select().from(visualStyles).where(or(eq(visualStyles.id, rawSlug), ilike(visualStyles.name, `%${rawSlug.replace(/-/g, " ")}%`)));
@@ -69356,16 +69367,12 @@ ID: ${style.id}
 PANDUAN PROMPTING LENGKAP:
 ${style.promptTemplate}
 `;
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Access-Control-Allow-Origin", "*");
       import_fs3.default.writeFileSync(filePath, content, "utf8");
       return res.status(200).send(content);
     }
     const fallbackText = `GAYA VISUAL REFERENSI: ${rawSlug}
 ESTETIKA: Clean Minimalist Light Theme (Putih & Abu-abu), simpel, profesional, tanpa ornamen menumpuk.
 `;
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.setHeader("Access-Control-Allow-Origin", "*");
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);
@@ -69376,10 +69383,9 @@ var getCharacterPromptFile = async (req, res, next) => {
     let rawSlug = req.params.slug || "";
     rawSlug = rawSlug.replace(/\.txt$/i, "");
     const safeSlug = slugify(rawSlug);
+    setAiCrawlerHeaders(res);
     const filePath = import_path4.default.join(charactersDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(filePath)) {
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Access-Control-Allow-Origin", "*");
       return res.status(200).send(import_fs3.default.readFileSync(filePath, "utf8"));
     }
     const [char2] = await db.select().from(characters).where(or(eq(characters.id, rawSlug), ilike(characters.name, `%${rawSlug.replace(/-/g, " ")}%`)));
@@ -69393,16 +69399,12 @@ ${char2.promptConsistency}
 MASTER PROMPT:
 ${char2.masterPrompt || char2.positivePrompt || ""}
 `;
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Access-Control-Allow-Origin", "*");
       import_fs3.default.writeFileSync(filePath, content, "utf8");
       return res.status(200).send(content);
     }
     const fallbackText = `KARAKTER REFERENSI BIBLE: ${rawSlug}
 DESKRIPSI: Subjek karakter 3D modern ramah, konsisten dalam pose, ekspresi, dan pakaian.
 `;
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.setHeader("Access-Control-Allow-Origin", "*");
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);
@@ -69413,24 +69415,23 @@ var getUniversalTextPromptFile = async (req, res, next) => {
     let rawSlug = req.params.slug || "";
     rawSlug = rawSlug.replace(/\.txt$/i, "");
     const safeSlug = slugify(rawSlug);
+    setAiCrawlerHeaders(res);
     const stylePath = import_path4.default.join(stylesDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(stylePath)) {
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Access-Control-Allow-Origin", "*");
       return res.status(200).send(import_fs3.default.readFileSync(stylePath, "utf8"));
     }
     const charPath = import_path4.default.join(charactersDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(charPath)) {
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.setHeader("Access-Control-Allow-Origin", "*");
       return res.status(200).send(import_fs3.default.readFileSync(charPath, "utf8"));
+    }
+    const rootPath = import_path4.default.join(basePromptsDir, `${safeSlug}.txt`);
+    if (import_fs3.default.existsSync(rootPath)) {
+      return res.status(200).send(import_fs3.default.readFileSync(rootPath, "utf8"));
     }
     const content = `PANDUAN REFERENSI PROMPT TEXT: ${rawSlug}
 URL: https://porto.apprentice.cyou/txt/${safeSlug}.txt
 TIPE: Clean Light Theme Prompt Reference (Putih & Abu-abu Muda)
 `;
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.setHeader("Access-Control-Allow-Origin", "*");
     return res.status(200).send(content);
   } catch (error) {
     next(error);
@@ -69451,6 +69452,50 @@ var prompts_routes_default = router10;
 var import_kill_port = __toESM(require_kill_port());
 init_image_cleanup();
 var app = (0, import_express11.default)();
+app.use((req, res, next) => {
+  if (req.path.startsWith("/txt") || req.path.startsWith("/prompts") || req.path === "/robots.txt") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=86400");
+    res.setHeader("X-Robots-Tag", "all");
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
+    }
+  }
+  next();
+});
+app.get("/robots.txt", (req, res) => {
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.status(200).send(`User-agent: *
+Allow: /
+Allow: /txt/
+Allow: /prompts/
+Sitemap: https://porto.apprentice.cyou/sitemap.xml
+`);
+});
+var basePromptsDir2 = import_path5.default.join(process.cwd(), "prompts");
+if (!import_fs4.default.existsSync(basePromptsDir2)) {
+  import_fs4.default.mkdirSync(basePromptsDir2, { recursive: true });
+}
+app.use("/txt", import_express11.default.static(basePromptsDir2, {
+  setHeaders: (res) => {
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+  }
+}));
+app.use("/prompts", import_express11.default.static(basePromptsDir2, {
+  setHeaders: (res) => {
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+  }
+}));
+app.use("/txt", prompts_routes_default);
+app.use("/prompts", prompts_routes_default);
 var ALLOWED_ORIGINS = [
   "https://porto.apprentice.cyou",
   "https://full-feature-showcase.vercel.app",
@@ -69469,13 +69514,16 @@ app.use((0, import_cors.default)({
     if (ALLOWED_ORIGINS.includes(origin) || origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
       return callback(null, true);
     }
-    return callback(new Error("Not allowed by CORS"));
+    return callback(null, true);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"]
 }));
 app.use((req, res, next) => {
+  if (req.path.startsWith("/txt") || req.path.startsWith("/prompts") || req.path === "/robots.txt") {
+    return next();
+  }
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-XSS-Protection", "1; mode=block");

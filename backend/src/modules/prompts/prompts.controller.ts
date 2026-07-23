@@ -17,6 +17,16 @@ const charactersDir = path.join(basePromptsDir, 'characters');
   }
 });
 
+// Helper to set maximal permissive headers for AI crawlers & web fetchers
+function setAiCrawlerHeaders(res: Response) {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+  res.setHeader('X-Robots-Tag', 'all');
+}
+
 // Helper to convert string to safe slug
 export function slugify(str: string): string {
   return str
@@ -38,21 +48,25 @@ export async function syncPromptFilesToDisk() {
       const styleSlug = slugify(style.name) || style.id;
       const fileName = `${styleSlug}.txt`;
       const filePath = path.join(stylesDir, fileName);
+      const rootFilePath = path.join(basePromptsDir, fileName);
       const content = `GAYA VISUAL REFERENSI: ${style.name}\n` +
         `ID: ${style.id}\n` +
         `TEMA WARNA & ESTETIKA: Tema Terang Putih & Abu-Abu Muda Clean minimalis\n\n` +
         `PANDUAN PROMPTING LENGKAP:\n${style.promptTemplate}\n`;
       fs.writeFileSync(filePath, content, 'utf8');
+      fs.writeFileSync(rootFilePath, content, 'utf8');
     }
 
     // Default style fallback
     const defaultStylePath = path.join(stylesDir, 'auto.txt');
+    const defaultRootStylePath = path.join(basePromptsDir, 'auto.txt');
     const defaultStyleContent = `GAYA VISUAL OTOMATIS: Lively Clean Light Theme\n` +
       `TEMA WARNA BASE: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG TEMA GELAP / DARK MODE!\n` +
       `WARNA AKSEN SEGAR: Wajib padukan 1-2 sentuhan warna aksen segar yang selaras (misal: soft pastel accent, warm highlight, sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.\n` +
       `ESTETIKA: Sederhana, bersih, tidak norak, jangan banyak warna yang bertabrakan, tanpa embel-embel ornamen menumpuk.\n` +
       `KETERBACAAN: Tipografi Swiss grid modern, kontras tinggi, sangat profesional dan berkelas.\n`;
     fs.writeFileSync(defaultStylePath, defaultStyleContent, 'utf8');
+    fs.writeFileSync(defaultRootStylePath, defaultStyleContent, 'utf8');
 
     // 2. Sync characters
     const activeChars = await db.select().from(characters).where(eq(characters.isActive, true));
@@ -94,10 +108,10 @@ export const getStylePromptFile = async (req: Request, res: Response, next: Next
     rawSlug = rawSlug.replace(/\.txt$/i, '');
     const safeSlug = slugify(rawSlug);
 
+    setAiCrawlerHeaders(res);
+
     const filePath = path.join(stylesDir, `${safeSlug}.txt`);
     if (fs.existsSync(filePath)) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Access-Control-Allow-Origin', '*');
       return res.status(200).send(fs.readFileSync(filePath, 'utf8'));
     }
 
@@ -111,8 +125,6 @@ export const getStylePromptFile = async (req: Request, res: Response, next: Next
       const content = `GAYA VISUAL REFERENSI: ${style.name}\n` +
         `ID: ${style.id}\n` +
         `PANDUAN PROMPTING LENGKAP:\n${style.promptTemplate}\n`;
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Access-Control-Allow-Origin', '*');
       fs.writeFileSync(filePath, content, 'utf8');
       return res.status(200).send(content);
     }
@@ -120,8 +132,6 @@ export const getStylePromptFile = async (req: Request, res: Response, next: Next
     // Generic fallback for any style slug
     const fallbackText = `GAYA VISUAL REFERENSI: ${rawSlug}\n` +
       `ESTETIKA: Clean Minimalist Light Theme (Putih & Abu-abu), simpel, profesional, tanpa ornamen menumpuk.\n`;
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);
@@ -137,10 +147,10 @@ export const getCharacterPromptFile = async (req: Request, res: Response, next: 
     rawSlug = rawSlug.replace(/\.txt$/i, '');
     const safeSlug = slugify(rawSlug);
 
+    setAiCrawlerHeaders(res);
+
     const filePath = path.join(charactersDir, `${safeSlug}.txt`);
     if (fs.existsSync(filePath)) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Access-Control-Allow-Origin', '*');
       return res.status(200).send(fs.readFileSync(filePath, 'utf8'));
     }
 
@@ -155,8 +165,6 @@ export const getCharacterPromptFile = async (req: Request, res: Response, next: 
         `DESKRIPSI: ${char.description}\n\n` +
         `KONSISTENSI VISUAL:\n${char.promptConsistency}\n\n` +
         `MASTER PROMPT:\n${char.masterPrompt || char.positivePrompt || ''}\n`;
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Access-Control-Allow-Origin', '*');
       fs.writeFileSync(filePath, content, 'utf8');
       return res.status(200).send(content);
     }
@@ -164,8 +172,6 @@ export const getCharacterPromptFile = async (req: Request, res: Response, next: 
     // Generic fallback for any character slug
     const fallbackText = `KARAKTER REFERENSI BIBLE: ${rawSlug}\n` +
       `DESKRIPSI: Subjek karakter 3D modern ramah, konsisten dalam pose, ekspresi, dan pakaian.\n`;
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);
@@ -181,28 +187,30 @@ export const getUniversalTextPromptFile = async (req: Request, res: Response, ne
     rawSlug = rawSlug.replace(/\.txt$/i, '');
     const safeSlug = slugify(rawSlug);
 
+    setAiCrawlerHeaders(res);
+
     // Check style first
     const stylePath = path.join(stylesDir, `${safeSlug}.txt`);
     if (fs.existsSync(stylePath)) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Access-Control-Allow-Origin', '*');
       return res.status(200).send(fs.readFileSync(stylePath, 'utf8'));
     }
 
     // Check character next
     const charPath = path.join(charactersDir, `${safeSlug}.txt`);
     if (fs.existsSync(charPath)) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Access-Control-Allow-Origin', '*');
       return res.status(200).send(fs.readFileSync(charPath, 'utf8'));
+    }
+
+    // Check root prompt dir next
+    const rootPath = path.join(basePromptsDir, `${safeSlug}.txt`);
+    if (fs.existsSync(rootPath)) {
+      return res.status(200).send(fs.readFileSync(rootPath, 'utf8'));
     }
 
     // Return plain text prompt
     const content = `PANDUAN REFERENSI PROMPT TEXT: ${rawSlug}\n` +
       `URL: https://porto.apprentice.cyou/txt/${safeSlug}.txt\n` +
       `TIPE: Clean Light Theme Prompt Reference (Putih & Abu-abu Muda)\n`;
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).send(content);
   } catch (error) {
     next(error);

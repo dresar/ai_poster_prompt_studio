@@ -87,9 +87,9 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
   "slidesContent": [
     {
       "slideNumber": 1,
-      "headline": "Judul memikat & punchy (30–60 karakter)",
-      "description": "Ringkasan poin utama (40–70 kata / 250–500 karakter total). GAMBAR = POIN INTI, CAPTION = PENJELASAN LENGKAP & MENDALAM.",
-      "subject": "Ilustrasi visual utama yang sangat mendominasi artwork (70% area visual)",
+      "headline": "Hook memikat & singkat MAX 8 KATA (Cover Hook Slide 1)",
+      "description": "Subjudul singkat MAX 15 KATA. TANPA bullet list, TANPA paragraf panjang, TANPA infografik, TANPA statistik besar. Tujuan utama memancing rasa penasaran agar audiens swipe ke Slide 2.",
+      "subject": "Satu visual utama memikat yang memenuhi minimal 65–70% kanvas artwork",
       "sceneDescription": "Deskripsi latar dan detail artwork visual",
       "visualEmphasis": "Data atau ilustrasi kunci yang ditonjolkan",
       "communicationGoal": "Poin inti yang harus ditangkap pembaca saat swipe cepat di HP",

@@ -343,7 +343,7 @@ ALUR KERJA WAJIB:
         isi_utama_detail: "250–500 karakter total per slide",
         bullet_point: "3–5 poin (tiap bullet 20–50 karakter)",
         total_karakter_satu_slide: "350–700 karakter (maksimal 40–70 kata per slide agar nyaman dibaca di layar HP)",
-        hook_slide_1_cover: "300–500 karakter (Headline memikat + subtext ringkas)",
+        hook_slide_1_cover: "Hook singkat max 8 kata + Subjudul max 15 kata + 1 Visual Utama memikat (65-70% kanvas). TANPA bullet list, TANPA paragraf panjang, TANPA infografik, TANPA statistik besar, TANPA badge nomor. Tujuan utama memancing rasa penasaran untuk swipe ke Slide 2.",
         slide_isi_2_sampai_5: "400–700 karakter per slide",
         slide_penutup_cta: "250–500 karakter"
       },

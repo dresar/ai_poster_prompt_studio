@@ -69290,7 +69290,19 @@ function writeTxtToAllLocations(subPath, content) {
       if (!import_fs3.default.existsSync(parentDir)) {
         import_fs3.default.mkdirSync(parentDir, { recursive: true });
       }
+      try {
+        import_fs3.default.chmodSync(dir, 493);
+      } catch (e) {
+      }
+      try {
+        import_fs3.default.chmodSync(parentDir, 493);
+      } catch (e) {
+      }
       import_fs3.default.writeFileSync(fullFilePath, content, "utf8");
+      try {
+        import_fs3.default.chmodSync(fullFilePath, 420);
+      } catch (e) {
+      }
     } catch (e) {
     }
   });
@@ -69299,6 +69311,10 @@ function writeTxtToAllLocations(subPath, content) {
   try {
     if (!import_fs3.default.existsSync(dir)) {
       import_fs3.default.mkdirSync(dir, { recursive: true });
+    }
+    try {
+      import_fs3.default.chmodSync(dir, 493);
+    } catch (e) {
     }
   } catch (e) {
   }

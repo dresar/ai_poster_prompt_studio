@@ -10,7 +10,7 @@ PassengerStartupFile app.js
 </IfModule>
 # DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
 
-# 🌐 PERMISSIVE HEADERS FOR PUBLIC AI PROMPT TEXT ENDPOINTS & AI CRAWLERS
+# 🌐 PERMISSIVE HEADERS & PUBLIC ACCESS FOR AI PROMPT TEXT ENDPOINTS & CRAWLERS
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
@@ -18,9 +18,23 @@ PassengerStartupFile app.js
     Header set X-Robots-Tag "all"
 </IfModule>
 
-# Force text/plain MIME type for all .txt files
+# Force text/plain MIME type and Allow Public Access for all .txt files
 <FilesMatch "\.(txt)$">
     ForceType text/plain
     Header set Content-Type "text/plain; charset=utf-8"
     Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
 </FilesMatch>
+
+# Explicitly allow unauthenticated public access for /txt directory
+<IfModule mod_authz_core.c>
+    <Location "/txt">
+        Require all granted
+    </Location>
+    <Location "/prompts">
+        Require all granted
+    </Location>
+</IfModule>

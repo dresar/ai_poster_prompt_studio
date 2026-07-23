@@ -17,7 +17,7 @@ const cpanelPublicDirs = [
   path.join(process.cwd(), 'uploads', 'txt'),
 ];
 
-// Helper to write file safely to all possible cPanel directories
+// Helper to write file safely to all possible cPanel directories with explicit 0755 & 0644 permissions
 function writeTxtToAllLocations(subPath: string, content: string) {
   const targetDirs = [
     basePromptsDir,
@@ -34,19 +34,24 @@ function writeTxtToAllLocations(subPath: string, content: string) {
       if (!fs.existsSync(parentDir)) {
         fs.mkdirSync(parentDir, { recursive: true });
       }
+      try { fs.chmodSync(dir, 0o755); } catch (e) {}
+      try { fs.chmodSync(parentDir, 0o755); } catch (e) {}
+
       fs.writeFileSync(fullFilePath, content, 'utf8');
+      try { fs.chmodSync(fullFilePath, 0o644); } catch (e) {}
     } catch (e) {
-      // Ignore individual directory creation errors (e.g. if public_html is read-only)
+      // Ignore individual directory creation errors
     }
   });
 }
 
-// Ensure prompt directories exist
+// Ensure prompt directories exist with 0755 permissions
 [basePromptsDir, stylesDir, charactersDir, ...cpanelPublicDirs].forEach((dir) => {
   try {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
+    try { fs.chmodSync(dir, 0o755); } catch (e) {}
   } catch (e) {}
 });
 

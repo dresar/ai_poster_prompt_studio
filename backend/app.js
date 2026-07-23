@@ -64827,15 +64827,23 @@ function compileEdukasiMasterPrompt(payload, fullFormState, styleTemplate, chara
   const masterPromptObj = {
     judul_project: `${topic} - Carousel Edukasi ${slidesCount} Slide`,
     instruksi_cara_kerja_ai: `PERINTAH UTAMA \u2014 BACA DAN INGAT SELAMA SESI INI BERLANGSUNG:
-Ini adalah satu paket prompt master untuk membuat ${slidesCount} gambar carousel edukasi secara berurutan. JANGAN generate semua ${slidesCount} gambar sekaligus. Ikuti alur kerja berikut:
+Ini adalah satu paket prompt master untuk membuat ${slidesCount} gambar carousel edukasi secara berurutan. MODE GENERATE: SATU SLIDE = SATU GAMBAR.
 
+AI WAJIB menghasilkan TEPAT SATU (1) GAMBAR yang hanya berisi SATU SLIDE dalam setiap proses generate.
+
+DILARANG KERAS:
+- Menggabungkan 2 slide atau lebih dalam satu gambar.
+- Membuat seluruh carousel sekaligus.
+- Membuat kolase, grid, mosaik, contact sheet, atau layout multi-panel.
+- Menampilkan preview semua slide atau menghasilkan 1/6\u20136/6 sekaligus.
+
+ALUR KERJA WAJIB:
 1. KONFIRMASI: Setelah membaca prompt ini, berikan rangkuman singkat bahwa kamu paham aturan global, gaya visual, dan daftar ${slidesCount} slide, lalu TUNGGU perintah 'lanjut'.
-2. EKSEKUSI PER SLIDE: Setiap user mengetik 'lanjut' atau 'next', generate SATU gambar untuk slide berikutnya sesuai urutan.
-3. KONSISTENSI KARAKTER & VISUAL (FITUR WAJIB): Simpan metadata visual (warna dominan, ciri fisik karakter, pakaian, jenis lighting, environment/background) di ingatanmu. Gunakan seed atau deskripsi referensi yang identik di setiap prompt gambar selanjutnya untuk mempertahankan konsistensi identitas.
-4. VARIASI ANGLE & KOMPOSISI: Selalu bandingkan rencana komposisi slide baru dengan slide sebelumnya. Variasikan angle kamera (close-up, medium shot, wide shot, top-down) dan posisi objek utama agar tidak repetitif, NAMUN tetap 100% patuh pada 'gaya_visual_global'.
-5. KONSISTENSI UI/OVERLAY: Pastikan elemen UI seperti nomor slide, CTA follow, dan footer diletakkan pada posisi pixel yang identik di setiap gambar.
-6. ATURAN LATAR/BACKGROUND: WAJIB gunakan latar belakang dengan nuansa Putih Bersih di seluruh slide.
-7. PROGRESS TRACKING: Jika ditanya 'sudah sampai mana', berikan laporan progres dari total ${slidesCount} slide.`,
+2. EKSEKUSI PER SLIDE: Setiap user mengetik 'lanjut', 'next', atau 'slide 2', generate TEPAT SATU GAMBAR untuk slide berikutnya sesuai urutan.
+3. BERHENTI DENGAN SEGERA setelah 1 gambar slide selesai. Jangan buat slide selanjutnya sampai diminta.
+4. KONSISTENSI KARAKTER & VISUAL (FITUR WAJIB): Simpan metadata visual (warna dominan, ciri fisik karakter, pakaian, jenis lighting, environment/background) di ingatanmu untuk slide berikutnya.
+5. KONSISTENSI UI/OVERLAY: Pastikan nomor slide (mulai slide 2), CTA follow, dan footer diletakkan pada posisi pixel yang identik di setiap gambar.
+6. ATURAN LATAR/BACKGROUND: WAJIB gunakan latar belakang dengan nuansa Putih Bersih di seluruh slide.`,
     aturan_global: {
       platform_target: "Instagram Carousel Post",
       peran: "Kamu adalah Senior Graphic Designer & Art Director yang mengetahui kombinasi warna, tipografi, dan estetika visual premium.",

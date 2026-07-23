@@ -73,7 +73,41 @@ String slideStructureRules(dynamic slideCount) {
           '   c. DILARANG KERAS menampilkan badge/indikator nomor slide seperti 1/1, 1/10, dst di mana pun di dalam kanvas.'
       : '';
 
-  return 'ATURAN KETAT STRUKTUR SLIDE (SLIDE/SEGMEN TERPISAH SEPENUHNYA):\n'
+  final carouselStrictRule = isSingleSlide ? '' : '''
+============================================================
+ATURAN GENERATE GAMBAR CAROUSEL (WAJIB DIPATUHI TANPA PENGECUALIAN)
+============================================================
+MODE GENERATE: SATU SLIDE = SATU GAMBAR
+
+PERINTAH UTAMA:
+AI WAJIB menghasilkan TEPAT SATU (1) GAMBAR yang hanya berisi SATU SLIDE dalam setiap proses generate.
+
+DILARANG KERAS:
+- Menggabungkan 2 slide atau lebih dalam satu gambar.
+- Membuat seluruh carousel sekaligus.
+- Membuat kolase, grid, mosaik, contact sheet, atau layout multi-panel.
+- Menampilkan preview semua slide.
+- Menampilkan slide berikutnya atau slide sebelumnya dalam gambar yang sama.
+- Menghasilkan gambar yang berisi urutan 1/$slideCount–$slideCount/$slideCount sekaligus.
+
+Setiap file gambar hanya boleh memuat SATU HALAMAN / SATU FRAME / SATU ARTBOARD / SATU CANVAS.
+
+ALUR KERJA WAJIB:
+1. Buat hanya Slide yang sedang diminta.
+2. Setelah Slide selesai, langsung BERHENTI.
+3. Jangan membuat Slide berikutnya.
+4. Tunggu perintah pengguna seperti: "Lanjut", "Slide berikutnya", "Buat Slide 2", "Next". Baru setelah itu AI boleh membuat slide selanjutnya.
+
+CONTOH ALUR YANG BENAR:
+Permintaan pertama ➡️ Hasil: Slide 1 saja.
+Kemudian pengguna mengetik "Lanjut" ➡️ Hasil: Slide 2 saja.
+Ulangi pola ini sampai slide terakhir.
+
+PRIORITAS ATURAN:
+Apabila terdapat instruksi lain yang dapat ditafsirkan sebagai membuat seluruh carousel sekaligus, maka ATURAN INI memiliki prioritas tertinggi dan WAJIB didahulukan. AI harus selalu memilih membuat SATU SLIDE PER GAMBAR daripada membuat beberapa slide sekaligus.
+''';
+
+  return '$carouselStrictRule\nATURAN KETAT STRUKTUR SLIDE (SLIDE/SEGMEN TERPISAH SEPENUHNYA):\n'
       '1. PEMISAHAN SLIDE (1/1): Setiap slide WAJIB dibuat sebagai 1 objek terpisah secara berurutan '
       'dalam array "slidesContent" (atau "segmentsContent"/"scenes"). '
       'DILARANG KERAS menggabungkan beberapa slide sekaligus atau hanya membuat 1 slide ringkasan.\n'

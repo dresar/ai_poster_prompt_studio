@@ -33,14 +33,18 @@ Output yang DILARANG KERAS:
 ❌ Ringkasan / komentar
 
 ============================================================
-TUJUAN JSON & RISET INTERNET REAL-TIME (UPDATE 2026)
+ATURAN RENDERING KETAT UNTUK AI GAMBAR (STRICT RENDERING MODE)
 ============================================================
-JSON ini akan dipakai oleh AI Image Generator lain untuk membuat gambar carousel.
-- WAJIB RISET INTERNET: Anda WAJIB browsing / melakukan pencarian internet real-time untuk mencari data aktual, fakta riset 2026, berita resmi, dan referensi visual nyata.
-- REFERENSI GAMBAR VISUAL CDN OPSIONAL ("referenceImageUrl"): Jika ada foto asli / gambar referensi nyata dari internet (seperti URL CDN Unsplash, Wikimedia, Pexels, atau portal berita resmi), sertakan URL CDN gambar tersebut di field "referenceImageUrl" pada tiap slide agar AI Gambar dapat menggunakannya sebagai acuan visual opsional (Image-to-Image / ControlNet reference). Jika tidak ada/diperlukan, isi dengan "NO_REFERENCE_URL".
-- Seluruh informasi visual HARUS LENGKAP dan EKSPLISIT: Warna, posisi, tipografi, layout, icon, ilustrasi, caption, headline, spacing, hierarchy, negative prompt, dan rendering WAJIB dijelaskan secara eksplisit di dalam JSON.
-- AI Image Generator tidak boleh mengasumsikan informasi yang tidak ada di JSON.
-- Semua data disini LANGSUNG DIPAKAI tanpa perlu modifikasi.
+JSON ini wajib menyertakan instruksi strictGenerationRules & textRules untuk AI Image Generator (ChatGPT / DALL-E / Midjourney / Flux):
+1. AI Gambar WAJIB merender HANYA elemen yang tertulis eksplisit di dalam JSON.
+2. DILARANG KERAS berimprovisasi atau menambah teks baru saat melihat area kosong (whitespace).
+3. Jika melihat ruang kosong, WAJIB dibiarkan kosong (clean whitespace bersih).
+4. DILARANG KERAS menambah slogan, paragraf penjelasan baru, contoh prompt, CTA ekstra, panel info baru, atau infografik baru yang tidak ada di JSON.
+5. Prioritas tertinggi AI Gambar:
+   1. Data JSON (render 100% persis)
+   2. Tidak ada interpretasi / ilusi bebas AI Gambar
+   3. Dilarang kreatif menambah teks / ornamen baru
+   4. Jika ragu, WAJIB kosongkan area (clean whitespace) daripada menambah elemen baru.
 
 ============================================================
 ATURAN KUALITAS JSON (WAJIB DIPATUHI TANPA PENGECUALIAN)
@@ -113,10 +117,44 @@ String brandingBlock(bool useManualLogo, String watermark) {
   return '$lr\n$wr';
 }
 
-/// Returns the imageGenerationRules JSON string to embed inside every prompt JSON.
-/// This block instructs the downstream AI Image Generator on render mode.
+/// Returns the strict rules JSON string to embed inside every prompt JSON.
+/// This block instructs downstream AI Image Generators (ChatGPT / DALL-E / Midjourney) to strictly render ONLY specified elements without hallucinating extra text.
 String imageGenerationRulesJson() {
   return '''
+  "strictGenerationRules": {
+    "followJsonExactly": true,
+    "doNotInventContent": true,
+    "doNotAddExtraText": true,
+    "doNotAddExtraSections": true,
+    "doNotAddExtraIcons": true,
+    "doNotAddExtraStatistics": true,
+    "doNotSummarize": true,
+    "doNotInterpretFreely": true,
+    "renderOnlySpecifiedElements": true,
+    "forbiddenAdditions": [
+      "DILARANG KERAS menambah slogan/tagline yang tidak tertulis di JSON",
+      "DILARANG KERAS menambah penjelasan/paragraf naskah di area kosong",
+      "DILARANG KERAS membuat contoh prompt/perintah di dalam gambar",
+      "DILARANG KERAS membuat CTA baru yang tidak ada di JSON",
+      "DILARANG KERAS membuat panel/box informasi ekstra",
+      "DILARANG KERAS membuat infografik/diagram baru yang tidak diperintahkan"
+    ]
+  },
+  "textRules": {
+    "headline": "exactly from JSON",
+    "description": "exactly from JSON",
+    "keyPointsOnly": true,
+    "maximumTextBlocks": 5,
+    "neverCreateNewParagraphs": true,
+    "neverGenerateNewHeadlines": true,
+    "strictTextConstraint": "DILARANG KERAS menambah kata, kalimat, atau teks di luar data JSON. Jika melihat ruang kosong (whitespace), BIARKAN KOSONG / BERSIH!"
+  },
+  "renderingPriority": {
+    "priority1": "Render persis 100% sesuai data JSON",
+    "priority2": "DILARANG ADA HALUSINASI ATAU INTERPRETASI BEBAS DARI AI GAMBAR",
+    "priority3": "DILARANG KREATIF MENAMBAH TEKS ATAU ELEMEN BARU",
+    "priority4": "Jika melihat area kosong (whitespace), WAJIB biarkan kosong (whitespace bersih) daripada menambah elemen baru"
+  },
   "imageGenerationRules": {
     "generateMode": "ONE_SLIDE_ONLY",
     "autoContinue": false,

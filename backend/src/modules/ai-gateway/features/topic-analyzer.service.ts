@@ -18,7 +18,16 @@ export class TopicAnalyzerService {
     else if (isVideo) typeName = "video";
     else if (category) typeName = category;
 
-    const prompt = `Berikan analisis mendalam dan ide konten untuk topik ${typeName} berikut: "${topic}".
+    const genericFormatKeywords = ['poster', 'poster edukasi', 'edukasi', 'banner', 'spanduk', 'baliho', 'berita', 'iklan', 'produk', 'logo', 'quotes', 'kata mutiara', 'video', 'karakter', 'gaya visual'];
+    const cleanTopic = (topic || '').trim().toLowerCase();
+    const isGenericTopic = genericFormatKeywords.includes(cleanTopic) || cleanTopic.length <= 3;
+
+    let topicInstruction = `topik ${typeName} berikut: "${topic}"`;
+    if (isGenericTopic) {
+      topicInstruction = `kategori ${typeName}. PERINTAH UTAMA: Input user "${topic}" adalah NAMA FORMAT MEDIA, BUKAN TOPIK ISI MATERI! DILARANG KERAS menganalisis kata "${topic}" atau "poster" sebagai subjek materi utama. Sebaliknya, PILIHLAH 1 TOPIK KONTEN REAL YANG VIRAL, EDUKATIF/PROMOSI, DAN SANGAT SPESIFIK (misalnya tentang Finansial, Kesehatan, Bisnis Digital, Karir, Sains/AI, atau Lifestyle) dan hasilkan analisis komprehensif untuk topik konten tersebut!`;
+    }
+
+    const prompt = `Berikan analisis mendalam dan ide konten untuk ${topicInstruction}.
 Output harus berformat JSON dengan struktur berikut:
 {
   "description": "Penjelasan dan ringkasan materi secara SANGAT mendalam, komprehensif, panjang, dan detail (berupa deskripsi detail yang komprehensif, minimal 3 paragraf panjang atau 150-250 kata). Uraikan latar belakang topik, masalah utama yang dibahas, urgensi dari topik tersebut, serta rangkuman lengkap solusinya. DILARANG keras menggunakan kata 'poster' atau 'infografis' jika kategori bukan poster.",
@@ -71,12 +80,7 @@ Output wajib berformat JSON array of string seperti ini:
         generationConfig: { responseMimeType: 'application/json' }
       });
       const response = await model.generateContent(prompt);
-      const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-      if (Array.isArray(parsed)) return parsed;
-      for (const val of Object.values(parsed)) {
-        if (Array.isArray(val)) return val as string[];
-      }
-      return [];
+      return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
     });
   }
 }

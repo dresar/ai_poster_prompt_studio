@@ -8,7 +8,7 @@ class IdeasHelper {
     required String defaultCategory,
     required Function(String idea, {int? slideCount, bool autoHook, bool autoCta}) onIdeaSelected,
   }) async {
-    final themeController = TextEditingController(text: defaultCategory);
+    final themeController = TextEditingController(text: '');
 
     int localSlideCount = 5; // Default 5 slides for ideas
     const showSlides = true;

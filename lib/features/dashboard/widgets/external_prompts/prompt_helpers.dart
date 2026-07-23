@@ -7,13 +7,13 @@ String outputRulesBlock() {
 ============================================================
 ROLE — BACA DAN PATUHI SEBELUM MELAKUKAN APAPUN
 ============================================================
-Anda adalah AI Content Architecture Engine profesional.
+Anda adalah AI Content Architecture Engine profesional (Claude).
 
 Tugas Anda BUKAN membuat gambar.
-Tugas Anda adalah menghasilkan JSON Master yang nantinya akan dipakai oleh AI Image Generator lain.
+Tugas Anda adalah menghasilkan JSON Master yang nantinya akan dipakai oleh AI Image Generator lain (ChatGPT / DALL-E 3 / Midjourney / Flux).
 
 Seluruh output WAJIB berupa JSON valid.
-Jangan menambahkan markdown.
+Jangan menambahkan markdown di luar JSON.
 Jangan menambahkan penjelasan.
 Jangan memberi komentar di luar JSON.
 Jangan membuat gambar.
@@ -31,6 +31,14 @@ Output yang DILARANG KERAS:
 ❌ Markdown di luar blok JSON
 ❌ Penjelasan teks bebas
 ❌ Ringkasan / komentar
+
+============================================================
+HUKUM KETAT: DILARANG SERTAKAN LINK URL DALAM HASIL JSON OUTPUT!
+============================================================
+1. LINK URL (https://porto.apprentice.cyou/txt/...) HANYA DIGUNAKAN OLEH ANDA (CLAUDE) UNTUK MEMBACA DAN MENGANALISIS PATOKAN GAYA VISUAL DAN KARAKTER.
+2. DILARANG KERAS MENAMPILKAN, MENULISKAN, ATAU MENYUNTIKKAN LINK URL APAPUN (HTTP/HTTPS/STYLEREFERENCEURL/CHARACTERREFERENCEURL) DI DALAM HASIL JSON OUTPUT!
+3. SELURUH INSTRUKSI VISUAL, PALET WARNA, LIGHTING, TIPOGRAFI, KOMPOSISI, DAN BIBLE KARAKTER WAJIB ANDA TERJEMAHKAN, SINTESIS, DAN RANGKUM SECARA MENDALAM, PANJANG, RINCI, LENGKAP, DAN EKSPLISIT DALAM BENTUK TEKS TEKSTUAL DI DALAM FIELD JSON (seperti designSystem, visualBlueprint, dan character).
+4. AI Gambar (DALL-E 3 / Midjourney / Flux) TIDAK BISA membuka URL internet saat merender gambar. Oleh karena itu, hasil JSON WAJIB 100% BERISI TEKS MURNI YANG SANGAT KAYA DAN DETIL TANPA LINK URL APAPUN.
 
 ============================================================
 ATURAN RENDERING KETAT UNTUK AI GAMBAR (STRICT RENDERING MODE)
@@ -72,6 +80,7 @@ Sebelum mengirim JSON, lakukan validasi internal secara mandiri:
 ✓ Setiap visual/sceneDescription unik (variasi komposisi antar slide)
 ✓ Tidak ada duplikasi konten atau copy-paste antar field
 ✓ Semua referensi visual konsisten (warna, karakter, gaya)
+✓ TIDAK ADA URL SAMA SEKALI di dalam output JSON
 
 ============================================================
 ATURAN PENGIRIMAN OUTPUT
@@ -109,25 +118,25 @@ String styleBlock(String style, String characterFocus) {
   final charUrl = 'https://porto.apprentice.cyou/txt/characters/$charSlug.txt';
 
   final sRule = isStyleAuto
-      ? 'GAYA VISUAL OTOMATIS AI (TEMA TERANG HIDUP & ELEGAN):\n'
-          '- PANDUAN TEKS INLINE (WAJIB TULIS PENUH DI DALAM JSON): Rancang gaya visual terang hidup di field "designSystem" & "visualBlueprint". Tuliskan palet warna (base putih/off-white/light grey + 1-2 warna aksen segar), tipografi, lighting studio, dan layout secara eksplisit di dalam JSON!\n'
-          '- TEMA WARNA BASE TERANG: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE!\n'
-          '- JANGAN FULL PUTIH POLOS MONOTON: Wajib padukan dengan 1–2 sentuhan warna aksen segar yang harmonis (misal: aksen pastel segar, warm highlight, atau sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.\n'
-          '- JANGAN BANYAK WARNA (TIDAK NORAK): Batasi warna aksen hanya 1–2 warna saja agar tidak ramai bertabrakan. Buat visual yang simpel, clean, estetik, namun berkelas dan sangat hidup saat dilihat.\n'
-          '- URL SLUG REFERENSI OPSIONAL: $styleUrl'
-      : 'GAYA VISUAL MANUAL = "$style":\n'
-          '- PANDUAN TEKS INLINE (WAJIB TULIS EKSPLISIT DI DALAM JSON): Karena AI Gambar (DALL-E 3 / Midjourney / Flux) TIDAK DAPAT melakukan browsing HTTP URL saat render gambar, Anda WAJIB menuliskankan instruksi visual gaya "$style" secara LENGKAP DAN EKSPLISIT di dalam field "designSystem" dan "visualBlueprint" agar AI Gambar dapat langsung membacanya!\n'
-          '- URL SLUG REFERENSI OPSIONAL: $styleUrl\n'
-          '- Isi field "designSystem" dengan deskripsi lengkap gaya visual "$style" + menyertakan field "styleReferenceUrl": "$styleUrl".';
+      ? 'ANALISIS & DESAIN GAYA VISUAL OTOMATIS CLAUDE (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
+          '- LINK PATOKAN GAYA VISUAL UNTUK DIBACA CLAUDE: $styleUrl\n'
+          '- TUGAS CLAUDE: Bacalah panduan visual dari link di atas, lalu susunlah RINGKASAN GAYA VISUAL DAN PALET WARNA SECARA SANGAT DETIL, RINCI, PANJANG, DAN SEMPURNA langsung di dalam field "designSystem" & "visualBlueprint".\n'
+          '- HARMONISASI WARNA DENGAN TOPIK: Gunakan base terang (Putih/Off-White/Light Grey - DILARANG TEMA GELAP) dipadukan 1-2 warna aksen segar yang SANGAT NYAMBUNG DAN HARMONIS DENGAN ISI TEMA MATERI KONTEN.\n'
+          '- DILARANG SERTAKAN URL DI OUTPUT JSON: Seluruh hasil JSON WAJIB 100% teks murni eksplisit. DILARANG KERAS menyertakan link URL https atau styleReferenceUrl di dalam hasil JSON!'
+      : 'ANALISIS & DESAIN GAYA VISUAL MANUAL "$style" (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
+          '- LINK PATOKAN GAYA VISUAL UNTUK DIBACA CLAUDE: $styleUrl\n'
+          '- TUGAS CLAUDE: Bacalah panduan gaya visual "$style" dari link di atas, lalu SINTESIS DAN TULISKAN DESKRIPSI GAYA VISUAL SEPERTI WARNA, LIGHTING, TIPOGRAFI, KOMPOSISI, DAN AMBIENCE SECARA SANGAT RINCI, PANJANG, LENGKAP, DAN SEMPURNA langsung di dalam field "designSystem" & "visualBlueprint" agar AI Gambar (DALL-E 3 / Midjourney / Flux) dapat membacanya 100% tanpa perlu fetch internet!\n'
+          '- HARMONISASI WARNA: Sesuaikan nuansa dan warna aksen gaya "$style" agar sangat nyambung, estetis, dan selaras dengan topik materi.\n'
+          '- DILARANG SERTAKAN URL DI OUTPUT JSON: SELURUH RESULT JSON WAJIB 100% DESKRIPSI TEKS MURNI. JANGAN MENULIS LINK URL HTTPS ATAU STYLEREFERENCEURL DI DALAM HASIL JSON!';
 
   final cRule = isCharAuto
-      ? 'KARAKTER/SUBJEK (AI BEBAS):\n'
-          '- PANDUAN TEKS INLINE: Rancang deskripsi subjek visual yang konsisten dan menarik secara eksplisit di dalam JSON.\n'
-          '- URL SLUG REFERENSI BIBLE KARAKTER OPSIONAL: $charUrl'
-      : 'KARAKTER/SUBJEK MANUAL = "$characterFocus":\n'
-          '- PANDUAN TEKS INLINE (WAJIB TULIS EKSPLISIT DI DALAM JSON): Tuliskan deskripsi karakter, bentuk fisik, pakaian, pose, dan ekspresi "$characterFocus" secara LENGKAP DAN EKSPLISIT di dalam JSON field "character" agar AI Gambar dapat langsung membacanya tanpa perlu fetch internet!\n'
-          '- URL SLUG REFERENSI BIBLE KARAKTER OPSIONAL: $charUrl\n'
-          '- Isi field "character" dengan deskripsi detail karakter "$characterFocus" + menyertakan field "characterReferenceUrl": "$charUrl".';
+      ? 'ANALISIS & DESAIN KARAKTER OTOMATIS CLAUDE (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
+          '- LINK PATOKAN BIBLE KARAKTER UNTUK DIBACA CLAUDE: $charUrl\n'
+          '- TUGAS CLAUDE: Bacalah bible karakter di atas, lalu susun deskripsi subjek visual yang kaya, rinci, dan konsisten secara eksplisit di dalam JSON field "character". DILARANG MENUMPANKAN LINK URL APAPUN DI DALAM JSON OUTPUT.'
+      : 'ANALISIS & DESAIN KARAKTER MANUAL "$characterFocus" (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
+          '- LINK PATOKAN BIBLE KARAKTER UNTUK DIBACA CLAUDE: $charUrl\n'
+          '- TUGAS CLAUDE: Bacalah bible karakter dari link di atas, lalu tuliskan deskripsi fisik, pakaian, ekspresi, pose, dan ciri khas karakter "$characterFocus" SECARA SANGAT RINCI, PANJANG, LENGKAP, DAN EKSPLISIT di dalam JSON field "character"!\n'
+          '- DILARANG SERTAKAN URL DI OUTPUT JSON: DILARANG KERAS menyertakan link URL https atau characterReferenceUrl di dalam JSON output. Seluruh deskripsi karakter WAJIB berupa teks murni yang kaya dan lengkap!';
 
   return '$sRule\n$cRule';
 }

@@ -64400,16 +64400,17 @@ var GeminiClient = class {
       eq(geminiApiKeys.provider, "gemini"),
       eq(geminiApiKeys.isActive, true),
       eq(geminiApiKeys.healthStatus, "healthy")
-    )).orderBy(asc(geminiApiKeys.priority));
+    ));
     if (keys.length === 0) {
       logger.info("Auto self-healing: Resetting all keys to healthy status.");
-      await db.update(geminiApiKeys).set({ healthStatus: "healthy", priority: 0 }).where(eq(geminiApiKeys.provider, "gemini"));
-      return await db.select().from(geminiApiKeys).where(and(
+      await db.update(geminiApiKeys).set({ healthStatus: "healthy" }).where(eq(geminiApiKeys.provider, "gemini"));
+      const resetKeys = await db.select().from(geminiApiKeys).where(and(
         eq(geminiApiKeys.provider, "gemini"),
         eq(geminiApiKeys.isActive, true)
-      )).orderBy(asc(geminiApiKeys.priority));
+      ));
+      return resetKeys.sort(() => Math.random() - 0.5);
     }
-    return keys;
+    return keys.sort(() => Math.random() - 0.5);
   }
   sanitizeJson(text2) {
     const jsonMatch = text2.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -64499,36 +64500,26 @@ var GeminiClient = class {
    * Helper method for text & chat completion using native Gemini SDK with high-speed model pool
    */
   async generateChatCompletion(messages, options = {}) {
-    const requestedModel = options.model || "gemini-3.1-flash-lite";
-    const fallbackModels = ["gemini-3.1-flash-lite", "gemini-2.5-flash"];
-    const candidateModels = Array.from(/* @__PURE__ */ new Set([requestedModel, ...fallbackModels]));
+    const targetModel = "gemini-3.1-flash-lite";
     const systemMsg = messages.find((m2) => m2.role === "system")?.content || "";
     const userMsgs = messages.filter((m2) => m2.role !== "system").map((m2) => m2.content).join("\n\n");
     const fullPrompt = systemMsg ? `${systemMsg}
 
 ${userMsgs}` : userMsgs;
     return await this.executeWithKey(async (genAI) => {
-      let lastModelError = null;
-      for (const modelName of candidateModels) {
-        try {
-          const model = genAI.getGenerativeModel({
-            model: modelName,
-            generationConfig: {
-              temperature: options.temperature ?? 0.7,
-              maxOutputTokens: options.max_tokens ?? 4096
-            }
-          });
-          const result = await model.generateContent(fullPrompt);
-          const text2 = result.response.text();
-          if (text2 && text2.trim().length > 0) {
-            return text2.trim();
-          }
-        } catch (err) {
-          logger.warn(`Native Gemini model ${modelName} failed: ${err?.message || err}`);
-          lastModelError = err;
+      const model = genAI.getGenerativeModel({
+        model: targetModel,
+        generationConfig: {
+          temperature: options.temperature ?? 0.7,
+          maxOutputTokens: options.max_tokens ?? 4096
         }
+      });
+      const result = await model.generateContent(fullPrompt);
+      const text2 = result.response.text();
+      if (text2 && text2.trim().length > 0) {
+        return text2.trim();
       }
-      throw lastModelError || new Error("All native Gemini models failed for key.");
+      throw new Error("Empty response text from Gemini");
     });
   }
 };

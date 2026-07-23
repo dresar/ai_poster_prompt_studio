@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { nb } from "@/lib/nb";
-import { Plus, Trash2, KeyRound, X, RefreshCw, Sparkles, Code, Check } from "lucide-react";
+import { Plus, Trash2, KeyRound, X, RefreshCw, Sparkles, Code, Check, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/_admin/keys")({
   component: KeysPage,
@@ -222,25 +222,42 @@ function KeysPage() {
       {/* Tab Contents */}
       {activeTab === 'pool' ? (
         <div className="space-y-5">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-bold uppercase">Koleksi API Key Gemini</h3>
-            <div className="flex gap-2 flex-wrap">
+          {/* Responsive Header Action Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl border-3 border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <div className="flex items-center gap-3">
+              <div className="nb-border bg-[var(--nb-yellow)] p-2.5 rounded-lg border-2 border-black">
+                <KeyRound className="w-6 h-6 text-black" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black uppercase tracking-tight text-black">Pool Key Gemini</h3>
+                <p className="text-xs font-mono text-gray-600">Total {data.length} Kunci Terdaftar (Rotasi Otomatis)</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
               <button
                 onClick={() => testAllMut.mutate()}
                 disabled={testAllMut.isPending}
-                className={`${nb.btn} bg-white border-2 border-black !text-black !py-2 !px-4 text-sm`}
+                className="nb-border nb-shadow-sm nb-press-hover flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-white text-black font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg border-2 border-black hover:bg-gray-50 transition-all cursor-pointer"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 inline ${testAllMut.isPending ? "animate-spin" : ""}`} />
-                {testAllMut.isPending ? "MENGUJI…" : "TES SEMUA KUNCI"}
+                <RefreshCw className={`w-4 h-4 ${testAllMut.isPending ? "animate-spin" : ""}`} />
+                <span>{testAllMut.isPending ? "MENGUJI…" : "TES SEMUA KUNCI"}</span>
               </button>
+
               <button
                 onClick={() => setShowBulkModal(true)}
-                className={`${nb.btn} bg-[var(--nb-yellow)] border-2 border-black !text-black !py-2 !px-4 text-sm font-bold`}
+                className="nb-border nb-shadow-sm nb-press-hover flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-[var(--nb-yellow)] text-black font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-lg border-2 border-black hover:bg-yellow-300 transition-all cursor-pointer"
               >
-                ⚡ IMPORT MASSAL GEMINI KEYS
+                <Zap className="w-4 h-4 text-black fill-black" />
+                <span>IMPORT MASSAL</span>
               </button>
-              <button onClick={() => { setProvider('gemini'); setOpen(true); }} className={`${nb.btn} ${nb.btnPink}`}>
-                <Plus className="w-4 h-4" /> Tambah Kunci Pool
+
+              <button 
+                onClick={() => { setProvider('gemini'); setOpen(true); }}
+                className="nb-border nb-shadow-sm nb-press-hover w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[var(--nb-pink)] text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-lg border-2 border-black hover:opacity-90 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>TAMBAH KUNCI</span>
               </button>
             </div>
           </div>
@@ -326,15 +343,15 @@ function KeysPage() {
           <div className={`${nb.card} overflow-hidden hidden md:block`}>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-[var(--nb-yellow)] border-b-[3px] border-black">
-                  <tr className="text-left uppercase text-xs">
-                    <th className="px-4 py-3">API Key</th>
-                    <th className="px-4 py-3">Provider</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Prioritas</th>
-                    <th className="px-4 py-3">Rotasi (Error)</th>
-                    <th className="px-4 py-3">Aktif</th>
-                    <th className="px-4 py-3 text-right">Aksi</th>
+                <thead className="bg-gray-900 text-white border-b-[3px] border-black">
+                  <tr className="text-left uppercase text-xs tracking-wider">
+                    <th className="px-4 py-3.5 font-extrabold">API Key</th>
+                    <th className="px-4 py-3.5 font-extrabold">Provider</th>
+                    <th className="px-4 py-3.5 font-extrabold">Status</th>
+                    <th className="px-4 py-3.5 font-extrabold">Prioritas</th>
+                    <th className="px-4 py-3.5 font-extrabold">Rotasi (Error)</th>
+                    <th className="px-4 py-3.5 font-extrabold">Aktif</th>
+                    <th className="px-4 py-3.5 font-extrabold text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="font-mono">

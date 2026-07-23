@@ -17,26 +17,28 @@ export class GeminiClient {
         eq(geminiApiKeys.provider, 'gemini'),
         eq(geminiApiKeys.isActive, true),
         eq(geminiApiKeys.healthStatus, 'healthy')
-      ))
-      .orderBy(asc(geminiApiKeys.priority));
+      ));
 
     if (keys.length === 0) {
-      // Automatic self-healing: If all keys are marked limited, reset them to healthy!
+      // Automatic self-healing: Reset all active keys to healthy status instantly
       logger.info('Auto self-healing: Resetting all keys to healthy status.');
       await db.update(geminiApiKeys)
-        .set({ healthStatus: 'healthy', priority: 0 })
+        .set({ healthStatus: 'healthy' })
         .where(eq(geminiApiKeys.provider, 'gemini'));
 
-      return await db.select()
+      const resetKeys = await db.select()
         .from(geminiApiKeys)
         .where(and(
           eq(geminiApiKeys.provider, 'gemini'),
           eq(geminiApiKeys.isActive, true)
-        ))
-        .orderBy(asc(geminiApiKeys.priority));
+        ));
+
+      // Shuffle keys randomly for maximum load balancing across 45 keys
+      return resetKeys.sort(() => Math.random() - 0.5);
     }
 
-    return keys;
+    // Shuffle healthy keys randomly to balance load evenly across all keys (675 RPM total)
+    return keys.sort(() => Math.random() - 0.5);
   }
 
   public sanitizeJson(text: string): string {
@@ -146,40 +148,26 @@ export class GeminiClient {
     messages: Array<{ role: string; content: string }>,
     options: { temperature?: number; model?: string; max_tokens?: number } = {}
   ): Promise<string> {
-    const requestedModel = options.model || 'gemini-3.1-flash-lite';
-    // ONLY use active, supported high-speed models (gemini-3.1-flash-lite & gemini-2.5-flash)
-    const fallbackModels = ['gemini-3.1-flash-lite', 'gemini-2.5-flash'];
-    const candidateModels = Array.from(new Set([requestedModel, ...fallbackModels]));
-
+    const targetModel = 'gemini-3.1-flash-lite';
     const systemMsg = messages.find(m => m.role === 'system')?.content || '';
     const userMsgs = messages.filter(m => m.role !== 'system').map(m => m.content).join('\n\n');
     const fullPrompt = systemMsg ? `${systemMsg}\n\n${userMsgs}` : userMsgs;
 
     return await this.executeWithKey(async (genAI: GoogleGenerativeAI) => {
-      let lastModelError: any = null;
+      const model = genAI.getGenerativeModel({
+        model: targetModel,
+        generationConfig: {
+          temperature: options.temperature ?? 0.7,
+          maxOutputTokens: options.max_tokens ?? 4096,
+        },
+      });
 
-      for (const modelName of candidateModels) {
-        try {
-          const model = genAI.getGenerativeModel({
-            model: modelName,
-            generationConfig: {
-              temperature: options.temperature ?? 0.7,
-              maxOutputTokens: options.max_tokens ?? 4096,
-            },
-          });
-
-          const result = await model.generateContent(fullPrompt);
-          const text = result.response.text();
-          if (text && text.trim().length > 0) {
-            return text.trim();
-          }
-        } catch (err: any) {
-          logger.warn(`Native Gemini model ${modelName} failed: ${err?.message || err}`);
-          lastModelError = err;
-        }
+      const result = await model.generateContent(fullPrompt);
+      const text = result.response.text();
+      if (text && text.trim().length > 0) {
+        return text.trim();
       }
-
-      throw lastModelError || new Error('All native Gemini models failed for key.');
+      throw new Error('Empty response text from Gemini');
     });
   }
 }

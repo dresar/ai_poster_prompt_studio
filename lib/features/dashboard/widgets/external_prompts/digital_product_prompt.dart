@@ -103,6 +103,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Headline 3D Showcase", "Headline Hemat Waktu 10x", "Headline Template Siap Pakai"],
     "logoExplanation": "Strategi branding produk digital",
     "socialMediaCaption": "Caption peluncuran produk digital + daftar bonus + link akses + ajakan follow + TEPAT 3 hashtag digital product 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

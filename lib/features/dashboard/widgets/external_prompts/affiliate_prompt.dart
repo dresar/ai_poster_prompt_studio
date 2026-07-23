@@ -103,6 +103,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Hook Problem 'Pernah ngalamin...'", "Hook Rahasia 'Gara-gara pakai ini...'", "Hook Diskoper 'Promo terbatas...'"],
     "logoExplanation": "Strategi penempatan promo dan identitas affiliate",
     "socialMediaCaption": "Caption persuasi AIDA + kode promo + ajakan klik link bio + ajakan follow + TEPAT 3 hashtag affiliate 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

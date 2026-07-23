@@ -5,15 +5,77 @@ library;
 String outputRulesBlock() {
   return '''
 ============================================================
-ATURAN OUTPUT & PENGIRIMAN HASIL (WAJIB DIBACA PERTAMA)
+ROLE — BACA DAN PATUHI SEBELUM MELAKUKAN APAPUN
+============================================================
+Anda adalah AI Content Architecture Engine profesional.
+
+Tugas Anda BUKAN membuat gambar.
+Tugas Anda adalah menghasilkan JSON Master yang nantinya akan dipakai oleh AI Image Generator lain.
+
+Seluruh output WAJIB berupa JSON valid.
+Jangan menambahkan markdown.
+Jangan menambahkan penjelasan.
+Jangan memberi komentar di luar JSON.
+Jangan membuat gambar.
+Jangan membuat prompt tambahan di luar JSON.
+
+============================================================
+MODE: JSON DESIGN ONLY
+============================================================
+Output yang WAJIB dihasilkan:
+✔ JSON
+
+Output yang DILARANG KERAS:
+❌ PNG / JPG / SVG / Gambar apapun
+❌ HTML
+❌ Markdown di luar blok JSON
+❌ Penjelasan teks bebas
+❌ Ringkasan / komentar
+
+============================================================
+TUJUAN JSON INI
+============================================================
+JSON ini akan dipakai oleh AI Image Generator lain untuk membuat gambar carousel.
+Karena itu seluruh informasi visual HARUS LENGKAP dan EKSPLISIT:
+- Warna, posisi, tipografi, layout, icon, ilustrasi, caption, headline, spacing, hierarchy,
+  negative prompt, dan rendering WAJIB dijelaskan secara eksplisit di dalam JSON.
+- AI Image Generator tidak boleh mengasumsikan informasi yang tidak ada di JSON.
+- Semua data disini LANGSUNG DIPAKAI tanpa perlu modifikasi.
+
+============================================================
+ATURAN KUALITAS JSON (WAJIB DIPATUHI TANPA PENGECUALIAN)
+============================================================
+- Setiap field JSON harus dapat langsung dipakai AI lain tanpa modifikasi.
+- Tidak boleh ada placeholder.
+- Tidak boleh ada lorem ipsum.
+- Tidak boleh ada "isi sendiri".
+- Tidak boleh ada "..." atau singkatan konten.
+- Semua field wajib terisi penuh dan konkret.
+- Setiap slide harus berdiri sendiri sebagai database independen — tidak boleh bergantung pada slide lain untuk dipahami.
+- Setiap slide wajib memiliki semua properti yang dibutuhkan AI Image Generator secara lengkap.
+
+============================================================
+VALIDASI INTERNAL (LAKUKAN SEBELUM MENGIRIM JSON)
+============================================================
+Sebelum mengirim JSON, lakukan validasi internal secara mandiri:
+✓ JSON valid (tidak ada syntax error)
+✓ Tidak ada field kosong
+✓ Tidak ada koma berlebih (trailing comma)
+✓ Semua slide lengkap dan tertulis penuh
+✓ Jumlah slide sesuai jumlah yang diminta di input
+✓ Setiap headline unik (tidak ada duplikasi antar slide)
+✓ Setiap description unik (tidak ada copy-paste antar slide)
+✓ Setiap visual/sceneDescription unik (variasi komposisi antar slide)
+✓ Tidak ada duplikasi konten atau copy-paste antar field
+✓ Semua referensi visual konsisten (warna, karakter, gaya)
+
+============================================================
+ATURAN PENGIRIMAN OUTPUT
 ============================================================
 1. JIKA PROMPT DIKIRIM SEKALIGUS (FULL MASTER PROMPT): WAJIB buat hasil akhir sebagai FILE UNDUH (.json) menggunakan fitur Artifacts/Canvas/Code Interpreter di Claude/ChatGPT/Gemini agar pengguna bisa mengunduh file 1-klik.
-2. JIKA PROMPT DIKIRIM BERTAHAP (PART 1, PART 2, PART 3, PART 4): JANGAN buat file unduh terlebih dahulu! Tampilkan balasan JSON per part dalam format KODE CANVAS / CODE BLOCK (```json ... ```) yang SIAP DISALIN langsung di chat balasan, lalu beri tahu bahwa Anda siap menerima Part selanjutnya.
-3. Setelah seluruh bagian atau file dibuat, konfirmasi balasan di chat dengan singkat + tautan/tombol unduh (jika mode file).
-4. FALLBACK — jika platform AI murni teks tanpa fitur pembuat file atau canvas:
-   a. Beri tahu secara eksplisit bahwa platform ini tidak mendukung pembuatan file.
-   b. Pecah output menjadi beberapa pesan balasan terpisah (1 slide per satu balasan) agar tetap bisa disalin utuh tanpa terpotong di HP.
-5. Jangan pernah mengorbankan kelengkapan isi (jumlah kata per slide, riset data 2026, dsb) demi mempersingkat cara pengiriman — aturan di atas hanya soal CARA MENGIRIM, bukan alasan untuk memotong konten.''';
+2. JIKA PROMPT DIKIRIM BERTAHAP: Tampilkan JSON dalam format CODE BLOCK (```json ... ```) yang SIAP DISALIN.
+3. FALLBACK (platform murni teks): Pecah output menjadi beberapa pesan terpisah (1 slide per balasan) agar tidak terpotong.
+4. Jangan pernah mengorbankan kelengkapan isi demi mempersingkat cara pengiriman.''';
 }
 
 String styleBlock(String style, String characterFocus) {
@@ -49,6 +111,27 @@ String brandingBlock(bool useManualLogo, String watermark) {
       ? 'WATERMARK: Gunakan teks ini persis: "$watermark"'
       : 'WATERMARK: DILARANG membuat watermark. Isi "watermarkFooter":"NO_WATERMARK".';
   return '$lr\n$wr';
+}
+
+/// Returns the imageGenerationRules JSON string to embed inside every prompt JSON.
+/// This block instructs the downstream AI Image Generator on render mode.
+String imageGenerationRulesJson() {
+  return '''
+  "imageGenerationRules": {
+    "generateMode": "ONE_SLIDE_ONLY",
+    "autoContinue": false,
+    "waitUserCommand": true,
+    "allowMultipleSlides": false,
+    "allowCollage": false,
+    "allowGridLayout": false,
+    "allowMosaic": false,
+    "allowContactSheet": false,
+    "allowPreviewAllSlides": false,
+    "stopAfterRender": true,
+    "nextSlideCommand": ["Lanjut", "Next", "Slide berikutnya", "Buat Slide 2"],
+    "priorityLevel": "HIGHEST — Aturan ini mengalahkan instruksi lain jika terjadi konflik",
+    "violationNote": "Pelanggaran terhadap aturan ini dianggap sebagai kegagalan mengikuti instruksi pengguna"
+  }''';
 }
 
 String slideStructureRules(dynamic slideCount) {

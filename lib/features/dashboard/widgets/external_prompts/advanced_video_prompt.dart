@@ -104,6 +104,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA adegan wajib ditulis PENUH)
     "hooks": ["Visual Hook Pembuka", "Audio Hook Atmosfer", "Dramatic Hook Monolog"],
     "logoExplanation": "Penempatan kredit sutradara dan brand identity",
     "socialMediaCaption": "Caption peluncuran film/iklan sinematik + ajakan follow sosmed + TEPAT 3 hashtag sinematik 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

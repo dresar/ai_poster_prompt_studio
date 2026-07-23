@@ -104,6 +104,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA segmen wajib ditulis PENUH)
     "hooks": ["Visual Hook A", "Audio Hook B", "Text Hook C"],
     "logoExplanation": "Penempatan identitas pembuat video",
     "socialMediaCaption": "Script caption video viral + CTA ajakan follow sosmed + TEPAT 3 hashtag trending video 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

@@ -103,6 +103,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Variasi headline A", "Variasi headline B", "Variasi headline C"],
     "logoExplanation": "Rekomendasi penempatan logo/brand identity",
     "socialMediaCaption": "Ad copy siap: primary text + headline + ajakan follow sosmed + TEPAT 3 hashtag Ads 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

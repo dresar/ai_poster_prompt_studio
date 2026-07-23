@@ -100,6 +100,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi PENUH)
     "styleAestheticScore": 95,
     "trendfit2026": "Analisis seberapa relevan gaya ini dengan tren visual tahun 2026.",
     "verdict": "Kesimpulan super singkat dalam 2 kalimat."
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

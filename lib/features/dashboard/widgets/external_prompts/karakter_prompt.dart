@@ -173,6 +173,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi PENUH)
   "usageGuidelines": {
     "platform": "$platform",
     "recommendedUseCases": ["Poster Edukasi", "Brand Mascot", "Banner Promo", "Video Shorts"]
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

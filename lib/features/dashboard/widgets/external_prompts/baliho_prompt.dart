@@ -106,6 +106,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Headline A - paling direct", "Headline B - paling emosional", "Headline C - paling memorable"],
     "logoExplanation": "Rekomendasi ukuran dan posisi logo untuk brand recall optimal",
     "socialMediaCaption": "Caption posting foto baliho di sosmed + tag akun + TEPAT 3 hashtag outdoor 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

@@ -104,6 +104,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Kutipan versi A - pendek & tajam", "Kutipan versi B - puitis mendalam", "Kutipan versi C - inspiratif modern"],
     "logoExplanation": "Penempatan identitas penulis dan watermark estetik",
     "socialMediaCaption": "Caption renungan mendalam + pertanyaan untuk diskusi + ajakan follow + TEPAT 3 hashtag quotes 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

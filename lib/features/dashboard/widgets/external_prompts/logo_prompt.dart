@@ -103,6 +103,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Konsep A - Minimalist Modern", "Konsep B - Symbolic Abstract", "Konsep C - Heritage Emblem"],
     "logoExplanation": "Buku panduan brand identity (brand guidelines ringkas)",
     "socialMediaCaption": "Caption peluncuran logo baru + filosofi brand + ajakan follow + TEPAT 3 hashtag branding 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

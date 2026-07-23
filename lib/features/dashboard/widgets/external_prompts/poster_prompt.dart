@@ -107,6 +107,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Hook provokatif", "Hook emosional", "Hook informatif"],
     "logoExplanation": "Strategi branding dan identitas visual",
     "socialMediaCaption": "Caption lengkap + emoji relevan + ajakan follow sosmed + TEPAT 3 hashtag trending 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

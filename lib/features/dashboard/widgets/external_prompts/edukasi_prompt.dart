@@ -106,6 +106,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "hooks": ["Hook statistik mengejutkan 2026", "Hook pertanyaan retoris", "Hook mitos vs fakta"],
     "logoExplanation": "Strategi penempatan identitas dan sumber data",
     "socialMediaCaption": "Caption: fakta mengejutkan + ajakan swipe + ajakan follow akun sosmed + TEPAT 3 hashtag edukasi 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

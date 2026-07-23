@@ -65282,14 +65282,13 @@ ${previousError}
       if (isStrict) generationConfig.responseSchema = strictSchema;
       const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig });
       const parts = [];
-      const prompt = `Kamu adalah Content Strategist, Art Director & Prompt Compiler Engine profesional.
-Tugasmu adalah menganalisis input form user dan menyusun arsitektur data konten poster/carousel yang solid ke dalam format JSON yang bersih dan representatif.
-JANGAN membuat atau memasukkan aturan layout, aturan grid, aturan tipografi, aturan warna, lighting, kamera, rendering, atau aturan negatif apa pun. Seluruh hal visual tersebut sudah memiliki Blueprint tersendiri.
+      const prompt = `ROLE: Anda adalah AI Content Architecture Engine profesional. Tugas Anda BUKAN membuat gambar. Tugas Anda adalah menghasilkan JSON Master yang nantinya akan dipakai oleh AI Image Generator.
 
-Fokuskan tugasmu HANYA pada penyusunan pesan komunikasi, topik utama, copywriting teks slide (headline & description), serta data konten terstruktur pendukung lainnya.
-
-STRATEGI KONTEN DARI CONTENT INTELLIGENCE ENGINE:
-${contentIntelligence}
+MODE: JSON DESIGN ONLY
+- Output WAJIB 100% JSON valid tanpa markdown bebas di luar JSON, tanpa HTML, tanpa gambar, dan tanpa penjelasan ekstra.
+- JSON ini akan dipakai oleh AI Image Generator lain, sehingga seluruh informasi visual (warna, posisi, tipografi, layout, ilustrasi, spacing, hierarchy) HARUS dijelaskan secara EKSPLISIT. AI gambar tidak boleh mengasumsikan data.
+- Setiap slide WAJIB dibuat seperti DATABASE PRODUKSI INDEPENDEN (berdiri sendiri, memiliki semua properti lengkap, dan dapat langsung dipakai AI Gambar).
+- VALIDASI INTERNAL WAJIB SEBELUM KIRIM: Pastikan JSON valid, tidak ada field kosong/placeholder/lorem ipsum/'...', semua slide (${slideCount}) terisi penuh, headline/description unik tiap slide.
 
 INPUT USER:
 ${JSON.stringify(fullFormState, null, 2)}
@@ -65312,7 +65311,7 @@ DESAIN SISTEM KONTEN YANG WAJIB DIATUR:
    - subject: Deskripsi karakter/subjek utama pada slide ini secara singkat dan jelas.
    - sceneDescription: Deskripsi latar belakang, aksi, dan suasana khusus pada slide ini.
    - visualEmphasis: Elemen fokus utama atau penekanan visual pada slide ini.
-3. Quality Evaluation -> Analisis kualitas draf input dan berikan nilai numeric:
+3. Quality Evaluation & Image Generation Rules -> Analisis kualitas draf input dan sertakan aturan eksekusi gambar (imageGenerationRules: { generateMode: "ONE_SLIDE_ONLY", autoContinue: false, waitUserCommand: true, allowMultipleSlides: false, allowCollage: false, stopAfterRender: true }):
    - promptScore (0-100)
    - detailScore (0-100)
    - creativityScore (0-100)

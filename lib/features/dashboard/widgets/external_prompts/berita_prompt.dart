@@ -128,6 +128,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi PENUH)
     "hooks": ["Headline Singkat 1", "Headline Singkat 2"],
     "logoExplanation": "Penempatan identitas media berita",
     "socialMediaCaption": "Caption berita singkat 5W+1H + hashtag berita 2026"
-  }
+  },
+${imageGenerationRulesJson()}
 }''';
 }

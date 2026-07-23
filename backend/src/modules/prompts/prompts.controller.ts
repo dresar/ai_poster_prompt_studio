@@ -129,6 +129,30 @@ export async function syncPromptFilesToDisk() {
   }
 }
 
+// Helper to send smart content (HTML <pre> for web crawlers, plain text for AI APIs)
+function sendSmartContent(req: Request, res: Response, textContent: string) {
+  setAiCrawlerHeaders(res);
+  const acceptsHtml = req.headers.accept?.includes('text/html') && !req.headers['user-agent']?.includes('curl');
+  
+  if (acceptsHtml) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="index, follow, max-snippet:-1">
+  <title>PANDUAN REFERENSI PROMPT AI</title>
+  <style>body{font-family:monospace;padding:20px;white-space:pre-wrap;background:#fff;color:#111;line-height:1.6;}</style>
+</head>
+<body><pre>${textContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body>
+</html>`;
+    return res.status(200).send(html);
+  }
+
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  return res.status(200).send(textContent);
+}
+
 /**
  * Endpoint GET /txt/styles/:slug.txt or GET /prompts/styles/:slug.txt
  */
@@ -138,11 +162,10 @@ export const getStylePromptFile = async (req: Request, res: Response, next: Next
     rawSlug = rawSlug.replace(/\.txt$/i, '');
     const safeSlug = slugify(rawSlug);
 
-    setAiCrawlerHeaders(res);
-
     const filePath = path.join(stylesDir, `${safeSlug}.txt`);
     if (fs.existsSync(filePath)) {
-      return res.status(200).send(fs.readFileSync(filePath, 'utf8'));
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      return sendSmartContent(req, res, fileContent);
     }
 
     // Fallback search DB
@@ -157,14 +180,14 @@ export const getStylePromptFile = async (req: Request, res: Response, next: Next
         `PANDUAN PROMPTING LENGKAP:\n${style.promptTemplate}\n`;
       writeTxtToAllLocations(`styles/${safeSlug}.txt`, content);
       writeTxtToAllLocations(`${safeSlug}.txt`, content);
-      return res.status(200).send(content);
+      return sendSmartContent(req, res, content);
     }
 
     // Generic fallback for any style slug
     const fallbackText = `GAYA VISUAL REFERENSI: ${rawSlug}\n` +
       `ESTETIKA: Clean Minimalist Light Theme (Putih & Abu-abu), simpel, profesional, tanpa ornamen menumpuk.\n`;
     writeTxtToAllLocations(`styles/${safeSlug}.txt`, fallbackText);
-    return res.status(200).send(fallbackText);
+    return sendSmartContent(req, res, fallbackText);
   } catch (error) {
     next(error);
   }
@@ -179,11 +202,10 @@ export const getCharacterPromptFile = async (req: Request, res: Response, next: 
     rawSlug = rawSlug.replace(/\.txt$/i, '');
     const safeSlug = slugify(rawSlug);
 
-    setAiCrawlerHeaders(res);
-
     const filePath = path.join(charactersDir, `${safeSlug}.txt`);
     if (fs.existsSync(filePath)) {
-      return res.status(200).send(fs.readFileSync(filePath, 'utf8'));
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      return sendSmartContent(req, res, fileContent);
     }
 
     // Fallback search DB
@@ -198,14 +220,14 @@ export const getCharacterPromptFile = async (req: Request, res: Response, next: 
         `KONSISTENSI VISUAL:\n${char.promptConsistency}\n\n` +
         `MASTER PROMPT:\n${char.masterPrompt || char.positivePrompt || ''}\n`;
       writeTxtToAllLocations(`characters/${safeSlug}.txt`, content);
-      return res.status(200).send(content);
+      return sendSmartContent(req, res, content);
     }
 
     // Generic fallback for any character slug
     const fallbackText = `KARAKTER REFERENSI BIBLE: ${rawSlug}\n` +
       `DESKRIPSI: Subjek karakter 3D modern ramah, konsisten dalam pose, ekspresi, dan pakaian.\n`;
     writeTxtToAllLocations(`characters/${safeSlug}.txt`, fallbackText);
-    return res.status(200).send(fallbackText);
+    return sendSmartContent(req, res, fallbackText);
   } catch (error) {
     next(error);
   }
@@ -220,31 +242,32 @@ export const getUniversalTextPromptFile = async (req: Request, res: Response, ne
     rawSlug = rawSlug.replace(/\.txt$/i, '');
     const safeSlug = slugify(rawSlug);
 
-    setAiCrawlerHeaders(res);
-
     // Check style first
     const stylePath = path.join(stylesDir, `${safeSlug}.txt`);
     if (fs.existsSync(stylePath)) {
-      return res.status(200).send(fs.readFileSync(stylePath, 'utf8'));
+      const fileContent = fs.readFileSync(stylePath, 'utf8');
+      return sendSmartContent(req, res, fileContent);
     }
 
     // Check character next
     const charPath = path.join(charactersDir, `${safeSlug}.txt`);
     if (fs.existsSync(charPath)) {
-      return res.status(200).send(fs.readFileSync(charPath, 'utf8'));
+      const fileContent = fs.readFileSync(charPath, 'utf8');
+      return sendSmartContent(req, res, fileContent);
     }
 
     // Check root prompt dir next
     const rootPath = path.join(basePromptsDir, `${safeSlug}.txt`);
     if (fs.existsSync(rootPath)) {
-      return res.status(200).send(fs.readFileSync(rootPath, 'utf8'));
+      const fileContent = fs.readFileSync(rootPath, 'utf8');
+      return sendSmartContent(req, res, fileContent);
     }
 
     // Return plain text prompt
     const content = `PANDUAN REFERENSI PROMPT TEXT: ${rawSlug}\n` +
       `URL: https://porto.apprentice.cyou/txt/${safeSlug}.txt\n` +
       `TIPE: Clean Light Theme Prompt Reference (Putih & Abu-abu Muda)\n`;
-    return res.status(200).send(content);
+    return sendSmartContent(req, res, content);
   } catch (error) {
     next(error);
   }

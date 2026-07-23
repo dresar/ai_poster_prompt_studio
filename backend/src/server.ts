@@ -45,6 +45,38 @@ app.get('/robots.txt', (req, res) => {
   res.status(200).send(`User-agent: *\nAllow: /\nAllow: /txt/\nAllow: /prompts/\nSitemap: https://porto.apprentice.cyou/sitemap.xml\n`);
 });
 
+// Dynamic sitemap.xml for AI Search Crawlers & Bingbot
+app.get('/sitemap.xml', (req, res) => {
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://porto.apprentice.cyou/</loc><priority>1.0</priority></url>
+  <url><loc>https://porto.apprentice.cyou/txt/styles/auto.txt</loc><priority>0.8</priority></url>
+  <url><loc>https://porto.apprentice.cyou/txt/characters/auto.txt</loc><priority>0.8</priority></url>
+  <url><loc>https://porto.apprentice.cyou/txt/styles/teknologi-modern.txt</loc><priority>0.8</priority></url>
+</urlset>`;
+  res.status(200).send(xml);
+});
+
+// Root homepage 200 OK for Web Search Crawlers
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.status(200).send(`<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="index, follow">
+  <title>AI Poster Prompt Studio Server</title>
+</head>
+<body style="font-family:sans-serif;padding:40px;background:#fafafa;">
+  <h1>AI Poster Prompt Studio API & Public Prompts</h1>
+  <p>Server is running active. Public prompt references available under <code>/txt/styles/</code> and <code>/txt/characters/</code>.</p>
+</body>
+</html>`);
+});
+
 // Serve static text files directly via express.static at root /txt and /prompts
 const basePromptsDir = path.join(process.cwd(), 'prompts');
 const publicTxtDir = path.join(process.cwd(), 'public', 'txt');

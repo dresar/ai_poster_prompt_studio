@@ -69386,15 +69386,35 @@ KONSISTENSI VISUAL: Pertahankan warna baju, gaya rambut, ciri fisik, dan lightin
     logger.error("[PromptsSync] Error syncing prompt files to disk:", error);
   }
 }
+function sendSmartContent(req, res, textContent) {
+  setAiCrawlerHeaders(res);
+  const acceptsHtml = req.headers.accept?.includes("text/html") && !req.headers["user-agent"]?.includes("curl");
+  if (acceptsHtml) {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="index, follow, max-snippet:-1">
+  <title>PANDUAN REFERENSI PROMPT AI</title>
+  <style>body{font-family:monospace;padding:20px;white-space:pre-wrap;background:#fff;color:#111;line-height:1.6;}</style>
+</head>
+<body><pre>${textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></body>
+</html>`;
+    return res.status(200).send(html);
+  }
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  return res.status(200).send(textContent);
+}
 var getStylePromptFile = async (req, res, next) => {
   try {
     let rawSlug = req.params.slug || "";
     rawSlug = rawSlug.replace(/\.txt$/i, "");
     const safeSlug = slugify(rawSlug);
-    setAiCrawlerHeaders(res);
     const filePath = import_path4.default.join(stylesDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(filePath)) {
-      return res.status(200).send(import_fs3.default.readFileSync(filePath, "utf8"));
+      const fileContent = import_fs3.default.readFileSync(filePath, "utf8");
+      return sendSmartContent(req, res, fileContent);
     }
     const [style] = await db.select().from(visualStyles).where(or(eq(visualStyles.id, rawSlug), ilike(visualStyles.name, `%${rawSlug.replace(/-/g, " ")}%`)));
     if (style) {
@@ -69405,13 +69425,13 @@ ${style.promptTemplate}
 `;
       writeTxtToAllLocations(`styles/${safeSlug}.txt`, content);
       writeTxtToAllLocations(`${safeSlug}.txt`, content);
-      return res.status(200).send(content);
+      return sendSmartContent(req, res, content);
     }
     const fallbackText = `GAYA VISUAL REFERENSI: ${rawSlug}
 ESTETIKA: Clean Minimalist Light Theme (Putih & Abu-abu), simpel, profesional, tanpa ornamen menumpuk.
 `;
     writeTxtToAllLocations(`styles/${safeSlug}.txt`, fallbackText);
-    return res.status(200).send(fallbackText);
+    return sendSmartContent(req, res, fallbackText);
   } catch (error) {
     next(error);
   }
@@ -69421,10 +69441,10 @@ var getCharacterPromptFile = async (req, res, next) => {
     let rawSlug = req.params.slug || "";
     rawSlug = rawSlug.replace(/\.txt$/i, "");
     const safeSlug = slugify(rawSlug);
-    setAiCrawlerHeaders(res);
     const filePath = import_path4.default.join(charactersDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(filePath)) {
-      return res.status(200).send(import_fs3.default.readFileSync(filePath, "utf8"));
+      const fileContent = import_fs3.default.readFileSync(filePath, "utf8");
+      return sendSmartContent(req, res, fileContent);
     }
     const [char2] = await db.select().from(characters).where(or(eq(characters.id, rawSlug), ilike(characters.name, `%${rawSlug.replace(/-/g, " ")}%`)));
     if (char2) {
@@ -69438,13 +69458,13 @@ MASTER PROMPT:
 ${char2.masterPrompt || char2.positivePrompt || ""}
 `;
       writeTxtToAllLocations(`characters/${safeSlug}.txt`, content);
-      return res.status(200).send(content);
+      return sendSmartContent(req, res, content);
     }
     const fallbackText = `KARAKTER REFERENSI BIBLE: ${rawSlug}
 DESKRIPSI: Subjek karakter 3D modern ramah, konsisten dalam pose, ekspresi, dan pakaian.
 `;
     writeTxtToAllLocations(`characters/${safeSlug}.txt`, fallbackText);
-    return res.status(200).send(fallbackText);
+    return sendSmartContent(req, res, fallbackText);
   } catch (error) {
     next(error);
   }
@@ -69454,24 +69474,26 @@ var getUniversalTextPromptFile = async (req, res, next) => {
     let rawSlug = req.params.slug || "";
     rawSlug = rawSlug.replace(/\.txt$/i, "");
     const safeSlug = slugify(rawSlug);
-    setAiCrawlerHeaders(res);
     const stylePath = import_path4.default.join(stylesDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(stylePath)) {
-      return res.status(200).send(import_fs3.default.readFileSync(stylePath, "utf8"));
+      const fileContent = import_fs3.default.readFileSync(stylePath, "utf8");
+      return sendSmartContent(req, res, fileContent);
     }
     const charPath = import_path4.default.join(charactersDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(charPath)) {
-      return res.status(200).send(import_fs3.default.readFileSync(charPath, "utf8"));
+      const fileContent = import_fs3.default.readFileSync(charPath, "utf8");
+      return sendSmartContent(req, res, fileContent);
     }
     const rootPath = import_path4.default.join(basePromptsDir, `${safeSlug}.txt`);
     if (import_fs3.default.existsSync(rootPath)) {
-      return res.status(200).send(import_fs3.default.readFileSync(rootPath, "utf8"));
+      const fileContent = import_fs3.default.readFileSync(rootPath, "utf8");
+      return sendSmartContent(req, res, fileContent);
     }
     const content = `PANDUAN REFERENSI PROMPT TEXT: ${rawSlug}
 URL: https://porto.apprentice.cyou/txt/${safeSlug}.txt
 TIPE: Clean Light Theme Prompt Reference (Putih & Abu-abu Muda)
 `;
-    return res.status(200).send(content);
+    return sendSmartContent(req, res, content);
   } catch (error) {
     next(error);
   }
@@ -69514,6 +69536,34 @@ Allow: /txt/
 Allow: /prompts/
 Sitemap: https://porto.apprentice.cyou/sitemap.xml
 `);
+});
+app.get("/sitemap.xml", (req, res) => {
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://porto.apprentice.cyou/</loc><priority>1.0</priority></url>
+  <url><loc>https://porto.apprentice.cyou/txt/styles/auto.txt</loc><priority>0.8</priority></url>
+  <url><loc>https://porto.apprentice.cyou/txt/characters/auto.txt</loc><priority>0.8</priority></url>
+  <url><loc>https://porto.apprentice.cyou/txt/styles/teknologi-modern.txt</loc><priority>0.8</priority></url>
+</urlset>`;
+  res.status(200).send(xml);
+});
+app.get("/", (req, res) => {
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.status(200).send(`<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="index, follow">
+  <title>AI Poster Prompt Studio Server</title>
+</head>
+<body style="font-family:sans-serif;padding:40px;background:#fafafa;">
+  <h1>AI Poster Prompt Studio API & Public Prompts</h1>
+  <p>Server is running active. Public prompt references available under <code>/txt/styles/</code> and <code>/txt/characters/</code>.</p>
+</body>
+</html>`);
 });
 var basePromptsDir2 = import_path5.default.join(process.cwd(), "prompts");
 var publicTxtDir = import_path5.default.join(process.cwd(), "public", "txt");

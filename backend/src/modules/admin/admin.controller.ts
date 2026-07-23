@@ -620,31 +620,16 @@ export const testGeminiKey = async (req: Request, res: Response, next: NextFunct
         actualKey = decrypt(actualKey);
       }
 
-      if (keyRecord.provider === 'groq') {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${actualKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: 'say OK' }], max_tokens: 5 })
-        });
-        const resJson: any = await response.json();
-        if (response.ok && resJson.choices?.[0]?.message?.content) {
-          success = true;
-          await db.update(geminiApiKeys).set({ healthStatus: 'healthy' }).where(eq(geminiApiKeys.id, id));
-        } else {
-          throw new Error(resJson.error?.message || `Groq test failed: ${response.status}`);
-        }
+      const genAI = new GoogleGenerativeAI(actualKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
+      const response = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'say OK' }] }], generationConfig: { maxOutputTokens: 5 } });
+      const text = response.response.text();
+      
+      if (text) {
+        success = true;
+        await db.update(geminiApiKeys).set({ healthStatus: 'healthy' }).where(eq(geminiApiKeys.id, id));
       } else {
-        const genAI = new GoogleGenerativeAI(actualKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
-        const response = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'say OK' }] }], generationConfig: { maxOutputTokens: 5 } });
-        const text = response.response.text();
-        
-        if (text) {
-          success = true;
-          await db.update(geminiApiKeys).set({ healthStatus: 'healthy' }).where(eq(geminiApiKeys.id, id));
-        } else {
-          throw new Error('Empty response');
-        }
+        throw new Error('Empty response');
       }
     } catch (err: any) {
       errorMessage = err?.message || String(err);
@@ -684,31 +669,16 @@ export const testAllGeminiKeys = async (req: Request, res: Response, next: NextF
           actualKey = decrypt(actualKey);
         }
 
-        if (keyRecord.provider === 'groq') {
-          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${actualKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: 'say OK' }], max_tokens: 5 })
-          });
-          const resJson: any = await response.json();
-          if (response.ok && resJson.choices?.[0]?.message?.content) {
-            success = true;
-            await db.update(geminiApiKeys).set({ healthStatus: 'healthy' }).where(eq(geminiApiKeys.id, keyRecord.id));
-          } else {
-            throw new Error(resJson.error?.message || `Groq test failed: ${response.status}`);
-          }
+        const genAI = new GoogleGenerativeAI(actualKey);
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
+        const response = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'say OK' }] }], generationConfig: { maxOutputTokens: 5 } });
+        const text = response.response.text();
+        
+        if (text) {
+          success = true;
+          await db.update(geminiApiKeys).set({ healthStatus: 'healthy' }).where(eq(geminiApiKeys.id, keyRecord.id));
         } else {
-          const genAI = new GoogleGenerativeAI(actualKey);
-          const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
-          const response = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'say OK' }] }], generationConfig: { maxOutputTokens: 5 } });
-          const text = response.response.text();
-          
-          if (text) {
-            success = true;
-            await db.update(geminiApiKeys).set({ healthStatus: 'healthy' }).where(eq(geminiApiKeys.id, keyRecord.id));
-          } else {
-            throw new Error('Empty response');
-          }
+          throw new Error('Empty response');
         }
       } catch (err: any) {
         errorMessage = err?.message || String(err);

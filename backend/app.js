@@ -18800,14 +18800,14 @@ var require_etag = __commonJS({
   "node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto12 = require("crypto");
+    var crypto11 = require("crypto");
     var Stats = require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto12.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto11.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -21700,11 +21700,11 @@ var require_request = __commonJS({
 // node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/cookie-signature/index.js"(exports2) {
-    var crypto12 = require("crypto");
+    var crypto11 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto12.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto11.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21713,7 +21713,7 @@ var require_cookie_signature = __commonJS({
       return sha1(mac) == sha1(val) ? str : false;
     };
     function sha1(str) {
-      return crypto12.createHash("sha1").update(str).digest("hex");
+      return crypto11.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -23033,7 +23033,7 @@ var require_main = __commonJS({
     var fs4 = require("fs");
     var path5 = require("path");
     var os2 = require("os");
-    var crypto12 = require("crypto");
+    var crypto11 = require("crypto");
     var packageJson = require_package();
     var version2 = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -23252,7 +23252,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto12.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto11.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error) {
@@ -33927,7 +33927,7 @@ var require_winston = __commonJS({
 var require_object_hash = __commonJS({
   "node_modules/object-hash/index.js"(exports2, module2) {
     "use strict";
-    var crypto12 = require("crypto");
+    var crypto11 = require("crypto");
     exports2 = module2.exports = objectHash;
     function objectHash(object, options) {
       options = applyDefaults(object, options);
@@ -33945,7 +33945,7 @@ var require_object_hash = __commonJS({
     exports2.keysMD5 = function(object) {
       return objectHash(object, { algorithm: "md5", encoding: "hex", excludeValues: true });
     };
-    var hashes = crypto12.getHashes ? crypto12.getHashes().slice() : ["sha1", "md5"];
+    var hashes = crypto11.getHashes ? crypto11.getHashes().slice() : ["sha1", "md5"];
     hashes.push("passthrough");
     var encodings = ["buffer", "hex", "binary", "base64"];
     function applyDefaults(object, sourceOptions) {
@@ -33991,7 +33991,7 @@ var require_object_hash = __commonJS({
     function hash(object, options) {
       var hashingStream;
       if (options.algorithm !== "passthrough") {
-        hashingStream = crypto12.createHash(options.algorithm);
+        hashingStream = crypto11.createHash(options.algorithm);
       } else {
         hashingStream = new PassThrough();
       }
@@ -38308,7 +38308,7 @@ var require_FileStreamRotator = __commonJS({
     var fs4 = require("fs");
     var path5 = require("path");
     var moment = require_moment();
-    var crypto12 = require("crypto");
+    var crypto11 = require("crypto");
     var EventEmitter = require("events");
     var FileStreamRotator = {};
     module2.exports = FileStreamRotator;
@@ -38437,7 +38437,7 @@ var require_FileStreamRotator = __commonJS({
       }
     };
     function removeFile(file, verbose) {
-      if (file.hash === crypto12.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")) {
+      if (file.hash === crypto11.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")) {
         try {
           if (fs4.existsSync(file.name)) {
             fs4.unlinkSync(file.name);
@@ -38503,7 +38503,7 @@ var require_FileStreamRotator = __commonJS({
         audit.files.push({
           date: time2,
           name: logfile,
-          hash: crypto12.createHash(audit.hashType).update(logfile + "LOG_FILE" + time2).digest("hex")
+          hash: crypto11.createHash(audit.hashType).update(logfile + "LOG_FILE" + time2).digest("hex")
         });
         if (audit.keep.days) {
           var oldestDate = moment().subtract(audit.keep.amount, "days").valueOf();
@@ -54950,14 +54950,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto12 = require("crypto");
+    var crypto11 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util2 = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto12.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto11.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -55047,17 +55047,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto12.createHmac("sha" + bits, secret);
+        var hmac = crypto11.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto12 ? function timingSafeEqual2(a2, b2) {
+    var timingSafeEqual = "timingSafeEqual" in crypto11 ? function timingSafeEqual2(a2, b2) {
       if (a2.byteLength !== b2.byteLength) {
         return false;
       }
-      return crypto12.timingSafeEqual(a2, b2);
+      return crypto11.timingSafeEqual(a2, b2);
     } : function timingSafeEqual2(a2, b2) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -55074,7 +55074,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto12.createSign("RSA-SHA" + bits);
+        var signer = crypto11.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -55084,7 +55084,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto12.createVerify("RSA-SHA" + bits);
+        var verifier = crypto11.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -55093,11 +55093,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto12.createSign("RSA-SHA" + bits);
+        var signer = crypto11.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -55107,12 +55107,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto12.createVerify("RSA-SHA" + bits);
+        var verifier = crypto11.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -64396,11 +64396,20 @@ function formatAiError(rawError, provider = "gemini") {
 // src/modules/ai-gateway/core/gemini-client.ts
 var GeminiClient = class {
   async getHealthyKeys() {
-    return await db.select().from(geminiApiKeys).where(and(
+    const keys = await db.select().from(geminiApiKeys).where(and(
       eq(geminiApiKeys.provider, "gemini"),
       eq(geminiApiKeys.isActive, true),
       eq(geminiApiKeys.healthStatus, "healthy")
     )).orderBy(asc(geminiApiKeys.priority));
+    if (keys.length === 0) {
+      logger.info("Auto self-healing: Resetting all keys to healthy status.");
+      await db.update(geminiApiKeys).set({ healthStatus: "healthy", priority: 0 }).where(eq(geminiApiKeys.provider, "gemini"));
+      return await db.select().from(geminiApiKeys).where(and(
+        eq(geminiApiKeys.provider, "gemini"),
+        eq(geminiApiKeys.isActive, true)
+      )).orderBy(asc(geminiApiKeys.priority));
+    }
+    return keys;
   }
   sanitizeJson(text2) {
     const jsonMatch = text2.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -64456,10 +64465,10 @@ var GeminiClient = class {
         lastError = error;
         const errorMessage = error?.message || String(error);
         logger.warn(`Gemini native call failed with key ID ${keyObj.id}. Error: ${errorMessage}`);
-        const isQuotaError = errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("Quota") || errorMessage.includes("LIMIT");
-        const isNetworkOrTimeout = errorMessage.includes("timeout") || errorMessage.includes("FETCH_ERROR") || errorMessage.includes("500") || errorMessage.includes("503") || errorMessage.includes("API_KEY_INVALID");
-        if ((isQuotaError || isNetworkOrTimeout) && keyObj.id !== "env_fallback") {
-          const newStatus = isQuotaError ? "limited" : "error";
+        const isInvalidKey = errorMessage.includes("API_KEY_INVALID") || errorMessage.includes("invalid");
+        const isQuotaError = errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("Quota");
+        if ((isQuotaError || isInvalidKey) && keyObj.id !== "env_fallback") {
+          const newStatus = isInvalidKey ? "error" : "limited";
           await db.update(geminiApiKeys).set({
             healthStatus: newStatus,
             priority: 100
@@ -64470,7 +64479,7 @@ var GeminiClient = class {
             detail: {
               provider: "gemini",
               keyId: keyObj.id,
-              reason: isQuotaError ? "API Rate Limit (429)" : "API Key Error/Invalid",
+              reason: isQuotaError ? "API Rate Limit (429)" : "API Key Invalid",
               error: errorMessage,
               newStatus,
               demotedToPriority: 100
@@ -64487,11 +64496,11 @@ var GeminiClient = class {
     );
   }
   /**
-   * Helper method for text & chat completion using native Gemini SDK with model fallback
+   * Helper method for text & chat completion using native Gemini SDK with high-speed model pool
    */
   async generateChatCompletion(messages, options = {}) {
     const requestedModel = options.model || "gemini-3.1-flash-lite";
-    const fallbackModels = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const fallbackModels = ["gemini-3.1-flash-lite", "gemini-2.5-flash"];
     const candidateModels = Array.from(/* @__PURE__ */ new Set([requestedModel, ...fallbackModels]));
     const systemMsg = messages.find((m2) => m2.role === "system")?.content || "";
     const userMsgs = messages.filter((m2) => m2.role !== "system").map((m2) => m2.content).join("\n\n");
@@ -64524,115 +64533,14 @@ ${userMsgs}` : userMsgs;
   }
 };
 
-// src/modules/ai-gateway/core/groq-client.ts
-init_db2();
-init_schema2();
-init_logger();
-var import_crypto4 = __toESM(require("crypto"));
-init_encryption();
-var GroqClient = class {
-  async getHealthyKeys() {
-    return await db.select().from(geminiApiKeys).where(and(eq(geminiApiKeys.provider, "groq"), eq(geminiApiKeys.isActive, true), eq(geminiApiKeys.healthStatus, "healthy"))).orderBy(asc(geminiApiKeys.priority));
-  }
-  sanitizeJson(text2) {
-    const jsonMatch = text2.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      return jsonMatch[1].trim();
-    }
-    const startIdx = text2.indexOf("{");
-    const endIdx = text2.lastIndexOf("}");
-    if (startIdx !== -1 && endIdx !== -1 && endIdx >= startIdx) {
-      return text2.substring(startIdx, endIdx + 1).trim();
-    }
-    return text2.trim();
-  }
-  async executeWithKey(fn) {
-    const keyPool = await this.getHealthyKeys();
-    if (keyPool.length === 0) {
-      throw new AppError("Terjadi kendala koneksi dengan server AI. Silakan coba lagi nanti.", 500, "NO_API_KEYS");
-    }
-    let lastError = null;
-    for (const keyObj of keyPool) {
-      try {
-        let apiKey = keyObj.keyEncrypted;
-        if (keyObj.isEncrypted) {
-          try {
-            apiKey = decrypt(apiKey);
-          } catch (decryptErr) {
-            logger.error(`Failed to decrypt API key ${keyObj.id}. Skipping.`);
-            continue;
-          }
-        }
-        const result = await fn(apiKey);
-        await db.update(geminiApiKeys).set({
-          usageCount: (keyObj.usageCount || 0) + 1,
-          lastUsedAt: /* @__PURE__ */ new Date()
-        }).where(eq(geminiApiKeys.id, keyObj.id));
-        return result;
-      } catch (error) {
-        lastError = error;
-        const errorMessage = error?.message || String(error);
-        logger.warn(`Groq call failed with key ID ${keyObj.id}. Error: ${errorMessage}`);
-        const isQuotaError = errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("rate limit") || errorMessage.includes("limit exceeded");
-        const isAuthError = errorMessage.includes("401") || errorMessage.includes("invalid") || errorMessage.includes("api key");
-        const isNetworkOrTimeout = errorMessage.includes("timeout") || errorMessage.includes("500") || errorMessage.includes("503") || errorMessage.includes("502");
-        if (isQuotaError || isAuthError || isNetworkOrTimeout) {
-          const newStatus = isQuotaError ? "limited" : "error";
-          await db.update(geminiApiKeys).set({
-            healthStatus: newStatus,
-            priority: 100
-          }).where(eq(geminiApiKeys.id, keyObj.id));
-          await db.insert(logs).values({
-            id: import_crypto4.default.randomUUID(),
-            action: "key_rotation",
-            detail: {
-              provider: "groq",
-              keyId: keyObj.id,
-              reason: isQuotaError ? "API Rate Limit (429)" : isAuthError ? "Invalid API Key (401)" : "API Error/Timeout",
-              error: errorMessage,
-              newStatus,
-              demotedToPriority: 100
-            }
-          });
-        }
-      }
-    }
-    const cleanErr = lastError?.message || String(lastError);
-    throw new AppError(
-      `Gagal memproses permintaan Anda. Kendala: ${formatAiError(cleanErr, "groq")}`,
-      502,
-      "AI_SERVICE_ERROR"
-    );
-  }
-  async post(apiKey, body) {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-    const resJson = await response.json();
-    if (!response.ok) {
-      const errMsg = resJson.error?.message || `Groq API Error: ${response.status} ${response.statusText}`;
-      throw new Error(errMsg);
-    }
-    return resJson;
-  }
-};
-
 // src/modules/ai-gateway/features/image-analyzer.service.ts
-init_logger();
 var import_http = __toESM(require("http"));
 var import_https = __toESM(require("https"));
 var ImageAnalyzerService = class {
-  constructor(geminiClient, groqClient) {
+  constructor(geminiClient) {
     this.geminiClient = geminiClient;
-    this.groqClient = groqClient;
   }
   geminiClient;
-  groqClient;
   async fetchImageAsBase64(imageUrl) {
     return new Promise((resolve, reject) => {
       const client = imageUrl.startsWith("https") ? import_https.default : import_http.default;
@@ -64666,12 +64574,11 @@ var ImageAnalyzerService = class {
       }
     };
   }
-  async analyzeReferenceImage(imageUrl, provider) {
-    try {
-      if (provider === "groq") {
-        return await this.groqClient.executeWithKey(async (apiKey) => {
-          const imageInfo = await this.fetchImageAsBase64(imageUrl);
-          const prompt = `Analisis gambar referensi ini secara mendalam untuk pembuatan poster.
+  async analyzeReferenceImage(imageUrl) {
+    return await this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+      const imagePart = await this.fetchImageAsBase64Part(imageUrl);
+      const prompt = `Analisis gambar referensi ini secara mendalam untuk pembuatan poster.
 Ekstrak elemen berikut:
 1. Palet warna dominan (dan kode heksadesimal jika memungkinkan).
 2. Tata letak / komposisi visual (posisi subjek, teks, whitespace).
@@ -64680,58 +64587,19 @@ Ekstrak elemen berikut:
 5. Nuansa / Mood (ceria, misterius, profesional, elegan).
 
 Tulis dalam format teks terstruktur yang padat namun sangat informatif dalam bahasa Indonesia.`;
-          const response = await this.groqClient.post(apiKey, {
-            model: "llama-3.2-11b-vision-preview",
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: prompt },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:${imageInfo.mimeType};base64,${imageInfo.base64Data}`
-                    }
-                  }
-                ]
-              }
-            ]
-          });
-          return response.choices[0]?.message?.content || "";
-        });
-      } else {
-        return await this.geminiClient.executeWithKey(async (genAI) => {
-          const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-          const imagePart = await this.fetchImageAsBase64Part(imageUrl);
-          const prompt = `Analisis gambar referensi ini secara mendalam untuk pembuatan poster.
-Ekstrak elemen berikut:
-1. Palet warna dominan (dan kode heksadesimal jika memungkinkan).
-2. Tata letak / komposisi visual (posisi subjek, teks, whitespace).
-3. Gaya seni/visual (ilustrasi modern, neubrutalism, 3D render, foto produk, retro, dll).
-4. Tipografi (gaya font: sans-serif bold, serif klasik, dekoratif).
-5. Nuansa / Mood (ceria, misterius, profesional, elegan).
-
-Tulis dalam format teks terstruktur yang padat namun sangat informatif dalam bahasa Indonesia.`;
-          const response = await model.generateContent([prompt, imagePart]);
-          return response.response.text();
-        });
-      }
-    } catch (err) {
-      logger.error(`Error analyzing reference image with ${provider}: ${err?.message}`);
-      throw err;
-    }
+      const response = await model.generateContent([prompt, imagePart]);
+      return response.response.text();
+    });
   }
 };
 
 // src/modules/ai-gateway/features/topic-analyzer.service.ts
 var TopicAnalyzerService = class {
-  constructor(geminiClient, groqClient) {
+  constructor(geminiClient) {
     this.geminiClient = geminiClient;
-    this.groqClient = groqClient;
   }
   geminiClient;
-  groqClient;
-  async analyzeTopic(topic, category, provider) {
+  async analyzeTopic(topic, category) {
     const isEdukasi = category === "edukasi";
     const isVideo = category === "video";
     let typeName = "poster/infografis";
@@ -64759,213 +64627,39 @@ Aturan Penting:
 3. Hasilkan juga 'hook' (kalimat pemikat yang menarik minat pembaca) dan 'cta' (kalimat ajakan bertindak) yang sesuai dengan materi/topik.
 Tulis respons hanya dalam format JSON yang valid, gunakan bahasa Indonesia.`;
     const cleanAnalysis = (data) => {
-      console.log("cleanAnalysis called. category:", category, "description type:", typeof data?.description);
       if (data && typeof data.description === "string" && category && category !== "poster") {
-        const oldDesc = data.description;
         data.description = data.description.replace(/\bposter\b/gi, "materi").replace(/\binfografis\b/gi, "materi");
-        console.log("cleanAnalysis regex replacement. Old:", oldDesc, "New:", data.description);
       }
       return data;
     };
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, {
-          model: "llama-3.3-70b-versatile",
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "system",
-              content: "Kamu adalah analis konten media sosial dan content strategist profesional. Kembalikan respons HANYA dalam format JSON valid sesuai skema yang diminta, tanpa komentar atau teks tambahan."
-            },
-            { role: "user", content: prompt }
-          ]
-        });
-        const text2 = response.choices[0]?.message?.content || "{}";
-        const parsed = JSON.parse(this.groqClient.sanitizeJson(text2));
-        return cleanAnalysis(parsed);
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-3.1-flash-lite",
+        generationConfig: { responseMimeType: "application/json" }
       });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-pro",
-          generationConfig: { responseMimeType: "application/json" }
-        });
-        const response = await model.generateContent(prompt);
-        const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-        return cleanAnalysis(parsed);
-      });
-    }
+      const response = await model.generateContent(prompt);
+      const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+      return cleanAnalysis(parsed);
+    });
   }
-  async generateHooks(topic, provider) {
+  async generateHooks(topic) {
     const prompt = `Hasilkan 4 variasi hook (kalimat pemikat/judul viral) dalam bahasa Indonesia untuk poster dengan topik: "${topic}".
 Hook harus dirancang untuk media sosial (menarik rasa penasaran, relevan, atau kontroversial secara positif).
 Output wajib berformat JSON array of string seperti ini:
 ["Hook Variasi 1", "Hook Variasi 2", "Hook Variasi 3", "Hook Variasi 4"]`;
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const wrappedPrompt = `Hasilkan 4 variasi hook (kalimat pemikat/judul viral) dalam bahasa Indonesia untuk poster dengan topik: "${topic}".
-Hook harus dirancang untuk media sosial (menarik rasa penasaran, relevan, atau kontroversial secara positif).
-Output wajib berformat JSON object dengan key "hooks" berisi array string:
-{"hooks": ["Hook Variasi 1", "Hook Variasi 2", "Hook Variasi 3", "Hook Variasi 4"]}`;
-        const response = await this.groqClient.post(apiKey, {
-          model: "llama-3.3-70b-versatile",
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "system",
-              content: 'Kamu adalah copywriter viral media sosial profesional. Kembalikan respons HANYA dalam format JSON valid dengan key "hooks" berisi array string hook yang menarik.'
-            },
-            { role: "user", content: wrappedPrompt }
-          ]
-        });
-        const text2 = response.choices[0]?.message?.content || "{}";
-        const parsed = JSON.parse(this.groqClient.sanitizeJson(text2));
-        if (Array.isArray(parsed)) return parsed;
-        if (Array.isArray(parsed.hooks)) return parsed.hooks;
-        for (const val of Object.values(parsed)) {
-          if (Array.isArray(val)) return val;
-        }
-        return [];
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-3.1-flash-lite",
+        generationConfig: { responseMimeType: "application/json" }
       });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({
-          model: "gemini-3.1-flash-lite-preview",
-          generationConfig: { responseMimeType: "application/json" }
-        });
-        const response = await model.generateContent(prompt);
-        const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-        if (Array.isArray(parsed)) return parsed;
-        for (const val of Object.values(parsed)) {
-          if (Array.isArray(val)) return val;
-        }
-        return [];
-      });
-    }
-  }
-  async generateStoryboard(topic, duration, provider) {
-    const segmentCount = Math.ceil((duration || 30) / 10);
-    const prompt = `Buatkan storyboard video sinematik profesional yang utuh dan terperinci untuk topik/ide berikut: "${topic}".
-Video ini berdurasi ${duration} detik dan dibagi menjadi ${segmentCount} segmen masing-masing tepat 10 detik.
-
-Kembalikan respons HANYA dalam format JSON yang valid dengan struktur data berikut (Gunakan Bahasa Indonesia):
-{
-  "projectSummary": {
-    "title": "Judul Storyboard Video",
-    "totalDuration": ${duration},
-    "description": "Deskripsi alur cerita video secara keseluruhan."
-  },
-  "storyBible": {
-    "storyType": "Narrative / Edukasi / Commercial / dll",
-    "narrative": "Penjelasan narasi video...",
-    "conflict": "Konflik utama cerita...",
-    "resolution": "Resolusi konflik...",
-    "ending": "Ending...",
-    "emotionalArc": "Perkembangan emosi (misal: penasaran -> tegang -> lega)"
-  },
-  "characterBible": [
-    {
-      "name": "Karakter Utama (misal: Alex)",
-      "age": "Umur",
-      "height": "Tinggi badan",
-      "face": "Deskripsi wajah",
-      "skin": "Warna kulit",
-      "eyes": "Warna/bentuk mata",
-      "hair": "Gaya rambut",
-      "clothes": "Pakaian permanen sepanjang scene",
-      "accessories": "Aksesoris",
-      "expressionDefault": "Ekspresi utama",
-      "walkStyle": "Cara berjalan",
-      "gesture": "Gestur khas",
-      "habits": "Kebiasaan",
-      "personality": "Kepribadian",
-      "voiceTone": "Tone suara"
-    }
-  ],
-  "environmentBible": [
-    {
-      "location": "Nama Lokasi Utama",
-      "season": "Musim",
-      "weather": "Cuaca",
-      "time": "Waktu (Siang/Malam/dll)",
-      "colors": "Skema warna dominan",
-      "materials": "Material dominan",
-      "atmosphere": "Atmosfer/suasana",
-      "objectDensity": "Kepadatan objek",
-      "fog": "Ada/tidak",
-      "rain": "Ada/tidak",
-      "wind": "Ada/tidak",
-      "lighting": "Pencahayaan"
-    }
-  ],
-  "cameraBible": {
-    "shotSize": "Medium Shot / Close Up / dll",
-    "movement": "Pan / Tilt / Orbit / dll",
-    "focalLength": "35mm / 50mm / dll",
-    "lens": "Anamorphic / Prime / dll",
-    "depthOfField": "Shallow / Deep",
-    "cameraSpeed": "Normal / Slow-motion / Fast",
-    "stabilization": "Gimbal / Handheld",
-    "cameraDirection": "Horizontal panning"
-  },
-  "motionBible": {
-    "characterMovement": "Gerakan karakter utama",
-    "objectMovement": "Gerakan objek di sekitar",
-    "gazeDirection": "Arah pandang karakter",
-    "speedRhythm": "Kecepatan dan ritme"
-  },
-  "sceneBreakdown": [
-    {
-      "sceneNumber": 1,
-      "title": "Judul Scene 1 (00:00 - 00:10)",
-      "goal": "Tujuan dramatis scene ini",
-      "duration": 10,
-      "mainSubject": "Karakter Utama",
-      "action": "Aksi detail subjek utama",
-      "emotion": "Emosi subjek",
-      "camera": "Pengaturan kamera khusus scene ini",
-      "lighting": "Pencahayaan khusus scene ini",
-      "environment": "Latar lokasi scene ini",
-      "transition": "Transisi visual ke scene berikutnya",
-      "dialogue": "Dialog atau Voice-Over (jika ada)",
-      "soundEffect": "Efek suara",
-      "musicMood": "Nuansa musik pengiring",
-      "timelineBreakdown": [
-        { "timeRange": "0-3 detik", "action": "Aksi di detik awal" },
-        { "timeRange": "3-7 detik", "action": "Aksi di pertengahan" },
-        { "timeRange": "7-10 detik", "action": "Aksi di akhir" }
-      ],
-      "continuity": {
-        "startingState": "Kondisi fisik/posisi awal subjek",
-        "endingState": "Kondisi fisik/posisi akhir subjek",
-        "rules": "Aturan konsistensi (posisi, pakaian, lighting)"
+      const response = await model.generateContent(prompt);
+      const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+      if (Array.isArray(parsed)) return parsed;
+      for (const val of Object.values(parsed)) {
+        if (Array.isArray(val)) return val;
       }
-    }
-  ],
-  "continuityRules": "Aturan konsistensi antar-segmen (misalnya: pakaian dan lighting tidak boleh berubah mendadak)",
-  "negativePrompt": "flicker, character morphing, clothing color change, sudden lighting shifts, bad anatomy, double heads, text watermarks"
-}
-Tulis respons HANYA berupa JSON valid. Jangan beri penjelasan lain.`;
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, {
-          model: "llama-3.3-70b-versatile",
-          response_format: { type: "json_object" },
-          messages: [{ role: "user", content: prompt }]
-        });
-        const text2 = response.choices[0]?.message?.content || "{}";
-        return JSON.parse(this.groqClient.sanitizeJson(text2));
-      });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-pro",
-          generationConfig: { responseMimeType: "application/json" }
-        });
-        const response = await model.generateContent(prompt);
-        return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-      });
-    }
+      return [];
+    });
   }
 };
 
@@ -65267,13 +64961,11 @@ function compileFinalVideoPrompt(payload, activeSegmentNumber, styleTemplate, ch
 
 // src/modules/ai-gateway/features/prompt-generator.service.ts
 var PromptGeneratorService = class {
-  constructor(geminiClient, groqClient, imageAnalyzer) {
+  constructor(geminiClient, imageAnalyzer) {
     this.geminiClient = geminiClient;
-    this.groqClient = groqClient;
     this.imageAnalyzer = imageAnalyzer;
   }
   geminiClient;
-  groqClient;
   imageAnalyzer;
   buildPromptVariables(fullFormState) {
     const slideCount = fullFormState.slideCount || 1;
@@ -65572,7 +65264,7 @@ ${previousError}
       };
       const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictSchema;
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro", generationConfig });
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig });
       const parts = [];
       const prompt = `Kamu adalah Content Strategist, Art Director & Prompt Compiler Engine profesional.
 Tugasmu adalah menganalisis input form user dan menyusun arsitektur data konten poster/carousel yang solid ke dalam format JSON yang bersih dan representatif.
@@ -65647,21 +65339,12 @@ ${previousError}
       return { payloadJson: finalPayloadJson, promptFinal: finalPromptFinal };
     });
   }
-  async generatePrompt(fullFormState, previousError, provider) {
+  async generatePrompt(fullFormState, previousError) {
     if (fullFormState.feature === "video") {
-      if (provider === "groq") {
-        return this.generateVideoPromptGroq(fullFormState, previousError);
-      }
       return this.generateVideoPromptGemini(fullFormState, previousError);
     }
     if (fullFormState.feature === "advanced_video") {
-      if (provider === "groq") {
-        return this.generateAdvancedVideoPromptGroq(fullFormState, previousError);
-      }
       return this.generateAdvancedVideoPromptGemini(fullFormState, previousError);
-    }
-    if (provider === "groq") {
-      return this.generatePromptGroq(fullFormState, previousError);
     }
     return this.generatePromptGemini(fullFormState, previousError);
   }
@@ -65785,7 +65468,7 @@ ${previousError}
       };
       const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictVideoSchema;
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro", generationConfig });
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig });
       const parts = [];
       const prompt = `Kamu adalah Video Content Strategist, Art Director & AI Video Prompt Architect profesional.
 Tugasmu adalah menganalisis input form user dan menyusun arsitektur data konten video berdurasi ${duration} detik ke dalam format JSON yang bersih dan representatif.
@@ -66029,7 +65712,7 @@ Return ONLY valid JSON:
       });
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
         const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(imageUrl);
         const prompt = `You are an expert AI photo retouching and enhancement prompt engineer.
 You are given a real photo to deeply analyze. Your job is to produce a highly detailed, professional AI image generation prompt that will transform this photo according to the requested style.
@@ -66112,7 +65795,7 @@ Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
       });
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: { responseMimeType: "application/json" } });
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
         const response = await model.generateContent(prompt);
         return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
       });
@@ -66140,7 +65823,7 @@ Output ONLY the improved English prompt text directly.`;
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
         const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-flash",
+          model: "gemini-3.1-flash-lite",
           systemInstruction
         });
         const response = await model.generateContent(userPrompt);
@@ -66321,7 +66004,7 @@ Output ONLY the improved English prompt text directly.`;
       };
       const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictSchema;
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro", generationConfig });
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig });
       const prompt = `Kamu adalah Production Director, Storyboard Supervisor, dan AI Video Prompt Engineer profesional.
 Tugasmu adalah menganalisis input data proyek video, mengauditnya menggunakan Smart AI Analyzer, merumuskan final prompts untuk generator video AI (Kling, Runway, Pika, Hailuo, Gemini Veo), serta merapikan kesinambungan (continuity) visual antarsegmen.
 
@@ -66430,13 +66113,11 @@ Tulis respons HANYA berupa JSON valid tanpa komentar lain.`;
 init_db2();
 init_schema2();
 var ChatAssistantService = class {
-  constructor(geminiClient, groqClient) {
+  constructor(geminiClient) {
     this.geminiClient = geminiClient;
-    this.groqClient = groqClient;
   }
   geminiClient;
-  groqClient;
-  async generateContentIdeas(userId, category, provider, slideCount) {
+  async generateContentIdeas(userId, category, slideCount) {
     const history = await db.select({ topic: prompts.topic }).from(prompts).where(and(eq(prompts.userId, userId), eq(prompts.category, category))).orderBy(desc(prompts.createdAt)).limit(10);
     const historyTopics = history.map((h) => h.topic);
     const historyContext = historyTopics.length > 0 ? `Topik yang pernah dibuat sebelumnya (HINDARI ide yang mirip): ${historyTopics.join(", ")}` : "User belum pernah membuat topik untuk kategori ini.";
@@ -66446,85 +66127,61 @@ var ChatAssistantService = class {
       slideInstructions = `
 Topik harus dirancang khusus untuk format carousel dengan TEPAT ${slideCount} slide, di mana slide pertama didedikasikan untuk Cover & Hook utama. Oleh karena itu, buatlah ide topik yang memiliki tepat ${contentSlides} cara / langkah / tips / fakta penting (misalnya: "5 Cara...", "5 Langkah...", "5 Tips...").`;
     }
-    const prompt = `Berikan 5 ide topik konten poster/carousel yang kreatif, segar, dan sangat berpotensi viral untuk kategori: "${category}".${slideInstructions}
-Konteks riwayat user:
-${historyContext}
-
-Output wajib berformat JSON array of string seperti ini:
-["Ide Topik 1", "Ide Topik 2", "Ide Topik 3", "Ide Topik 4", "Ide Topik 5"]
-Tulis ide topik dalam Bahasa Indonesia yang singkat, padat, dan menarik perhatian.`;
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, {
-          model: "llama-3.3-70b-versatile",
-          response_format: { type: "json_object" },
-          messages: [{ role: "user", content: prompt }]
-        });
-        const text2 = response.choices[0]?.message?.content || "{}";
-        const parsed = JSON.parse(this.groqClient.sanitizeJson(text2));
-        if (Array.isArray(parsed)) return parsed;
-        for (const val of Object.values(parsed)) {
-          if (Array.isArray(val)) return val;
-        }
-        return [];
+    const prompt = `Kamu adalah Content Strategist media sosial profesional. Hasilkan tepat 5 ide topik konten yang sangat menarik, kreatif, spesifik, dan siap pakai untuk kategori "${category}".
+Aturan Wajib:
+1. Setiap topik harus sangat relevan dengan kategori "${category}".
+2. ${historyContext}
+3. ${slideInstructions}
+4. Kembalikan respons HANYA berupa array JSON of string berisi 5 judul topik pendek, misalnya: ["Judul 1", "Judul 2", "Judul 3", "Judul 4", "Judul 5"].
+5. Jangan sertakan teks penjelasan atau markdown di luar JSON array.`;
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-3.1-flash-lite",
+        generationConfig: { responseMimeType: "application/json" }
       });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({
-          model: "gemini-3.1-flash-lite-preview",
-          generationConfig: { responseMimeType: "application/json" }
-        });
-        const response = await model.generateContent(prompt);
-        const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-        if (Array.isArray(parsed)) return parsed;
-        for (const val of Object.values(parsed)) {
-          if (Array.isArray(val)) return val;
-        }
-        return [];
-      });
-    }
+      const response = await model.generateContent(prompt);
+      const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+      if (Array.isArray(parsed)) return parsed;
+      for (const val of Object.values(parsed)) {
+        if (Array.isArray(val)) return val;
+      }
+      return [];
+    });
   }
-  async chat(message, history, provider) {
+  async chat(message, history) {
     const systemInstruction = `Kamu adalah asisten AI yang ahli dalam prompting dan memberikan rekomendasi konten.
-PENTING: Jangan pernah memberitahu bahwa kamu adalah model dari Google, Gemini, Groq, atau platform asli lainnya.
+PENTING: Jangan pernah memberitahu bahwa kamu adalah model dari Google, Gemini, atau platform asli lainnya.
 Jika ditanya tentang model atau identitasmu, kamu WAJIB menjawab bahwa kamu adalah model "gpt-5.6" yang dikembangkan khusus untuk PROMTING STUDIO.
 Jawab dengan bahasa Indonesia yang ramah, santai tapi profesional.`;
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const messages = [
-          { role: "system", content: systemInstruction },
-          ...history.map((msg) => ({ role: msg.role === "user" ? "user" : "assistant", content: msg.content })),
-          { role: "user", content: message }
-        ];
-        const response = await this.groqClient.post(apiKey, { model: "llama-3.3-70b-versatile", messages });
-        return response.choices[0]?.message?.content || "";
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+      const chat2 = model.startChat({
+        history: [
+          { role: "user", parts: [{ text: "Siapa kamu dan apa modelmu? Jawab instruksi sistem." }] },
+          { role: "model", parts: [{ text: systemInstruction }] },
+          ...history.map((msg) => ({ role: msg.role === "user" ? "user" : "model", parts: [{ text: msg.content }] }))
+        ]
       });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
-        const chat2 = model.startChat({
-          history: [
-            { role: "user", parts: [{ text: "Siapa kamu dan apa modelmu? Jawab instruksi sistem." }] },
-            { role: "model", parts: [{ text: systemInstruction }] },
-            ...history.map((msg) => ({ role: msg.role === "user" ? "user" : "model", parts: [{ text: msg.content }] }))
-          ]
-        });
-        const result = await chat2.sendMessage(message);
-        return result.response.text();
-      });
-    }
+      const response = await chat2.sendMessage(message);
+      return response.response.text();
+    });
+  }
+  async generateResponse(messages, systemInstruction) {
+    const sys = systemInstruction || `Kamu adalah asisten AI dari PROMTING STUDIO.`;
+    return this.geminiClient.generateChatCompletion([
+      { role: "system", content: sys },
+      ...messages
+    ]);
   }
 };
 
 // src/modules/ai-gateway/features/viral-score.service.ts
 var ViralScoreService = class {
-  constructor(geminiClient, groqClient) {
+  constructor(geminiClient) {
     this.geminiClient = geminiClient;
-    this.groqClient = groqClient;
   }
   geminiClient;
-  groqClient;
-  async scoreViral(promptFinal, provider) {
+  async evaluateScore(promptFinal) {
     const prompt = `Analisis potensi viralitas dari prompt gambar/poster final berikut:
 "${promptFinal}"
 
@@ -66546,54 +66203,39 @@ Output wajib berformat JSON:
   }
 }
 Tulis respons hanya dalam format JSON yang valid.`;
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, {
-          model: "llama-3.3-70b-versatile",
-          response_format: { type: "json_object" },
-          messages: [{ role: "user", content: prompt }]
-        });
-        return JSON.parse(this.groqClient.sanitizeJson(response.choices[0]?.message?.content || "{}"));
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-3.1-flash-lite",
+        generationConfig: { responseMimeType: "application/json" }
       });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({
-          model: "gemini-3.1-flash-lite-preview",
-          generationConfig: { responseMimeType: "application/json" }
-        });
-        const response = await model.generateContent(prompt);
-        return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-      });
-    }
+      const response = await model.generateContent(prompt);
+      return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+    });
   }
 };
 
 // src/modules/ai-gateway/ai-gateway.service.ts
 var AIGatewayService = class {
   geminiClient = new GeminiClient();
-  groqClient = new GroqClient();
-  imageAnalyzer = new ImageAnalyzerService(this.geminiClient, this.groqClient);
-  topicAnalyzer = new TopicAnalyzerService(this.geminiClient, this.groqClient);
-  promptGenerator = new PromptGeneratorService(this.geminiClient, this.groqClient, this.imageAnalyzer);
-  chatAssistant = new ChatAssistantService(this.geminiClient, this.groqClient);
-  viralScoreService = new ViralScoreService(this.geminiClient, this.groqClient);
-  async getProvider() {
-    return "gemini";
-  }
+  imageAnalyzer = new ImageAnalyzerService(this.geminiClient);
+  topicAnalyzer = new TopicAnalyzerService(this.geminiClient);
+  promptGenerator = new PromptGeneratorService(this.geminiClient, this.imageAnalyzer);
+  chatAssistant = new ChatAssistantService(this.geminiClient);
+  viralScoreService = new ViralScoreService(this.geminiClient);
   async analyzeReferenceImage(imageUrl) {
-    return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, "gemini");
+    return await this.imageAnalyzer.analyzeReferenceImage(imageUrl);
   }
   async analyzeTopic(topic, category) {
-    return await this.topicAnalyzer.analyzeTopic(topic, category, "gemini");
+    return await this.topicAnalyzer.analyzeTopic(topic, category);
   }
   async generatePosterPrompts(formState) {
-    return await this.promptGenerator.generatePosterPrompts(formState, "gemini");
+    return await this.promptGenerator.generatePrompt(formState);
   }
   async generateChatResponse(messages, systemInstruction) {
-    return await this.chatAssistant.generateChatResponse(messages, "gemini", systemInstruction);
+    return await this.chatAssistant.generateResponse(messages, systemInstruction);
   }
   async evaluateViralScore(payload) {
-    return await this.viralScoreService.evaluateViralScore(payload, "gemini");
+    return await this.viralScoreService.evaluateScore(payload);
   }
 };
 
@@ -66911,7 +66553,7 @@ function repairJson(rawInput) {
 
 // src/modules/poster/poster.controller.ts
 var import_https2 = __toESM(require("https"));
-var import_crypto5 = __toESM(require("crypto"));
+var import_crypto4 = __toESM(require("crypto"));
 var import_path2 = __toESM(require("path"));
 var import_fs = __toESM(require("fs"));
 var aiService = new AIGatewayService();
@@ -67103,7 +66745,7 @@ var generatePoster = async (req, res, next) => {
       viralScore: viralData.score,
       hooks: finalHooks
     };
-    const promptId = import_crypto5.default.randomUUID();
+    const promptId = import_crypto4.default.randomUUID();
     const schemaVersion = isStrict ? "v2" : "v1";
     const [savedPrompt] = await db.insert(prompts).values({
       id: promptId,
@@ -67124,7 +66766,7 @@ var generatePoster = async (req, res, next) => {
       await db.update(users).set({ credits: sql`credits - 1` }).where(eq(users.id, userId));
     }
     await db.insert(logs).values({
-      id: import_crypto5.default.randomUUID(),
+      id: import_crypto4.default.randomUUID(),
       userId,
       action: "generate_poster_prompt",
       detail: { promptId: savedPrompt.id, topic: formState.topic }
@@ -67165,7 +66807,7 @@ var generateEnhance = async (req, res, next) => {
       promptFinal,
       viralScore: viralData.score
     };
-    const promptId = import_crypto5.default.randomUUID();
+    const promptId = import_crypto4.default.randomUUID();
     const [savedPrompt] = await db.insert(prompts).values({
       id: promptId,
       userId,
@@ -67184,7 +66826,7 @@ var generateEnhance = async (req, res, next) => {
       await db.update(users).set({ credits: sql`credits - 1` }).where(eq(users.id, userId));
     }
     await db.insert(logs).values({
-      id: import_crypto5.default.randomUUID(),
+      id: import_crypto4.default.randomUUID(),
       userId,
       action: "generate_enhance_prompt",
       detail: { promptId: savedPrompt.id, enhanceStyle, imageUrl }
@@ -67213,7 +66855,7 @@ var getContentIdeas = async (req, res, next) => {
     await Promise.all(
       ideas.map(
         (idea) => db.insert(contentIdeas).values({
-          id: import_crypto5.default.randomUUID(),
+          id: import_crypto4.default.randomUUID(),
           userId,
           category: String(category),
           idea
@@ -67318,7 +66960,7 @@ var activateLicense = async (req, res, next) => {
         usedAt: /* @__PURE__ */ new Date()
       }).where(eq(licenseKeys.id, license.id));
       await tx.insert(logs).values({
-        id: import_crypto5.default.randomUUID(),
+        id: import_crypto4.default.randomUUID(),
         userId,
         action: "claim_voucher",
         detail: { key, credits: license.credits }
@@ -67777,7 +67419,7 @@ var importExternalPrompt = async (req, res, next) => {
       hooks: finalHooks
     };
     payloadJson.viralBreakdown = viralData.breakdown;
-    const promptId = import_crypto5.default.randomUUID();
+    const promptId = import_crypto4.default.randomUUID();
     const [savedPrompt] = await db.insert(prompts).values({
       id: promptId,
       userId,
@@ -67849,7 +67491,7 @@ var saveExternalDraft = async (req, res, next) => {
       }
     }
     if (!savedPrompt) {
-      const newId = draftId || import_crypto5.default.randomUUID();
+      const newId = draftId || import_crypto4.default.randomUUID();
       const [inserted] = await db.insert(prompts).values({
         id: newId,
         userId,
@@ -68056,7 +67698,7 @@ var saveExternalDraftSchema = external_exports.object({
 // src/middlewares/spamBlocker.ts
 init_db2();
 init_schema2();
-var import_crypto6 = __toESM(require("crypto"));
+var import_crypto5 = __toESM(require("crypto"));
 var requestTracker = {};
 var spamBlocker = async (req, res, next) => {
   if (!req.user) {
@@ -68082,7 +67724,7 @@ var spamBlocker = async (req, res, next) => {
   if (requestCount >= hardLimit) {
     await db.update(users).set({ subscriptionStatus: "BLOCKED" }).where(eq(users.id, userId));
     await db.insert(logs).values({
-      id: import_crypto6.default.randomUUID(),
+      id: import_crypto5.default.randomUUID(),
       userId,
       action: "auto_block_user_spam",
       detail: {
@@ -68137,7 +67779,7 @@ var import_express3 = __toESM(require_express2());
 // src/modules/history/history.controller.ts
 init_db2();
 init_schema2();
-var import_crypto7 = __toESM(require("crypto"));
+var import_crypto6 = __toESM(require("crypto"));
 var getHistory = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -68213,7 +67855,7 @@ var duplicatePrompt = async (req, res, next) => {
       throw new AppError("Prompt not found", 404, "NOT_FOUND");
     }
     const [cloned] = await db.insert(prompts).values({
-      id: import_crypto7.default.randomUUID(),
+      id: import_crypto6.default.randomUUID(),
       userId,
       mode: prompt.mode,
       topic: `${prompt.topic} (Copy)`,
@@ -68390,7 +68032,7 @@ var import_express4 = __toESM(require_express2());
 // src/modules/dropdown/dropdown.controller.ts
 init_db2();
 init_schema2();
-var import_crypto8 = __toESM(require("crypto"));
+var import_crypto7 = __toESM(require("crypto"));
 var getDropdownOptions = async (req, res, next) => {
   try {
     const { groupKey } = req.query;
@@ -68445,7 +68087,7 @@ var createDropdownOption = async (req, res, next) => {
   try {
     const { groupKey, label, value, helperText, icon, isActive, sortOrder } = req.body;
     const [option] = await db.insert(dropdownOptions).values({
-      id: import_crypto8.default.randomUUID(),
+      id: import_crypto7.default.randomUUID(),
       groupKey,
       label,
       value,
@@ -68456,7 +68098,7 @@ var createDropdownOption = async (req, res, next) => {
     }).returning();
     if (req.user?.id) {
       await db.insert(logs).values({
-        id: import_crypto8.default.randomUUID(),
+        id: import_crypto7.default.randomUUID(),
         userId: req.user.id,
         action: "create_dropdown_option",
         detail: { optionId: option.id, groupKey, label }
@@ -68483,7 +68125,7 @@ var updateDropdownOption = async (req, res, next) => {
     const [updated] = await db.update(dropdownOptions).set(updateData).where(eq(dropdownOptions.id, id)).returning();
     if (req.user?.id) {
       await db.insert(logs).values({
-        id: import_crypto8.default.randomUUID(),
+        id: import_crypto7.default.randomUUID(),
         userId: req.user.id,
         action: "update_dropdown_option",
         detail: { optionId: id, updateData }
@@ -68509,7 +68151,7 @@ var deleteDropdownOption = async (req, res, next) => {
     await db.delete(dropdownOptions).where(eq(dropdownOptions.id, id));
     if (req.user?.id) {
       await db.insert(logs).values({
-        id: import_crypto8.default.randomUUID(),
+        id: import_crypto7.default.randomUUID(),
         userId: req.user.id,
         action: "delete_dropdown_option",
         detail: { optionId: id, groupKey: option.groupKey, label: option.label }
@@ -68578,7 +68220,7 @@ var import_express5 = __toESM(require_express2());
 // src/modules/admin/admin.controller.ts
 init_db2();
 init_schema2();
-var import_crypto9 = __toESM(require("crypto"));
+var import_crypto8 = __toESM(require("crypto"));
 init_encryption();
 var getDashboardStats = async (req, res, next) => {
   try {
@@ -68664,7 +68306,7 @@ var createGeminiKey = async (req, res, next) => {
     const shouldEncrypt = !!encryptionKey;
     const finalKey = shouldEncrypt ? encrypt(key) : key;
     const [newKey] = await db.insert(geminiApiKeys).values({
-      id: import_crypto9.default.randomUUID(),
+      id: import_crypto8.default.randomUUID(),
       keyEncrypted: finalKey,
       isEncrypted: shouldEncrypt,
       priority: priority !== void 0 ? priority : 0,
@@ -68674,7 +68316,7 @@ var createGeminiKey = async (req, res, next) => {
     }).returning();
     if (req.user?.id) {
       await db.insert(logs).values({
-        id: import_crypto9.default.randomUUID(),
+        id: import_crypto8.default.randomUUID(),
         userId: req.user.id,
         action: "create_gemini_key",
         detail: { keyId: newKey.id, provider: newKey.provider }
@@ -68708,7 +68350,7 @@ var bulkImportGeminiKeys = async (req, res, next) => {
     for (const key of keysArray) {
       const finalKey = shouldEncrypt ? encrypt(key) : key;
       const [newKey] = await db.insert(geminiApiKeys).values({
-        id: import_crypto9.default.randomUUID(),
+        id: import_crypto8.default.randomUUID(),
         keyEncrypted: finalKey,
         isEncrypted: shouldEncrypt,
         priority: startPriority++,
@@ -68721,7 +68363,7 @@ var bulkImportGeminiKeys = async (req, res, next) => {
     }
     if (req.user?.id) {
       await db.insert(logs).values({
-        id: import_crypto9.default.randomUUID(),
+        id: import_crypto8.default.randomUUID(),
         userId: req.user.id,
         action: "bulk_import_gemini_keys",
         detail: { addedCount, provider }
@@ -68758,7 +68400,7 @@ var updateGeminiKey = async (req, res, next) => {
     if (!updated) throw new AppError("Gemini Key not found", 404, "NOT_FOUND");
     if (req.user?.id) {
       await db.insert(logs).values({
-        id: import_crypto9.default.randomUUID(),
+        id: import_crypto8.default.randomUUID(),
         userId: req.user.id,
         action: "update_gemini_key",
         detail: { keyId: id, priority, isActive, healthStatus }
@@ -68775,7 +68417,7 @@ var deleteGeminiKey = async (req, res, next) => {
     const [deleted] = await db.delete(geminiApiKeys).where(eq(geminiApiKeys.id, id)).returning();
     if (!deleted) throw new AppError("Gemini Key not found", 404, "NOT_FOUND");
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "delete_gemini_key", detail: { keyId: id } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "delete_gemini_key", detail: { keyId: id } });
     }
     res.status(200).json({ success: true, message: "Gemini Key deleted successfully" });
   } catch (error) {
@@ -68804,7 +68446,7 @@ var encryptOldKey = async (req, res, next) => {
     }).where(eq(geminiApiKeys.id, id));
     if (req.user?.id) {
       await db.insert(logs).values({
-        id: import_crypto9.default.randomUUID(),
+        id: import_crypto8.default.randomUUID(),
         userId: req.user.id,
         action: "encrypt_gemini_key",
         detail: { keyId: id }
@@ -68829,7 +68471,7 @@ var getSystemSettings = async (req, res, next) => {
     let settings = settingsArr[0];
     if (!settings) {
       const [newSettings] = await db.insert(appSettings).values({
-        id: import_crypto9.default.randomUUID(),
+        id: import_crypto8.default.randomUUID(),
         key: "system_settings",
         value: {
           appName: "PROMTING STUDIO",
@@ -68858,9 +68500,9 @@ var getSystemSettings = async (req, res, next) => {
 var updateSystemSettings = async (req, res, next) => {
   try {
     const { value } = req.body;
-    const [updated] = await db.insert(appSettings).values({ id: import_crypto9.default.randomUUID(), key: "system_settings", value }).onConflictDoUpdate({ target: appSettings.key, set: { value } }).returning();
+    const [updated] = await db.insert(appSettings).values({ id: import_crypto8.default.randomUUID(), key: "system_settings", value }).onConflictDoUpdate({ target: appSettings.key, set: { value } }).returning();
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_system_settings", detail: { value } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "update_system_settings", detail: { value } });
     }
     res.status(200).json({ success: true, message: "System settings updated", data: updated.value });
   } catch (error) {
@@ -68897,7 +68539,7 @@ var updateUserSubscription = async (req, res, next) => {
     }).where(eq(users.id, id)).returning();
     if (!updated) throw new AppError("User not found", 404, "NOT_FOUND");
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_user_subscription", detail: { targetUserId: id, subscriptionStatus, subscriptionExpiresAt } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "update_user_subscription", detail: { targetUserId: id, subscriptionStatus, subscriptionExpiresAt } });
     }
     res.status(200).json({ success: true, message: "Updated successfully", data: updated });
   } catch (error) {
@@ -68911,7 +68553,7 @@ var updateUserRole = async (req, res, next) => {
     const [updated] = await db.update(users).set({ role }).where(eq(users.id, id)).returning();
     if (!updated) throw new AppError("User not found", 404, "NOT_FOUND");
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_user_role", detail: { targetUserId: id, newRole: role } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "update_user_role", detail: { targetUserId: id, newRole: role } });
     }
     res.status(200).json({ success: true, message: "Role updated successfully", data: { id: updated.id, email: updated.email, role: updated.role } });
   } catch (error) {
@@ -68946,9 +68588,9 @@ var updateImageKitSettings = async (req, res, next) => {
   try {
     const { publicKey, privateKey, urlEndpoint } = req.body;
     const value = { publicKey, privateKey, urlEndpoint };
-    const [updated] = await db.insert(appSettings).values({ id: import_crypto9.default.randomUUID(), key: "imagekit_settings", value }).onConflictDoUpdate({ target: appSettings.key, set: { value } }).returning();
+    const [updated] = await db.insert(appSettings).values({ id: import_crypto8.default.randomUUID(), key: "imagekit_settings", value }).onConflictDoUpdate({ target: appSettings.key, set: { value } }).returning();
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_imagekit_settings", detail: { publicKey, urlEndpoint } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "update_imagekit_settings", detail: { publicKey, urlEndpoint } });
     }
     res.status(200).json({ success: true, message: "Settings updated", data: updated.value });
   } catch (error) {
@@ -68967,14 +68609,14 @@ var createVisualStyle = async (req, res, next) => {
   try {
     const { name, promptTemplate, previewImageUrl } = req.body;
     const [newStyle] = await db.insert(visualStyles).values({
-      id: import_crypto9.default.randomUUID(),
+      id: import_crypto8.default.randomUUID(),
       name,
       promptTemplate,
       previewImageUrl,
       isActive: true
     }).returning();
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "create_visual_style", detail: { name, styleId: newStyle.id } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "create_visual_style", detail: { name, styleId: newStyle.id } });
     }
     res.status(201).json({ success: true, message: "Style created", data: newStyle });
   } catch (error) {
@@ -68998,7 +68640,7 @@ var updateVisualStyle = async (req, res, next) => {
       deleteLocalFileByUrl2(oldStyle.previewImageUrl);
     }
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_visual_style", detail: { styleId: id, name } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "update_visual_style", detail: { styleId: id, name } });
     }
     res.status(200).json({ success: true, message: "Style updated", data: updated });
   } catch (error) {
@@ -69016,7 +68658,7 @@ var deleteVisualStyle = async (req, res, next) => {
       deleteLocalFileByUrl2(oldStyle.previewImageUrl);
     }
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "delete_visual_style", detail: { styleId: id } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "delete_visual_style", detail: { styleId: id } });
     }
     res.status(200).json({ success: true, message: "Style deleted" });
   } catch (error) {
@@ -69042,11 +68684,11 @@ var generateLicenses = async (req, res, next) => {
       const part1 = Math.random().toString(36).substring(2, 6).toUpperCase();
       const part2 = Math.random().toString(36).substring(2, 6).toUpperCase();
       const key = `KEY-${part1}-${part2}`;
-      keysToCreate.push({ id: import_crypto9.default.randomUUID(), key, days: validDays, credits: validCredits });
+      keysToCreate.push({ id: import_crypto8.default.randomUUID(), key, days: validDays, credits: validCredits });
     }
     await db.insert(licenseKeys).values(keysToCreate);
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "generate_licenses", detail: { count: validCount, days: validDays } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "generate_licenses", detail: { count: validCount, days: validDays } });
     }
     res.status(201).json({ success: true, message: `Successfully generated ${validCount} license keys.` });
   } catch (error) {
@@ -69075,30 +68717,15 @@ var testGeminiKey = async (req, res, next) => {
       if (keyRecord.isEncrypted) {
         actualKey = decrypt(actualKey);
       }
-      if (keyRecord.provider === "groq") {
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${actualKey}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: "say OK" }], max_tokens: 5 })
-        });
-        const resJson = await response.json();
-        if (response.ok && resJson.choices?.[0]?.message?.content) {
-          success = true;
-          await db.update(geminiApiKeys).set({ healthStatus: "healthy" }).where(eq(geminiApiKeys.id, id));
-        } else {
-          throw new Error(resJson.error?.message || `Groq test failed: ${response.status}`);
-        }
+      const genAI = new GoogleGenerativeAI(actualKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+      const response = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "say OK" }] }], generationConfig: { maxOutputTokens: 5 } });
+      const text2 = response.response.text();
+      if (text2) {
+        success = true;
+        await db.update(geminiApiKeys).set({ healthStatus: "healthy" }).where(eq(geminiApiKeys.id, id));
       } else {
-        const genAI = new GoogleGenerativeAI(actualKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
-        const response = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "say OK" }] }], generationConfig: { maxOutputTokens: 5 } });
-        const text2 = response.response.text();
-        if (text2) {
-          success = true;
-          await db.update(geminiApiKeys).set({ healthStatus: "healthy" }).where(eq(geminiApiKeys.id, id));
-        } else {
-          throw new Error("Empty response");
-        }
+        throw new Error("Empty response");
       }
     } catch (err) {
       errorMessage = err?.message || String(err);
@@ -69106,7 +68733,7 @@ var testGeminiKey = async (req, res, next) => {
       const newStatus = isQuota ? "limited" : "error";
       await db.update(geminiApiKeys).set({ healthStatus: newStatus }).where(eq(geminiApiKeys.id, id));
       if (req.user?.id) {
-        await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "key_rotation", detail: { keyId: id, reason: "Manual Health Check Failure", error: errorMessage, newStatus } });
+        await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "key_rotation", detail: { keyId: id, reason: "Manual Health Check Failure", error: errorMessage, newStatus } });
       }
     }
     res.status(200).json({
@@ -69131,30 +68758,15 @@ var testAllGeminiKeys = async (req, res, next) => {
         if (keyRecord.isEncrypted) {
           actualKey = decrypt(actualKey);
         }
-        if (keyRecord.provider === "groq") {
-          const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${actualKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: "say OK" }], max_tokens: 5 })
-          });
-          const resJson = await response.json();
-          if (response.ok && resJson.choices?.[0]?.message?.content) {
-            success = true;
-            await db.update(geminiApiKeys).set({ healthStatus: "healthy" }).where(eq(geminiApiKeys.id, keyRecord.id));
-          } else {
-            throw new Error(resJson.error?.message || `Groq test failed: ${response.status}`);
-          }
+        const genAI = new GoogleGenerativeAI(actualKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+        const response = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "say OK" }] }], generationConfig: { maxOutputTokens: 5 } });
+        const text2 = response.response.text();
+        if (text2) {
+          success = true;
+          await db.update(geminiApiKeys).set({ healthStatus: "healthy" }).where(eq(geminiApiKeys.id, keyRecord.id));
         } else {
-          const genAI = new GoogleGenerativeAI(actualKey);
-          const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
-          const response = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "say OK" }] }], generationConfig: { maxOutputTokens: 5 } });
-          const text2 = response.response.text();
-          if (text2) {
-            success = true;
-            await db.update(geminiApiKeys).set({ healthStatus: "healthy" }).where(eq(geminiApiKeys.id, keyRecord.id));
-          } else {
-            throw new Error("Empty response");
-          }
+          throw new Error("Empty response");
         }
       } catch (err) {
         errorMessage = err?.message || String(err);
@@ -69162,7 +68774,7 @@ var testAllGeminiKeys = async (req, res, next) => {
         const newStatus = isQuota ? "limited" : "error";
         await db.update(geminiApiKeys).set({ healthStatus: newStatus }).where(eq(geminiApiKeys.id, keyRecord.id));
         if (req.user?.id) {
-          await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "key_rotation", detail: { keyId: keyRecord.id, reason: "Manual Health Check Failure", error: errorMessage, newStatus } });
+          await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "key_rotation", detail: { keyId: keyRecord.id, reason: "Manual Health Check Failure", error: errorMessage, newStatus } });
         }
       }
       results.push({ id: keyRecord.id, success, error: errorMessage ? formatAiError(errorMessage, keyRecord.provider) : "" });
@@ -69186,16 +68798,16 @@ var createDeveloperKey = async (req, res, next) => {
     const { name } = req.body;
     const userId = req.user?.id;
     if (!userId) throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
-    const secureToken = import_crypto9.default.randomBytes(20).toString("hex");
+    const secureToken = import_crypto8.default.randomBytes(20).toString("hex");
     const apiKey = `ps_live_${secureToken}`;
     const [newKey] = await db.insert(developerApiKeys).values({
-      id: import_crypto9.default.randomUUID(),
+      id: import_crypto8.default.randomUUID(),
       userId,
       name: name || "Default Key",
       apiKey,
       isActive: true
     }).returning();
-    await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId, action: "create_developer_key", detail: { keyId: newKey.id, name: newKey.name } });
+    await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId, action: "create_developer_key", detail: { keyId: newKey.id, name: newKey.name } });
     res.status(201).json({ success: true, message: "Key generated successfully", data: newKey });
   } catch (error) {
     next(error);
@@ -69208,7 +68820,7 @@ var deleteDeveloperKey = async (req, res, next) => {
     if (!userId) throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     const [deleted] = await db.delete(developerApiKeys).where(and(eq(developerApiKeys.id, id), eq(developerApiKeys.userId, userId))).returning();
     if (!deleted) throw new AppError("Key not found", 404, "NOT_FOUND");
-    await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId, action: "delete_developer_key", detail: { keyId: id, name: deleted.name } });
+    await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId, action: "delete_developer_key", detail: { keyId: id, name: deleted.name } });
     res.status(200).json({ success: true, message: "Key deleted" });
   } catch (error) {
     next(error);
@@ -69231,7 +68843,7 @@ var transferCreditsDirectly = async (req, res, next) => {
     }).where(eq(users.id, user.id)).returning();
     if (adminId) {
       await db.insert(logs).values({
-        id: import_crypto9.default.randomUUID(),
+        id: import_crypto8.default.randomUUID(),
         userId: adminId,
         action: "direct_credit_transfer",
         detail: { targetUserId: user.id, targetUserEmail: email, addedCredits: targetCredits, newTotalCredits: updated.credits }
@@ -69257,7 +68869,7 @@ var createCharacter = async (req, res, next) => {
       throw new AppError("Nama, deskripsi, dan prompt konsistensi wajib diisi", 400, "BAD_REQUEST");
     }
     const [newChar] = await db.insert(characters).values({
-      id: import_crypto9.default.randomUUID(),
+      id: import_crypto8.default.randomUUID(),
       name,
       description,
       imageUrl: imageUrl || null,
@@ -69270,7 +68882,7 @@ var createCharacter = async (req, res, next) => {
       isActive: true
     }).returning();
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "create_character", detail: { characterId: newChar.id, name } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "create_character", detail: { characterId: newChar.id, name } });
     }
     res.status(201).json({ success: true, message: "Karakter berhasil dibuat", data: newChar });
   } catch (error) {
@@ -69302,7 +68914,7 @@ var updateCharacter = async (req, res, next) => {
       deleteLocalFileByUrl2(oldChar.imageUrl);
     }
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_character", detail: { characterId: id, name } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "update_character", detail: { characterId: id, name } });
     }
     res.status(200).json({ success: true, message: "Karakter diperbarui", data: updated });
   } catch (error) {
@@ -69317,7 +68929,7 @@ var deleteCharacter = async (req, res, next) => {
     const { deleteLocalFileByUrl: deleteLocalFileByUrl2 } = await Promise.resolve().then(() => (init_image_cleanup(), image_cleanup_exports));
     deleteLocalFileByUrl2(deleted.imageUrl);
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "delete_character", detail: { characterId: id } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "delete_character", detail: { characterId: id } });
     }
     res.status(200).json({ success: true, message: "Karakter dihapus" });
   } catch (error) {
@@ -69339,7 +68951,7 @@ var createPromptTemplate = async (req, res, next) => {
       throw new AppError("Kategori dan template wajib diisi", 400, "BAD_REQUEST");
     }
     const [newTpl] = await db.insert(promptTemplates).values({
-      id: import_crypto9.default.randomUUID(),
+      id: import_crypto8.default.randomUUID(),
       title: title || payloadJson?.formState?.topic || payloadJson?.topic || null,
       category,
       template,
@@ -69352,7 +68964,7 @@ var createPromptTemplate = async (req, res, next) => {
       analysis: analysis || null
     }).returning();
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "create_prompt_template", detail: { templateId: newTpl.id, category } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "create_prompt_template", detail: { templateId: newTpl.id, category } });
     }
     res.status(201).json({ success: true, message: "Template berhasil dibuat", data: newTpl });
   } catch (error) {
@@ -69377,7 +68989,7 @@ var updatePromptTemplate = async (req, res, next) => {
     }).where(eq(promptTemplates.id, id)).returning();
     if (!updated) throw new AppError("Template tidak ditemukan", 404, "NOT_FOUND");
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "update_prompt_template", detail: { templateId: id, category } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "update_prompt_template", detail: { templateId: id, category } });
     }
     res.status(200).json({ success: true, message: "Template diperbarui", data: updated });
   } catch (error) {
@@ -69389,7 +69001,7 @@ var deletePromptTemplate = async (req, res, next) => {
     const { id } = req.params;
     await db.delete(promptTemplates).where(eq(promptTemplates.id, id));
     if (req.user?.id) {
-      await db.insert(logs).values({ id: import_crypto9.default.randomUUID(), userId: req.user.id, action: "delete_prompt_template", detail: { templateId: id } });
+      await db.insert(logs).values({ id: import_crypto8.default.randomUUID(), userId: req.user.id, action: "delete_prompt_template", detail: { templateId: id } });
     }
     res.status(200).json({ success: true, message: "Template dihapus" });
   } catch (error) {
@@ -69501,14 +69113,14 @@ var import_express7 = __toESM(require_express2());
 // src/modules/sync/sync.controller.ts
 init_db2();
 init_schema2();
-var import_crypto10 = __toESM(require("crypto"));
+var import_crypto9 = __toESM(require("crypto"));
 var getSyncChecksum = async (req, res, next) => {
   try {
     const dropdowns = await db.select({ id: dropdownOptions.id, value: dropdownOptions.value }).from(dropdownOptions).where(eq(dropdownOptions.isActive, true)).orderBy(asc(dropdownOptions.id));
     const styles = await db.select({ id: visualStyles.id, name: visualStyles.name }).from(visualStyles).where(eq(visualStyles.isActive, true)).orderBy(asc(visualStyles.id));
     const chars = await db.select({ id: characters.id, name: characters.name }).from(characters).where(eq(characters.isActive, true)).orderBy(asc(characters.id));
     const dataString = JSON.stringify({ dropdowns, styles, chars });
-    const checksum = import_crypto10.default.createHash("md5").update(dataString).digest("hex");
+    const checksum = import_crypto9.default.createHash("md5").update(dataString).digest("hex");
     res.status(200).json({
       success: true,
       checksum,

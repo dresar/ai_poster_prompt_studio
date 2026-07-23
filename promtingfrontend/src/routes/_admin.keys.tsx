@@ -41,7 +41,6 @@ function statusBadge(s?: string) {
 function KeysPage() {
   const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState<'pool' | 'developer'>('pool');
-  const [providerTab, setProviderTab] = useState<'gemini' | 'groq'>('gemini');
 
   // Pool Keys States
   const [open, setOpen] = useState(false);
@@ -74,14 +73,13 @@ function KeysPage() {
     },
   });
 
-  // Auto-calculate priority when modal opens or provider changes
+  // Auto-calculate priority when modal opens
   useEffect(() => {
     if (open) {
-      const providerKeys = data.filter(k => (k.provider || 'gemini').toLowerCase() === provider.toLowerCase());
-      const maxPrio = providerKeys.length > 0 ? Math.max(...providerKeys.map(k => k.priority || 0)) : 0;
+      const maxPrio = data.length > 0 ? Math.max(...data.map(k => k.priority || 0)) : 0;
       setPriority(maxPrio + 1);
     }
-  }, [open, provider, data]);
+  }, [open, data]);
 
   const { data: devKeys = [], isLoading: devLoading } = useQuery<any[]>({
     queryKey: ["admin", "devKeys"],
@@ -207,7 +205,7 @@ function KeysPage() {
               : 'bg-white hover:bg-gray-100'
           }`}
         >
-          Key Pool (Gemini & Groq)
+          Key Pool (Gemini Keys)
         </button>
         <button
           onClick={() => setActiveTab('developer')}
@@ -225,7 +223,7 @@ function KeysPage() {
       {activeTab === 'pool' ? (
         <div className="space-y-5">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-bold uppercase">Koleksi API Key Provider</h3>
+            <h3 className="text-lg font-bold uppercase">Koleksi API Key Gemini</h3>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => testAllMut.mutate()}
@@ -241,34 +239,10 @@ function KeysPage() {
               >
                 ⚡ IMPORT MASSAL GEMINI KEYS
               </button>
-              <button onClick={() => { setProvider(providerTab); setOpen(true); }} className={`${nb.btn} ${nb.btnPink}`}>
+              <button onClick={() => { setProvider('gemini'); setOpen(true); }} className={`${nb.btn} ${nb.btnPink}`}>
                 <Plus className="w-4 h-4" /> Tambah Kunci Pool
               </button>
             </div>
-          </div>
-
-          {/* Provider Tabs (Sub-tabs) */}
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setProviderTab('gemini')}
-              className={`px-4 py-2 font-bold uppercase text-xs rounded-md transition-all border-2 border-black ${
-                providerTab === 'gemini'
-                  ? 'bg-blue-100 text-blue-800 shadow-[0_2px_0_0_rgba(0,0,0,1)]'
-                  : 'bg-white text-gray-500 hover:bg-gray-100'
-              }`}
-            >
-              Gemini Keys
-            </button>
-            <button
-              onClick={() => setProviderTab('groq')}
-              className={`px-4 py-2 font-bold uppercase text-xs rounded-md transition-all border-2 border-black ${
-                providerTab === 'groq'
-                  ? 'bg-orange-100 text-orange-800 shadow-[0_2px_0_0_rgba(0,0,0,1)]'
-                  : 'bg-white text-gray-500 hover:bg-gray-100'
-              }`}
-            >
-              Groq Keys
-            </button>
           </div>
 
           {/* Mobile Card List */}
@@ -278,21 +252,19 @@ function KeysPage() {
                 Memuat…
               </div>
             )}
-            {!isLoading && data.filter((k) => (k.provider || 'gemini') === providerTab).length === 0 && (
+            {!isLoading && data.length === 0 && (
               <div className={`${nb.card} p-8 text-center text-muted-foreground`}>
-                Belum ada kunci {providerTab.toUpperCase()} terdaftar.
+                Belum ada kunci GEMINI terdaftar.
               </div>
             )}
-            {data.filter((k) => (k.provider || 'gemini') === providerTab).map((k) => (
+            {data.map((k) => (
               <div key={k.id} className={`${nb.card} p-4 space-y-3 font-mono text-sm`}>
                 <div className="flex items-center justify-between border-b-2 border-black/10 pb-2">
                   <span className="font-bold inline-flex items-center gap-1.5 truncate mr-2">
                     <KeyRound className="w-4 h-4 shrink-0" />
                     <span className="truncate">{k.maskedKey || mask(k.apiKey)}</span>
-                    <span className={`nb-border rounded-[var(--radius)] px-1.5 py-0.2 text-[9px] font-bold border-black ${
-                      k.provider === 'groq' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {(k.provider || 'gemini').toUpperCase()}
+                    <span className="nb-border rounded-[var(--radius)] px-1.5 py-0.2 text-[9px] font-bold border-black bg-blue-100 text-blue-700">
+                      GEMINI
                     </span>
                   </span>
                   <span className={`${nb.badge} ${statusBadge(k.status)} text-[10px] shrink-0`}>
@@ -373,24 +345,22 @@ function KeysPage() {
                       </td>
                     </tr>
                   )}
-                  {!isLoading && data.filter((k) => (k.provider || 'gemini') === providerTab).length === 0 && (
+                  {!isLoading && data.length === 0 && (
                     <tr>
                       <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                        Belum ada kunci {providerTab.toUpperCase()} terdaftar.
+                        Belum ada kunci GEMINI terdaftar.
                       </td>
                     </tr>
                   )}
-                  {data.filter((k) => (k.provider || 'gemini') === providerTab).map((k) => (
+                  {data.map((k) => (
                     <tr key={k.id} className="border-b-2 border-black/10">
                       <td className="px-4 py-3 flex items-center gap-2">
                         <KeyRound className="w-4 h-4" />
                         {k.maskedKey || mask(k.apiKey)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`nb-border rounded-[var(--radius)] px-2 py-0.5 text-xs font-bold border-black ${
-                          k.provider === 'groq' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          {(k.provider || 'gemini').toUpperCase()}
+                        <span className="nb-border rounded-[var(--radius)] px-2 py-0.5 text-xs font-bold border-black bg-blue-100 text-blue-700">
+                          GEMINI
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -463,7 +433,6 @@ function KeysPage() {
                     className={nb.input}
                   >
                     <option value="gemini">Google Gemini</option>
-                    <option value="groq">Groq AI (Llama)</option>
                   </select>
                 </div>
                 <div>
@@ -473,7 +442,7 @@ function KeysPage() {
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     className={`${nb.input} font-mono`}
-                    placeholder={provider === "groq" ? "gsk_..." : "AIzaSy..."}
+                    placeholder="AIzaSy..."
                   />
                 </div>
                 <div>
@@ -559,7 +528,7 @@ function KeysPage() {
             <div className="space-y-4 font-sans text-sm text-gray-700 leading-relaxed">
               <p>
                 Gunakan Developer API Key yang telah Anda generate di atas untuk menghubungkan Poster Prompt Studio dengan aplikasi eksternal (Website, Bot Telegram, Mobile App, dll.).
-                Backend kami akan secara otomatis memutar kunci (auto-rotation) secara pintar dari pool API Key Gemini/Groq yang aktif di sistem.
+                Backend kami akan secara otomatis memutar kunci (auto-rotation) secara pintar dari pool API Key Gemini yang aktif di sistem.
               </p>
 
               <div className="grid sm:grid-cols-2 gap-4 pt-2">

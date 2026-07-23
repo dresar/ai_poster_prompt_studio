@@ -11,7 +11,7 @@ import { formatGeminiError } from '../../../utils/errorFormatter';
 
 export class GeminiClient {
   private async getHealthyKeys(): Promise<any[]> {
-    return await db.select()
+    const keys = await db.select()
       .from(geminiApiKeys)
       .where(and(
         eq(geminiApiKeys.provider, 'gemini'),
@@ -19,6 +19,24 @@ export class GeminiClient {
         eq(geminiApiKeys.healthStatus, 'healthy')
       ))
       .orderBy(asc(geminiApiKeys.priority));
+
+    if (keys.length === 0) {
+      // Automatic self-healing: If all keys are marked limited, reset them to healthy!
+      logger.info('Auto self-healing: Resetting all keys to healthy status.');
+      await db.update(geminiApiKeys)
+        .set({ healthStatus: 'healthy', priority: 0 })
+        .where(eq(geminiApiKeys.provider, 'gemini'));
+
+      return await db.select()
+        .from(geminiApiKeys)
+        .where(and(
+          eq(geminiApiKeys.provider, 'gemini'),
+          eq(geminiApiKeys.isActive, true)
+        ))
+        .orderBy(asc(geminiApiKeys.priority));
+    }
+
+    return keys;
   }
 
   public sanitizeJson(text: string): string {
@@ -86,11 +104,11 @@ export class GeminiClient {
         const errorMessage = error?.message || String(error);
         logger.warn(`Gemini native call failed with key ID ${keyObj.id}. Error: ${errorMessage}`);
 
-        const isQuotaError = errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Quota') || errorMessage.includes('LIMIT');
-        const isNetworkOrTimeout = errorMessage.includes('timeout') || errorMessage.includes('FETCH_ERROR') || errorMessage.includes('500') || errorMessage.includes('503') || errorMessage.includes('API_KEY_INVALID');
+        const isInvalidKey = errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('invalid');
+        const isQuotaError = errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Quota');
 
-        if ((isQuotaError || isNetworkOrTimeout) && keyObj.id !== 'env_fallback') {
-          const newStatus = isQuotaError ? 'limited' : 'error';
+        if ((isQuotaError || isInvalidKey) && keyObj.id !== 'env_fallback') {
+          const newStatus = isInvalidKey ? 'error' : 'limited';
 
           await db.update(geminiApiKeys).set({
             healthStatus: newStatus,
@@ -103,7 +121,7 @@ export class GeminiClient {
             detail: {
               provider: 'gemini',
               keyId: keyObj.id,
-              reason: isQuotaError ? 'API Rate Limit (429)' : 'API Key Error/Invalid',
+              reason: isQuotaError ? 'API Rate Limit (429)' : 'API Key Invalid',
               error: errorMessage,
               newStatus,
               demotedToPriority: 100
@@ -122,14 +140,15 @@ export class GeminiClient {
   }
 
   /**
-   * Helper method for text & chat completion using native Gemini SDK with model fallback
+   * Helper method for text & chat completion using native Gemini SDK with high-speed model pool
    */
   public async generateChatCompletion(
     messages: Array<{ role: string; content: string }>,
     options: { temperature?: number; model?: string; max_tokens?: number } = {}
   ): Promise<string> {
     const requestedModel = options.model || 'gemini-3.1-flash-lite';
-    const fallbackModels = ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    // ONLY use active, supported high-speed models (gemini-3.1-flash-lite & gemini-2.5-flash)
+    const fallbackModels = ['gemini-3.1-flash-lite', 'gemini-2.5-flash'];
     const candidateModels = Array.from(new Set([requestedModel, ...fallbackModels]));
 
     const systemMsg = messages.find(m => m.role === 'system')?.content || '';

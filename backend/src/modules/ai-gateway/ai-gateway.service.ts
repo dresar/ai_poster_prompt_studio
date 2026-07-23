@@ -1,5 +1,4 @@
 import { GeminiClient } from './core/gemini-client';
-import { GroqClient } from './core/groq-client';
 
 import { ImageAnalyzerService } from './features/image-analyzer.service';
 import { TopicAnalyzerService } from './features/topic-analyzer.service';
@@ -9,20 +8,15 @@ import { ViralScoreService } from './features/viral-score.service';
 
 export class AIGatewayService {
   public geminiClient = new GeminiClient();
-  private groqClient = new GroqClient();
   
-  private imageAnalyzer = new ImageAnalyzerService(this.geminiClient, this.groqClient);
-  private topicAnalyzer = new TopicAnalyzerService(this.geminiClient, this.groqClient);
-  private promptGenerator = new PromptGeneratorService(this.geminiClient, this.groqClient, this.imageAnalyzer);
-  private chatAssistant = new ChatAssistantService(this.geminiClient, this.groqClient);
-  private viralScoreService = new ViralScoreService(this.geminiClient, this.groqClient);
-
-  private async getProvider(): Promise<'gemini'> {
-    return 'gemini'; // PURE GEMINI ALWAYS
-  }
+  private imageAnalyzer = new ImageAnalyzerService(this.geminiClient);
+  private topicAnalyzer = new TopicAnalyzerService(this.geminiClient);
+  private promptGenerator = new PromptGeneratorService(this.geminiClient, this.imageAnalyzer);
+  private chatAssistant = new ChatAssistantService(this.geminiClient);
+  private viralScoreService = new ViralScoreService(this.geminiClient);
 
   async analyzeReferenceImage(imageUrl: string): Promise<string> {
-    return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, 'gemini');
+    return await this.imageAnalyzer.analyzeReferenceImage(imageUrl);
   }
 
   async analyzeTopic(topic: string, category?: string): Promise<{
@@ -32,37 +26,18 @@ export class AIGatewayService {
     hook?: string;
     cta?: string;
   }> {
-    return await this.topicAnalyzer.analyzeTopic(topic, category, 'gemini');
+    return await this.topicAnalyzer.analyzeTopic(topic, category);
   }
 
-  async generatePosterPrompts(formState: any): Promise<{
-    payloadJson: any;
-    dslCode: string;
-    finalPrompt: string;
-    viralScore: number;
-    analysisShortcomings: string;
-    hooks: string[];
-    logoExplanation: string;
-    socialMediaCaption: string;
-    promptScore: number;
-    detailScore: number;
-    creativityScore: number;
-    compositionScore: number;
-    promptImprovement: string;
-    aiSuggestions: string[];
-  }> {
-    return await this.promptGenerator.generatePosterPrompts(formState, 'gemini');
+  async generatePosterPrompts(formState: any): Promise<any> {
+    return await this.promptGenerator.generatePrompt(formState);
   }
 
   async generateChatResponse(messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>, systemInstruction?: string): Promise<string> {
-    return await this.chatAssistant.generateChatResponse(messages, 'gemini', systemInstruction);
+    return await this.chatAssistant.generateResponse(messages, systemInstruction);
   }
 
-  async evaluateViralScore(payload: any): Promise<{
-    viralScore: number;
-    breakdown: { hook: number; visual: number; education: number; engagement: number };
-    recommendations: string[];
-  }> {
-    return await this.viralScoreService.evaluateViralScore(payload, 'gemini');
+  async evaluateViralScore(payload: any): Promise<any> {
+    return await this.viralScoreService.evaluateScore(payload);
   }
 }

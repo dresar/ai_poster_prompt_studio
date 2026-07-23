@@ -130,7 +130,6 @@ function SettingsPage() {
               className={nb.input}
             >
               <option value="gemini">Google Gemini (Model: gemini-3.1-flash-lite)</option>
-              <option value="groq">Groq AI (Model: llama-3.3-70b-versatile)</option>
             </select>
           </Field>
 

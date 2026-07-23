@@ -358,13 +358,17 @@ ${JSON.stringify(fullFormState, null, 2)}
 DESAIN SISTEM KONTEN YANG WAJIB DIATUR:
 1. System Mission & Content Payload -> Analisis topik, misi pembuatan poster, target audiens, dan pemicu emosi audiens.
 2. Slides Content -> TEPAT ${slideCount} slide dengan data terpisah (slideNumber, headline, description, subject, sceneDescription, visualEmphasis, communicationGoal, educationalObjective, keyPoints, supportingFacts, calloutSuggestions, storytellingSequence).
-   - PRINSIP UTAMA CAROUSEL: GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN (70% Visual Artwork, 30% Teks Ringkas). CAPTION = PENJELASAN LENGKAP & MENDALAM. DILARANG KERAS menjejalkan teks tebal atau naskah panjang di dalam gambar carousel!
-   - ATURAN BATAS KARAKTER TEKS GAMBAR PER SLIDE:
+   - HUKUM PROPORSI DENSITAS TEKS VS SLIDE (APLIKATIF UNTUK SEMUA FORMAT & BERITA CAROUSEL):
+     * JIKA SLIDE > 1 (CAROUSEL / MULTI-SLIDE / BERITA): Teks di dalam gambar WAJIB SINGKAT, RINGKAS, MINIMALIS, DAN PUNCHY (Maksimal 350–700 karakter / ~40–70 kata per slide). Artwork Visual 70% DOMINAN. GAMBAR = POIN INTI & HIGHLIGHT VISUAL. CAPTION SOSMED = PENJELASAN LENGKAP & MENDALAM. DILARANG KERAS menjejalkan teks tebal atau naskah paragraf panjang di dalam gambar carousel!
+     * JIKA SLIDE == 1 (POSTER TUNGGAL): Teks & narasi visual di dalam kanvas boleh LEBIH KOMPLEKS, PADAT, DAN MENDALAM (100–180 kata) agar karya poster tunggal tampil utuh dan kaya informasi.
+   - ATURAN BATAS KARAKTER TEKS GAMBAR CAROUSEL PER SLIDE:
      • Headline: 30–60 karakter (singkat, padat, punchy)
      • Subheadline: 40–80 karakter
-     • Total teks description/detail di gambar: 250–500 karakter total (~40–70 kata per slide)
+     • Total teks detail di gambar: 250–500 karakter total per slide (~40–70 kata)
      • Bullet points: 3–5 poin (tiap bullet 20–50 karakter)
-     • Total karakter 1 slide: 350–700 karakter (Hook Slide 1: 300–500 karakter, Slide Isi 2-5: 400–700 karakter, Slide Penutup CTA: 250–500 karakter)
+     • Hook Slide 1 Cover: 300–500 karakter (tanpa nomor slide)
+     • Slide Isi 2-5: 400–700 karakter
+     • Slide Penutup CTA: 250–500 karakter
    - JANGAN menulis field 'prompt' di dalam slide. Compiler akan merakit prompt secara otomatis dari data Anda.
    - subject: Deskripsi karakter/subjek utama pada slide ini secara singkat dan jelas.
    - sceneDescription: Deskripsi latar belakang, aksi, dan suasana khusus pada slide ini.

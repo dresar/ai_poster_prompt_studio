@@ -69278,6 +69278,7 @@ var cpanelPublicDirs = [
 function writeTxtToAllLocations(subPath, content) {
   const targetDirs = [
     basePromptsDir,
+    import_path4.default.join(process.cwd(), "txt"),
     import_path4.default.join(process.cwd(), "public", "txt"),
     import_path4.default.join(process.cwd(), "public_html", "txt"),
     import_path4.default.join(process.cwd(), "uploads", "txt")

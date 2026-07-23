@@ -1,9 +1,20 @@
-# cPanel .htaccess Rules for Public AI Plain Text Prompt Endpoints
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/rdsmahat/public_html/porto.apprentice.cyou"
+PassengerBaseURI "/"
+PassengerNodejs "/home/rdsmahat/nodevenv/public_html/porto.apprentice.cyou/22/bin/node"
+PassengerAppType node
+PassengerStartupFile app.js
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+<IfModule Litespeed>
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+
+# 🌐 PERMISSIVE HEADERS FOR PUBLIC AI PROMPT TEXT ENDPOINTS & AI CRAWLERS
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
     Header set Access-Control-Allow-Headers "*"
-    Header set Content-Type "text/plain; charset=utf-8"
     Header set X-Robots-Tag "all"
 </IfModule>
 
@@ -13,10 +24,3 @@
     Header set Content-Type "text/plain; charset=utf-8"
     Header set Access-Control-Allow-Origin "*"
 </FilesMatch>
-
-# Allow GPTBot, ChatGPT-User, ClaudeBot, PerplexityBot explicitly
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{HTTP_USER_AGENT} (GPTBot|ChatGPT-User|ClaudeBot|PerplexityBot|Googlebot) [NC]
-    RewriteRule ^ - [L]
-</IfModule>

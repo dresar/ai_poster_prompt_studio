@@ -319,7 +319,18 @@ export function compileEdukasiMasterPrompt(
       jenis_konten: "Edukasi Instagram",
       catatan_render_kode: "TIDAK BOLEH generate teks sintaks kode presisi (<p>, <a>, dll) sebagai teks asli dalam gambar. AI cukup membuat ilustrasi visual yang menyerupai blok kode dengan syntax highlighting (tanpa teks presisi) untuk diedit manual nantinya.",
       bahasa_teks_overlay: "Non-formal, santai, dan asik. Bicara seperti kakak/teman yang berbagi ilmu, BUKAN seperti buku pelajaran atau artikel jurnal.",
-      batas_teks: "Maksimal 10 kata per elemen teks (headline, subtext, detail, microTip). Ringkas, padat, cepat dibaca.",
+      prinsip_visual_vs_caption: "GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN. CAPTION = PENJELASAN LENGKAP & MENDALAM. DILARANG KERAS menjejalkan teks panjang di dalam gambar carousel!",
+      batas_karakter_ideal_per_slide: {
+        headline: "30–60 karakter (singkat, padat, punchy)",
+        subheadline: "40–80 karakter",
+        isi_utama_detail: "250–500 karakter total per slide",
+        bullet_point: "3–5 poin (tiap bullet 20–50 karakter)",
+        total_karakter_satu_slide: "350–700 karakter (maksimal 40–70 kata per slide agar nyaman dibaca di layar HP)",
+        hook_slide_1_cover: "300–500 karakter (Headline memikat + subtext ringkas)",
+        slide_isi_2_sampai_5: "400–700 karakter per slide",
+        slide_penutup_cta: "250–500 karakter"
+      },
+      batas_teks: "Maksimal 350-700 karakter (sekitar 40-70 kata) total per slide. Ringkas, padat, cepat dibaca di layar HP.",
       satu_poin_per_slide: "Satu slide = satu insight/tips/fakta yang disampaikan jelas dan mudah dicerna.",
       terminologi_wajib_diselipkan: [
         "fakta menarik",

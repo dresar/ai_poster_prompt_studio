@@ -64844,7 +64844,18 @@ Ini adalah satu paket prompt master untuk membuat ${slidesCount} gambar carousel
       jenis_konten: "Edukasi Instagram",
       catatan_render_kode: "TIDAK BOLEH generate teks sintaks kode presisi (<p>, <a>, dll) sebagai teks asli dalam gambar. AI cukup membuat ilustrasi visual yang menyerupai blok kode dengan syntax highlighting (tanpa teks presisi) untuk diedit manual nantinya.",
       bahasa_teks_overlay: "Non-formal, santai, dan asik. Bicara seperti kakak/teman yang berbagi ilmu, BUKAN seperti buku pelajaran atau artikel jurnal.",
-      batas_teks: "Maksimal 10 kata per elemen teks (headline, subtext, detail, microTip). Ringkas, padat, cepat dibaca.",
+      prinsip_visual_vs_caption: "GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN. CAPTION = PENJELASAN LENGKAP & MENDALAM. DILARANG KERAS menjejalkan teks panjang di dalam gambar carousel!",
+      batas_karakter_ideal_per_slide: {
+        headline: "30\u201360 karakter (singkat, padat, punchy)",
+        subheadline: "40\u201380 karakter",
+        isi_utama_detail: "250\u2013500 karakter total per slide",
+        bullet_point: "3\u20135 poin (tiap bullet 20\u201350 karakter)",
+        total_karakter_satu_slide: "350\u2013700 karakter (maksimal 40\u201370 kata per slide agar nyaman dibaca di layar HP)",
+        hook_slide_1_cover: "300\u2013500 karakter (Headline memikat + subtext ringkas)",
+        slide_isi_2_sampai_5: "400\u2013700 karakter per slide",
+        slide_penutup_cta: "250\u2013500 karakter"
+      },
+      batas_teks: "Maksimal 350-700 karakter (sekitar 40-70 kata) total per slide. Ringkas, padat, cepat dibaca di layar HP.",
       satu_poin_per_slide: "Satu slide = satu insight/tips/fakta yang disampaikan jelas dan mudah dicerna.",
       terminologi_wajib_diselipkan: [
         "fakta menarik",
@@ -65278,6 +65289,13 @@ ${JSON.stringify(fullFormState, null, 2)}
 DESAIN SISTEM KONTEN YANG WAJIB DIATUR:
 1. System Mission & Content Payload -> Analisis topik, misi pembuatan poster, target audiens, dan pemicu emosi audiens.
 2. Slides Content -> TEPAT ${slideCount} slide dengan data terpisah (slideNumber, headline, description, subject, sceneDescription, visualEmphasis, communicationGoal, educationalObjective, keyPoints, supportingFacts, calloutSuggestions, storytellingSequence).
+   - PRINSIP UTAMA CAROUSEL: GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN (70% Visual Artwork, 30% Teks Ringkas). CAPTION = PENJELASAN LENGKAP & MENDALAM. DILARANG KERAS menjejalkan teks tebal atau naskah panjang di dalam gambar carousel!
+   - ATURAN BATAS KARAKTER TEKS GAMBAR PER SLIDE:
+     \u2022 Headline: 30\u201360 karakter (singkat, padat, punchy)
+     \u2022 Subheadline: 40\u201380 karakter
+     \u2022 Total teks description/detail di gambar: 250\u2013500 karakter total (~40\u201370 kata per slide)
+     \u2022 Bullet points: 3\u20135 poin (tiap bullet 20\u201350 karakter)
+     \u2022 Total karakter 1 slide: 350\u2013700 karakter (Hook Slide 1: 300\u2013500 karakter, Slide Isi 2-5: 400\u2013700 karakter, Slide Penutup CTA: 250\u2013500 karakter)
    - JANGAN menulis field 'prompt' di dalam slide. Compiler akan merakit prompt secara otomatis dari data Anda.
    - subject: Deskripsi karakter/subjek utama pada slide ini secara singkat dan jelas.
    - sceneDescription: Deskripsi latar belakang, aksi, dan suasana khusus pada slide ini.

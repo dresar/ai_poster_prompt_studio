@@ -87,15 +87,15 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
   "slidesContent": [
     {
       "slideNumber": 1,
-      "headline": "Judul mengandung angka/statistik mengejutkan 2026 atau pertanyaan memancing penasaran (Hook Slide 1)",
-      "description": "NARASI EDUKATIF PANJANG minimal 100-150 kata: latar belakang, konteks, data riset aktual 2026 dengan KREDIT SUMBER, dampak nyata, relevansi kekinian. Analisis mendalam — BUKAN sekadar definisi.",
-      "subject": "Ilustrasi/ikon yang merepresentasikan konsep edukasi",
-      "sceneDescription": "Deskripsi latar dan detail visual + badge nomor slide di pojok atas",
-      "visualEmphasis": "Data atau informasi kunci yang ditonjolkan",
-      "communicationGoal": "Apa yang harus dipahami pembaca setelah melihat slide ini",
+      "headline": "Judul memikat & punchy (30–60 karakter)",
+      "description": "Ringkasan poin utama (40–70 kata / 250–500 karakter total). GAMBAR = POIN INTI, CAPTION = PENJELASAN LENGKAP & MENDALAM.",
+      "subject": "Ilustrasi visual utama yang sangat mendominasi artwork (70% area visual)",
+      "sceneDescription": "Deskripsi latar dan detail artwork visual",
+      "visualEmphasis": "Data atau ilustrasi kunci yang ditonjolkan",
+      "communicationGoal": "Poin inti yang harus ditangkap pembaca saat swipe cepat di HP",
       "educationalObjective": "Tujuan pembelajaran spesifik slide ini",
-      "keyPoints": ["Poin edukasi 1 + penjelasan mendalam 2026", "Poin 2 + kredit sumber"],
-      "supportingFacts": ["Fakta/statistik + nama sumber kredibel + tahun 2026"],
+      "keyPoints": ["Poin 1 singkat (20–50 karakter)", "Poin 2 singkat (20–50 karakter)", "Poin 3 singkat (20–50 karakter)"],
+      "supportingFacts": ["Fakta/statistik ringkas (sumber: Kompas 2026)"],
       "calloutSuggestions": ["Pull-quote atau highlight paling impactful"],
       "storytellingSequence": "Alur: Slide 1 (Hook) > Konteks > Data 2026 > Solusi > Slide Terakhir (Follow Sosmed & CTA)"
     }

@@ -61,9 +61,10 @@ String slideStructureRules(dynamic slideCount) {
           '   a. SLIDE PERTAMA (HOOK) — DILARANG ADA BADGE NOMOR: Slide 1 TIDAK BOLEH memiliki badge atau indikator nomor slide apapun ("1/$slideCount", "1/10", dsb). Slide pertama adalah Hook murni tanpa nomor slide.\n'
           '   b. SLIDE KEDUA S/D TERAKHIR — WAJIB ADA BADGE NOMOR: Mulai Slide 2, sertakan badge nomor slide yang estetik di pojok atas frame (contoh: "2/$slideCount", "3/$slideCount", ..., "${slideCount}/$slideCount"). Badge harus kontras, bersih, dan konsisten di semua slide.';
 
-  final slideDensityText = countInt >= 4
-      ? '5. KEPADATAN TEKS UNTUK CAROUSEL BANYAK SLIDE ($slideCount SLIDE): Karena jumlah slide cukup banyak ($slideCount slide), maka teks pada setiap slide WAJIB SINGKAT, RINGKAS, TO THE POINT, DAN PUNCHY (sekitar 40-70 kata per slide). DILARANG KERAS membuat teks terlalu tebal/penuh di setiap slide agar audiens nyaman membaca dan tidak lelah.'
-      : '5. KEPADATAN TEKS BERBANDING TERBALIK DENGAN JUMLAH SLIDE: Semakin sedikit jumlah slide ($slideCount slide), maka isi teks, narasi, dan analisis per slide WAJIB SEMAKIN KOMPLEKS, PADAT, DAN MENDALAM (minimal 100-150 kata per slide).';
+  final slideDensityText = '5. KEPADATAN TEKS UNTUK CAROUSEL EDUKASI ($slideCount SLIDE):\n'
+      '   a. GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN (70% Visual Art, 30% Teks Ringkas).\n'
+      '   b. CAPTION = PENJELASAN LENGKAP & MENDALAM.\n'
+      '   c. BATAS KARAKTER TEKS GAMBAR: Total teks per 1 slide WAJIB 350–700 karakter (~40–70 kata per slide agar nyaman dibaca di layar HP). Headline: 30–60 karakter, Subheadline: 40–80 karakter, Bullet points: 3–5 poin (20–50 karakter per bullet point). DILARANG KERAS menjejalkan naskah tebal di dalam gambar carousel!';
 
   final singleRuleText = isSingleSlide
       ? '\n8. ATURAN KHUSUS 1 SLIDE (POSTER TUNGGAL WAJIB PORTRAIT & SUPER KOMPLEKS):\n'

@@ -94,6 +94,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "keyPoints": ["Fitur utama 1", "Modul/Isi 2026"],
       "supportingFacts": ["Data kebutuhan skill/tools digital 2026 + kredit sumber"],
       "calloutSuggestions": ["Beli sekali akses selamanya", "Download instan", "Ajakan follow sosmed"],
+      "referenceImageUrl": "URL CDN / gambar mockup/UI asli dari internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Posisi: Slide 1 (Hook 3D Showcase) s/d Slide Terakhir (Penawaran & Follow)"
     }
   ],

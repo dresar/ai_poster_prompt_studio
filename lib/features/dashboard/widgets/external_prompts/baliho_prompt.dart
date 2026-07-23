@@ -97,6 +97,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "keyPoints": ["Pesan utama yang tersampaikan", "Info kontak/sosmed"],
       "supportingFacts": ["Data efektivitas outdoor advertising 2026 + kredit sumber"],
       "calloutSuggestions": ["CTA singkat dan actionable", "Follow akun sosmed / website"],
+      "referenceImageUrl": "URL CDN / gambar outdoor/model asli dari internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Struktur: Slide 1 (Hook 3 Detik) s/d Variasi Terakhir (Brand & Follow)"
     }
   ],

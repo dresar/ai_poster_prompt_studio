@@ -98,6 +98,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "keyPoints": ["Poin A dari riset 2026", "Poin B dari riset 2026"],
       "supportingFacts": ["Fakta/statistik nyata + nama sumber + tahun 2026"],
       "calloutSuggestions": ["Teks callout/highlight yang paling menarik perhatian"],
+      "referenceImageUrl": "URL CDN / gambar referensi asli dari riset internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Posisi dalam alur: Slide 1 (Hook Memancing Penasaran) s/d Slide Terakhir (Follow Sosmed & CTA)"
     }
   ],

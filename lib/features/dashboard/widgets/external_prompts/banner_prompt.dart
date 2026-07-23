@@ -94,6 +94,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "keyPoints": ["Benefit utama 2026", "USP yang dikomunikasikan visual"],
       "supportingFacts": ["Data riset consumer behavior kategori produk 2026 + kredit sumber"],
       "calloutSuggestions": ["Teks CTA button optimal", "Tagline pendukung", "Ajakan follow akun sosmed"],
+      "referenceImageUrl": "URL CDN / gambar promo asli dari internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Posisi: Variasi 1 (Hook) s/d Variasi Terakhir (Conversion & Follow)"
     }
   ],

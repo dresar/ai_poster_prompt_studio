@@ -95,6 +95,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA segmen wajib ditulis PENUH)
       "soundEffects": "Efek suara (SFX) yang memperkuat efek visual",
       "keyPoints": ["Insight utama adegan ini"],
       "supportingFacts": ["Fakta/statistik terkini 2026 + kredit sumber terpercaya"],
+      "referenceImageUrl": "URL CDN / gambar adegan video asli dari internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Posisi: Segmen 1 (Hook 3 Detik) s/d Segmen Terakhir (CTA & Follow Sosmed)"
     }
   ],

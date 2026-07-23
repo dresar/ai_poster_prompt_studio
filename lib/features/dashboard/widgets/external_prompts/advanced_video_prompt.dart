@@ -95,6 +95,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA adegan wajib ditulis PENUH)
       "soundEffects": "Desain suara lingkungan & foley (SFX)",
       "keyPoints": ["Fokus dramatis adegan ini"],
       "supportingFacts": ["Data/fakta riset pendukung 2026 + kredit sumber terpercaya"],
+      "referenceImageUrl": "URL CDN / gambar acuan sinematik asli dari internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Alur Sinematik: Adegan 1 (Hook Film) s/d Adegan Terakhir (Resolusi & Follow Sosmed)"
     }
   ],

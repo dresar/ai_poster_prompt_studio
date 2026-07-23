@@ -95,6 +95,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "keyPoints": ["Poin perenungan 1", "Poin perenungan 2"],
       "supportingFacts": ["Data psikologi emosi/referensi karya 2026 + kredit sumber"],
       "calloutSuggestions": ["Refleksi singkat", "Pertanyaan retoris", "Ajakan follow akun sosmed"],
+      "referenceImageUrl": "URL CDN / gambar atmosfer puitis asli dari internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Posisi: Variasi 1 (Hook Emosional) s/d Variasi Terakhir (Refleksi & Follow)"
     }
   ],

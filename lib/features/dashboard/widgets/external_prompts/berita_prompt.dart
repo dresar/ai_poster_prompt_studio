@@ -119,6 +119,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi PENUH)
       "keyPoints": ["Fakta 1 singkat", "Fakta 2 + Sumber 2026"],
       "supportingFacts": ["Data resmi 1-line"],
       "calloutSuggestions": ["Kutipan 1 kalimat"],
+      "referenceImageUrl": "URL CDN / foto insiden berita asli dari riset internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Alur Berita Visual Ringkas"
     }
   ],

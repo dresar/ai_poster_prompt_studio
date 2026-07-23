@@ -94,6 +94,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "keyPoints": ["Poin masalah 1", "Poin solusi 2026"],
       "supportingFacts": ["Data riset kepuasan konsumen 2026 + kredit sumber"],
       "calloutSuggestions": ["Teks promo", "Link di bio", "Ajakan follow akun sosmed"],
+      "referenceImageUrl": "URL CDN / foto produk asli dari internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Alur PAS/AIDA: Slide 1 (Hook Masalah) > Problem > Solusi > Penawaran > Slide Terakhir (CTA Bio & Follow)"
     }
   ],

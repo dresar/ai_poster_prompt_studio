@@ -33,12 +33,12 @@ Output yang DILARANG KERAS:
 ❌ Ringkasan / komentar
 
 ============================================================
-TUJUAN JSON INI
+TUJUAN JSON & RISET INTERNET REAL-TIME (UPDATE 2026)
 ============================================================
 JSON ini akan dipakai oleh AI Image Generator lain untuk membuat gambar carousel.
-Karena itu seluruh informasi visual HARUS LENGKAP dan EKSPLISIT:
-- Warna, posisi, tipografi, layout, icon, ilustrasi, caption, headline, spacing, hierarchy,
-  negative prompt, dan rendering WAJIB dijelaskan secara eksplisit di dalam JSON.
+- WAJIB RISET INTERNET: Anda WAJIB browsing / melakukan pencarian internet real-time untuk mencari data aktual, fakta riset 2026, berita resmi, dan referensi visual nyata.
+- REFERENSI GAMBAR VISUAL CDN OPSIONAL ("referenceImageUrl"): Jika ada foto asli / gambar referensi nyata dari internet (seperti URL CDN Unsplash, Wikimedia, Pexels, atau portal berita resmi), sertakan URL CDN gambar tersebut di field "referenceImageUrl" pada tiap slide agar AI Gambar dapat menggunakannya sebagai acuan visual opsional (Image-to-Image / ControlNet reference). Jika tidak ada/diperlukan, isi dengan "NO_REFERENCE_URL".
+- Seluruh informasi visual HARUS LENGKAP dan EKSPLISIT: Warna, posisi, tipografi, layout, icon, ilustrasi, caption, headline, spacing, hierarchy, negative prompt, dan rendering WAJIB dijelaskan secara eksplisit di dalam JSON.
 - AI Image Generator tidak boleh mengasumsikan informasi yang tidak ada di JSON.
 - Semua data disini LANGSUNG DIPAKAI tanpa perlu modifikasi.
 
@@ -211,12 +211,11 @@ String completionBlock(String topic, dynamic slideCount) {
       ? '150-250 kata (poster tunggal sangat kompleks)'
       : (countInt >= 4 ? '40-70 kata (singkat, ringkas, punchy per slide)' : '70-120 kata');
 
-  return 'RISET DATA REAL & AKTUAL (UPDATE 2026):\n'
+  return 'RISET DATA REAL-TIME INTERNET & REFERENSI VISUAL CDN (UPDATE 2026):\n'
+      '- WAJIB RISET INTERNET: Anda WAJIB browsing / melakukan pencarian internet real-time untuk mencari fakta, berita, tren, dan data statistik 2026 terbaru dari sumber terpercaya (seperti Kompas, Detik, Tempo, BPS, WHO, Reuters, Bloomberg, Forbes, dll) yang relevan dengan topik "$topic".\n'
+      '- KREDIT SUMBER: Setiap data/fakta WAJIB menyertakan KREDIT SUMBER & TAHUN di dalam teks (contoh: "Sumber: Kompas 2026", "Data: BPS 2025/2026").\n'
+      '- REFERENSI GAMBAR VISUAL CDN OPSIONAL ("referenceImageUrl"): Cari dan temukan URL gambar visual asli / foto referensi nyata dari internet (misal URL CDN Unsplash, Wikimedia, Pexels, atau portal resmi). Masukkan URL CDN gambar tersebut ke dalam field "referenceImageUrl" di setiap slide jika ada/diperlukan. Jika tidak ada atau tidak perlu, isi dengan "NO_REFERENCE_URL". AI Image Generator akan menggunakan URL CDN ini sebagai referensi visual opsional (Image-to-Image / ControlNet reference).\n'
       '- GAYA BAHASA: Gunakan bahasa SUPER NON-FORMAL, SANTAI, AKRAB, DAN ENAK DIBACA oleh audiens.\n'
-      '- Anda WAJIB melakukan riset data/berita/statistik terbaru hingga tahun 2026 dari sumber terpercaya '
-      '(seperti Kompas, Detik, Tempo, BPS, WHO, Reuters, Bloomberg, Forbes, dll) yang sangat relevan dengan topik "$topic".\n'
-      '- Setiap data/fakta WAJIB menyertakan KREDIT SUMBER & TAHUN di dalam teks (contoh: "Sumber: Kompas 2026", "Data: BPS 2025/2026"). '
-      'Jika ada materi/sub-poin yang tidak relevan atau outdated, WAJIB diganti dengan data paling aktual 2026.\n'
       '- KELENGKAPAN KRITIS: Tuliskan SEMUA $slideCount slide PENUH secara utuh. '
       'Field "description" berukuran $wordCount. '
       'DILARANG KERAS menggunakan singkatan, "...", atau placeholder. Target output 4000-8000+ karakter total.';

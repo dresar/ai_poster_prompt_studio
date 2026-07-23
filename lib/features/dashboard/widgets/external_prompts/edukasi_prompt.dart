@@ -97,6 +97,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "keyPoints": ["Poin 1 singkat (20–50 karakter)", "Poin 2 singkat (20–50 karakter)", "Poin 3 singkat (20–50 karakter)"],
       "supportingFacts": ["Fakta/statistik ringkas (sumber: Kompas 2026)"],
       "calloutSuggestions": ["Pull-quote atau highlight paling impactful"],
+      "referenceImageUrl": "URL CDN / foto referensi asli dari hasil riset internet opsional (misal https://... atau NO_REFERENCE_URL)",
       "storytellingSequence": "Alur: Slide 1 (Hook) > Konteks > Data 2026 > Solusi > Slide Terakhir (Follow Sosmed & CTA)"
     }
   ],

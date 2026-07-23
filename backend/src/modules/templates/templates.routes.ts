@@ -1,10 +1,49 @@
 import { Router } from 'express';
 import { db } from '../../config/db';
-import { promptTemplates } from '../../db/schema';
+import { promptTemplates, logs } from '../../db/schema';
 import { eq, and, ilike, or } from 'drizzle-orm';
 import { authenticate } from '../../middlewares/auth';
+import { AppError } from '../../middlewares/errorHandler';
+import crypto from 'crypto';
 
 const router = Router();
+
+// POST /api/templates — Allow authenticated users to save history entries as templates
+router.post('/', authenticate, async (req, res, next) => {
+  try {
+    const { title, category, template, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
+    if (!category || !template) {
+      throw new AppError('Kategori dan template wajib diisi', 400, 'BAD_REQUEST');
+    }
+
+    const [newTpl] = await db.insert(promptTemplates).values({
+      id: crypto.randomUUID(),
+      title: title || payloadJson?.formState?.topic || payloadJson?.topic || null,
+      category: category.toString().toLowerCase().trim(),
+      template,
+      isActive: true,
+      previewImageUrl: previewImageUrl || null,
+      viralScore: typeof viralScore === 'number' ? viralScore : null,
+      viralBreakdown: viralBreakdown || null,
+      payloadJson: payloadJson || null,
+      hooks: hooks || null,
+      analysis: analysis || null,
+    }).returning();
+
+    if (req.user?.id) {
+      await db.insert(logs).values({
+        id: crypto.randomUUID(),
+        userId: req.user.id,
+        action: 'create_template_from_history',
+        detail: { templateId: newTpl.id, category, title }
+      });
+    }
+
+    res.status(201).json({ success: true, message: 'Template berhasil dibuat', data: newTpl });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // GET /api/templates — Public (user authenticated) list templates with search + category filter
 router.get('/', authenticate, async (req, res, next) => {

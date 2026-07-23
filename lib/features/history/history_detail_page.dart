@@ -440,7 +440,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
 
     setState(() => _isSavingTemplate = true);
     try {
-      final response = await dioClient.post('/admin/templates', data: {
+      final response = await dioClient.post('/templates', data: {
         'title': topic,
         'category': selectedCategory,
         'template': _promptFinal,
@@ -457,7 +457,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal menyimpan template. Pastikan akun Anda memiliki akses admin.'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Gagal menyimpan template: ${e.toString()}'), backgroundColor: Colors.red),
         );
       }
     } finally {

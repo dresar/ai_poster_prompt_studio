@@ -18800,14 +18800,14 @@ var require_etag = __commonJS({
   "node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto11 = require("crypto");
+    var crypto12 = require("crypto");
     var Stats = require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto11.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto12.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -21700,11 +21700,11 @@ var require_request = __commonJS({
 // node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/cookie-signature/index.js"(exports2) {
-    var crypto11 = require("crypto");
+    var crypto12 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto11.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto12.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21713,7 +21713,7 @@ var require_cookie_signature = __commonJS({
       return sha1(mac) == sha1(val) ? str : false;
     };
     function sha1(str) {
-      return crypto11.createHash("sha1").update(str).digest("hex");
+      return crypto12.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -23033,7 +23033,7 @@ var require_main = __commonJS({
     var fs5 = require("fs");
     var path6 = require("path");
     var os2 = require("os");
-    var crypto11 = require("crypto");
+    var crypto12 = require("crypto");
     var packageJson = require_package();
     var version2 = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -23252,7 +23252,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto11.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto12.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error) {
@@ -33927,7 +33927,7 @@ var require_winston = __commonJS({
 var require_object_hash = __commonJS({
   "node_modules/object-hash/index.js"(exports2, module2) {
     "use strict";
-    var crypto11 = require("crypto");
+    var crypto12 = require("crypto");
     exports2 = module2.exports = objectHash;
     function objectHash(object, options) {
       options = applyDefaults(object, options);
@@ -33945,7 +33945,7 @@ var require_object_hash = __commonJS({
     exports2.keysMD5 = function(object) {
       return objectHash(object, { algorithm: "md5", encoding: "hex", excludeValues: true });
     };
-    var hashes = crypto11.getHashes ? crypto11.getHashes().slice() : ["sha1", "md5"];
+    var hashes = crypto12.getHashes ? crypto12.getHashes().slice() : ["sha1", "md5"];
     hashes.push("passthrough");
     var encodings = ["buffer", "hex", "binary", "base64"];
     function applyDefaults(object, sourceOptions) {
@@ -33991,7 +33991,7 @@ var require_object_hash = __commonJS({
     function hash(object, options) {
       var hashingStream;
       if (options.algorithm !== "passthrough") {
-        hashingStream = crypto11.createHash(options.algorithm);
+        hashingStream = crypto12.createHash(options.algorithm);
       } else {
         hashingStream = new PassThrough();
       }
@@ -38308,7 +38308,7 @@ var require_FileStreamRotator = __commonJS({
     var fs5 = require("fs");
     var path6 = require("path");
     var moment = require_moment();
-    var crypto11 = require("crypto");
+    var crypto12 = require("crypto");
     var EventEmitter = require("events");
     var FileStreamRotator = {};
     module2.exports = FileStreamRotator;
@@ -38437,7 +38437,7 @@ var require_FileStreamRotator = __commonJS({
       }
     };
     function removeFile(file, verbose) {
-      if (file.hash === crypto11.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")) {
+      if (file.hash === crypto12.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")) {
         try {
           if (fs5.existsSync(file.name)) {
             fs5.unlinkSync(file.name);
@@ -38503,7 +38503,7 @@ var require_FileStreamRotator = __commonJS({
         audit.files.push({
           date: time2,
           name: logfile,
-          hash: crypto11.createHash(audit.hashType).update(logfile + "LOG_FILE" + time2).digest("hex")
+          hash: crypto12.createHash(audit.hashType).update(logfile + "LOG_FILE" + time2).digest("hex")
         });
         if (audit.keep.days) {
           var oldestDate = moment().subtract(audit.keep.amount, "days").valueOf();
@@ -54950,14 +54950,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto11 = require("crypto");
+    var crypto12 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util2 = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto11.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto12.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -55047,17 +55047,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto11.createHmac("sha" + bits, secret);
+        var hmac = crypto12.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto11 ? function timingSafeEqual2(a2, b2) {
+    var timingSafeEqual = "timingSafeEqual" in crypto12 ? function timingSafeEqual2(a2, b2) {
       if (a2.byteLength !== b2.byteLength) {
         return false;
       }
-      return crypto11.timingSafeEqual(a2, b2);
+      return crypto12.timingSafeEqual(a2, b2);
     } : function timingSafeEqual2(a2, b2) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -55074,7 +55074,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto11.createSign("RSA-SHA" + bits);
+        var signer = crypto12.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -55084,7 +55084,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto11.createVerify("RSA-SHA" + bits);
+        var verifier = crypto12.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -55093,11 +55093,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto11.createSign("RSA-SHA" + bits);
+        var signer = crypto12.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -55107,12 +55107,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto11.createVerify("RSA-SHA" + bits);
+        var verifier = crypto12.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto12.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto12.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -69146,7 +69146,40 @@ var sync_routes_default = router7;
 var import_express8 = __toESM(require_express2());
 init_db2();
 init_schema2();
+var import_crypto10 = __toESM(require("crypto"));
 var router8 = (0, import_express8.Router)();
+router8.post("/", authenticate, async (req, res, next) => {
+  try {
+    const { title, category, template, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
+    if (!category || !template) {
+      throw new AppError("Kategori dan template wajib diisi", 400, "BAD_REQUEST");
+    }
+    const [newTpl] = await db.insert(promptTemplates).values({
+      id: import_crypto10.default.randomUUID(),
+      title: title || payloadJson?.formState?.topic || payloadJson?.topic || null,
+      category: category.toString().toLowerCase().trim(),
+      template,
+      isActive: true,
+      previewImageUrl: previewImageUrl || null,
+      viralScore: typeof viralScore === "number" ? viralScore : null,
+      viralBreakdown: viralBreakdown || null,
+      payloadJson: payloadJson || null,
+      hooks: hooks || null,
+      analysis: analysis || null
+    }).returning();
+    if (req.user?.id) {
+      await db.insert(logs).values({
+        id: import_crypto10.default.randomUUID(),
+        userId: req.user.id,
+        action: "create_template_from_history",
+        detail: { templateId: newTpl.id, category, title }
+      });
+    }
+    res.status(201).json({ success: true, message: "Template berhasil dibuat", data: newTpl });
+  } catch (error) {
+    next(error);
+  }
+});
 router8.get("/", authenticate, async (req, res, next) => {
   try {
     const { search, category } = req.query;

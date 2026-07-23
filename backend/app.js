@@ -69228,14 +69228,13 @@ ${style.promptTemplate}
       import_fs3.default.writeFileSync(filePath, content, "utf8");
     }
     const defaultStylePath = import_path4.default.join(stylesDir, "auto.txt");
-    if (!import_fs3.default.existsSync(defaultStylePath)) {
-      const defaultStyleContent = `GAYA VISUAL OTOMATIS: Clean Swiss Minimalist Light Theme
-TEMA WARNA: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey).
-ESTETIKA: Sederhana, bersih, tidak norak, tidak banyak warna mencolok, tanpa embel-embel ornamen menumpuk.
+    const defaultStyleContent = `GAYA VISUAL OTOMATIS: Lively Clean Light Theme
+TEMA WARNA BASE: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG TEMA GELAP / DARK MODE!
+WARNA AKSEN SEGAR: Wajib padukan 1-2 sentuhan warna aksen segar yang selaras (misal: soft pastel accent, warm highlight, sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.
+ESTETIKA: Sederhana, bersih, tidak norak, jangan banyak warna yang bertabrakan, tanpa embel-embel ornamen menumpuk.
 KETERBACAAN: Tipografi Swiss grid modern, kontras tinggi, sangat profesional dan berkelas.
 `;
-      import_fs3.default.writeFileSync(defaultStylePath, defaultStyleContent, "utf8");
-    }
+    import_fs3.default.writeFileSync(defaultStylePath, defaultStyleContent, "utf8");
     const activeChars = await db.select().from(characters).where(eq(characters.isActive, true));
     for (const char2 of activeChars) {
       const charSlug = slugify(char2.name) || char2.id;

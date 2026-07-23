@@ -109,11 +109,12 @@ String styleBlock(String style, String characterFocus) {
   final charUrl = 'https://porto.apprentice.cyou/txt/characters/$charSlug.txt';
 
   final sRule = isStyleAuto
-      ? 'GAYA VISUAL OTOMATIS AI (WAJIB TEMA TERANG PUTIH & ABU-ABU):\n'
+      ? 'GAYA VISUAL OTOMATIS AI (TEMA TERANG HIDUP & ELEGAN):\n'
           '- URL SLUG REFERENSI PANDUAN GAYA VISUAL: $styleUrl\n'
           '- PERINTAH UTAMA AI: Bacalah file teks panduan gaya visual dari URL di atas terlebih dahulu! AI WAJIB membaca file ini untuk memahami struktur layout, palet warna, tipografi, pencahayaan, dan estetika visual presisi, lalu rekomendasikan seluruh struktur sesuai gaya visual tersebut.\n'
-          '- TEMA WARNA WAJIB TERANG (PALET PUTIH BERSIH, OFF-WHITE, DAN ABU-ABU MUDA / LIGHT GREY). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE!\n'
-          '- Hindari embel-embel ornamen menumpuk yang tidak perlu — buat visual yang sederhana, clean, minimalis, namun sangat profesional, berkelas, dan enak dilihat. Teks wajib 100% mudah dibaca.'
+          '- TEMA WARNA BASE TERANG (PUTIH BERSIM, OFF-WHITE, DAN ABU-ABU MUDA / LIGHT GREY). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE!\n'
+          '- JANGAL FULL PUTIH POLOS MONOTON: Wajib padukan dengan 1–2 sentuhan warna aksen segar yang harmonis (misal: aksen pastel segar, warm highlight, atau sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.\n'
+          '- JANGAL BANYAK WARNA (TIDAK NORAK): Batasi warna aksen hanya 1–2 warna saja agar tidak ramai bertabrakan. Buat visual yang simpel, clean, estetik, namun berkelas dan sangat hidup saat dilihat.'
       : 'GAYA VISUAL (SUDAH DIPILIH MANUAL = "$style"):\n'
           '- URL SLUG REFERENSI PROMPT GAYA VISUAL: $styleUrl\n'
           '- PERINTAH AI: AI dan AI Image Generator WAJIB membaca file teks gaya visual di URL di atas terlebih dahulu untuk panduan render presisi!\n'

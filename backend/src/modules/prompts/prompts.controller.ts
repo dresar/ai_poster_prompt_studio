@@ -47,13 +47,12 @@ export async function syncPromptFilesToDisk() {
 
     // Default style fallback
     const defaultStylePath = path.join(stylesDir, 'auto.txt');
-    if (!fs.existsSync(defaultStylePath)) {
-      const defaultStyleContent = `GAYA VISUAL OTOMATIS: Clean Swiss Minimalist Light Theme\n` +
-        `TEMA WARNA: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey).\n` +
-        `ESTETIKA: Sederhana, bersih, tidak norak, tidak banyak warna mencolok, tanpa embel-embel ornamen menumpuk.\n` +
-        `KETERBACAAN: Tipografi Swiss grid modern, kontras tinggi, sangat profesional dan berkelas.\n`;
-      fs.writeFileSync(defaultStylePath, defaultStyleContent, 'utf8');
-    }
+    const defaultStyleContent = `GAYA VISUAL OTOMATIS: Lively Clean Light Theme\n` +
+      `TEMA WARNA BASE: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG TEMA GELAP / DARK MODE!\n` +
+      `WARNA AKSEN SEGAR: Wajib padukan 1-2 sentuhan warna aksen segar yang selaras (misal: soft pastel accent, warm highlight, sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.\n` +
+      `ESTETIKA: Sederhana, bersih, tidak norak, jangan banyak warna yang bertabrakan, tanpa embel-embel ornamen menumpuk.\n` +
+      `KETERBACAAN: Tipografi Swiss grid modern, kontras tinggi, sangat profesional dan berkelas.\n`;
+    fs.writeFileSync(defaultStylePath, defaultStyleContent, 'utf8');
 
     // 2. Sync characters
     const activeChars = await db.select().from(characters).where(eq(characters.isActive, true));

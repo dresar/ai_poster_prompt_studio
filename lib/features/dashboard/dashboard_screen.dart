@@ -768,14 +768,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       'Edukasi',
       'Iklan Affiliate',
       'Produk Digital',
-      'Spanduk Baliho',
+      'Spanduk',
       'Pembuatan Logo',
       'Kata Mutiara',
       'Percantik Foto',
       'Video Prompting',
       'Berita Carousel',
-      'Karakter & Maskot',
-      'Gaya Visual System',
+      'Karakter',
+      'Gaya Visual',
     ];
 
     return Scaffold(
@@ -1092,7 +1092,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       },
       {
         'icon': Icons.co_present_outlined,
-        'label': 'Spanduk/Baliho',
+        'label': 'Spanduk',
         'subtitle': 'Banner besar outdoor & indoor',
         'color': const Color(0xFFFF9F1C),
         'iconColor': const Color(0xFFFF6D00),
@@ -1146,7 +1146,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       },
       {
         'icon': Icons.face_retouching_natural_outlined,
-        'label': 'Karakter & Maskot',
+        'label': 'Karakter',
         'subtitle': 'Cetak biru karakter visual & maskot AI',
         'color': const Color(0xFFFF9800),
         'iconColor': const Color(0xFFF57C00),
@@ -1155,7 +1155,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       },
       {
         'icon': Icons.palette_outlined,
-        'label': 'Gaya Visual System',
+        'label': 'Gaya Visual',
         'subtitle': 'Desain sistem & estetika visual AI',
         'color': const Color(0xFF9C27B0),
         'iconColor': const Color(0xFF7B1FA2),

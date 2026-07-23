@@ -89,20 +89,44 @@ String styleBlock(String style, String characterFocus) {
       characterFocus == 'product_only' ||
       characterFocus.isEmpty;
 
+  final styleSlug = isStyleAuto
+      ? 'auto'
+      : style
+          .toLowerCase()
+          .trim()
+          .replaceAll(RegExp(r'[^\w\s-]'), '')
+          .replaceAll(RegExp(r'[\s_-]+'), '-');
+
+  final charSlug = isCharAuto
+      ? 'auto'
+      : characterFocus
+          .toLowerCase()
+          .trim()
+          .replaceAll(RegExp(r'[^\w\s-]'), '')
+          .replaceAll(RegExp(r'[\s_-]+'), '-');
+
+  final styleUrl = 'https://porto.apprentice.cyou/txt/styles/$styleSlug.txt';
+  final charUrl = 'https://porto.apprentice.cyou/txt/characters/$charSlug.txt';
+
   final sRule = isStyleAuto
-      ? 'GAYA VISUAL OTOMATIS AI (WAJIB TEMA TERANG PUTIH & ABU-ABU): Pengguna memilih otomatis. '
-          'Anda WAJIB merancang gaya visual yang SUPER SIMPEL, BERSIH, ELEGAN, TIDAK NORAK, DAN TIDAK BANYAK WARNA. '
-          'TEMA WARNA WAJIB TERANG (PALET PUTIH BERSIM, OFF-WHITE, DAN ABU-ABU MUDA / LIGHT GREY). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE! '
-          'Hindari embel-embel ornamen menumpuk yang tidak perlu — buat visual yang sederhana, clean, minimalis, namun sangat profesional, berkelas, dan enak dilihat. Teks wajib 100% mudah dibaca.'
-      : 'GAYA VISUAL (SUDAH DIPILIH MANUAL = "$style"): JANGAN rancang gaya visual baru. '
-          'KOSONGKAN field "designSystem" dan "visualBlueprint" dengan: '
-          '{"note":"SYSTEM_INJECTED - gaya dari backend: $style"}. '
-          'Backend kami mengisi otomatis dari database.';
+      ? 'GAYA VISUAL OTOMATIS AI (WAJIB TEMA TERANG PUTIH & ABU-ABU):\n'
+          '- URL SLUG REFERENSI PANDUAN GAYA VISUAL: $styleUrl\n'
+          '- PERINTAH UTAMA AI: Bacalah file teks panduan gaya visual dari URL di atas terlebih dahulu! AI WAJIB membaca file ini untuk memahami struktur layout, palet warna, tipografi, pencahayaan, dan estetika visual presisi, lalu rekomendasikan seluruh struktur sesuai gaya visual tersebut.\n'
+          '- TEMA WARNA WAJIB TERANG (PALET PUTIH BERSIH, OFF-WHITE, DAN ABU-ABU MUDA / LIGHT GREY). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE!\n'
+          '- Hindari embel-embel ornamen menumpuk yang tidak perlu — buat visual yang sederhana, clean, minimalis, namun sangat profesional, berkelas, dan enak dilihat. Teks wajib 100% mudah dibaca.'
+      : 'GAYA VISUAL (SUDAH DIPILIH MANUAL = "$style"):\n'
+          '- URL SLUG REFERENSI PROMPT GAYA VISUAL: $styleUrl\n'
+          '- PERINTAH AI: AI dan AI Image Generator WAJIB membaca file teks gaya visual di URL di atas terlebih dahulu untuk panduan render presisi!\n'
+          '- KOSONGKAN field "designSystem" dan "visualBlueprint" dengan: {"note":"SYSTEM_INJECTED - gaya dari backend: $style", "styleReferenceUrl": "$styleUrl"}.';
 
   final cRule = isCharAuto
-      ? 'KARAKTER/SUBJEK (AI BEBAS): Rancang karakter/subjek visual yang konsisten dan menarik.'
-      : 'KARAKTER/SUBJEK (MANUAL="$characterFocus"): JANGAN tulis deskripsi karakter baru. '
-          'Isi "character":"SYSTEM_INJECTED".';
+      ? 'KARAKTER/SUBJEK (AI BEBAS):\n'
+          '- URL SLUG REFERENSI BIBLE KARAKTER: $charUrl\n'
+          '- PERINTAH AI: Rancang karakter/subjek visual yang konsisten dan menarik.'
+      : 'KARAKTER/SUBJEK (MANUAL="$characterFocus"):\n'
+          '- URL SLUG REFERENSI BIBLE KARAKTER: $charUrl\n'
+          '- PERINTAH AI: AI dan AI Image Generator WAJIB membaca file teks bible karakter di URL $charUrl terlebih dahulu untuk memahami ekspresi, bentuk fisik, pakaian, pose, dan ciri khas karakter secara presisi sebelum merender gambar!\n'
+          '- Isi "character": {"note":"SYSTEM_INJECTED", "characterReferenceUrl": "$charUrl"}.';
 
   return '$sRule\n$cRule';
 }

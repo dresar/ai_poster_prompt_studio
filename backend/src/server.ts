@@ -14,9 +14,10 @@ import historyRoutes from './modules/history/history.routes';
 import dropdownRoutes from './modules/dropdown/dropdown.routes';
 import adminRoutes from './modules/admin/admin.routes';
 import developerRoutes from './modules/developer/developer.routes';
-import syncRoutes from './modules/sync/sync.routes';
 import templatesRoutes from './modules/templates/templates.routes';
 import formInfoRoutes from './modules/formInfo/formInfo.routes';
+import promptsRoutes from './modules/prompts/prompts.routes';
+import { syncPromptFilesToDisk } from './modules/prompts/prompts.controller';
 
 const app = express();
 
@@ -114,6 +115,10 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/templates', templatesRoutes);
 app.use('/api/form-infos', formInfoRoutes);
 
+// Public Plain Text Prompt SLUG Endpoints (e.g. https://porto.apprentice.cyou/txt/style.txt)
+app.use('/txt', promptsRoutes);
+app.use('/prompts', promptsRoutes);
+
 // 404 Route handler
 app.use((req, res) => {
   res.status(404).json({
@@ -144,6 +149,7 @@ async function startServer() {
     logger.info(`Server is running in ${env.NODE_ENV} mode on port ${env.PORT}`);
     // Start automatic garbage collection of unused uploads/images
     scheduleImageCleanup();
+    syncPromptFilesToDisk();
   });
 }
 

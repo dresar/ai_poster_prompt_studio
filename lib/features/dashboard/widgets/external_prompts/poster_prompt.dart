@@ -89,7 +89,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     {
       "slideNumber": 1,
       "headline": "Headline kuat dan memancing rasa ingin tahu (Hook Slide 1)",
-      "description": "NARASI PANJANG MENDALAM minimal 100-150 kata: konteks lengkap, fakta riset terkini 2026 dengan KREDIT SUMBER (misal: Kompas/BPS 2026), latar belakang isu, dampak nyata pada kehidupan audiens. Analisis mendalam — BUKAN ringkasan singkat.",
+      "description": "Narasi poin utama poster (40–80 kata / 350–700 karakter total). GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN, CAPTION = PENJELASAN LENGKAP.",
       "subject": "Deskripsi subjek/karakter visual utama",
       "sceneDescription": "Deskripsi latar, suasana, aksi, dan detail visual + badge nomor slide di pojok atas",
       "visualEmphasis": "Focal point dan cara penekanan visual",

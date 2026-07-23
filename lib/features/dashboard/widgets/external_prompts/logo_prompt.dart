@@ -86,7 +86,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     {
       "slideNumber": 1,
       "headline": "Nama Brand + Konsep Logo Utama (Hook Slide 1)",
-      "description": "FILOSOFI DAN KONSEP LOGO MENDALAM minimal 100 kata: interpretasi simbol, arsitektur visual, psikologi warna 2026, penerapan pada brand touchpoints, kredit tren desain 2026.",
+      "description": "Ringkasan filosofi logo (40–70 kata / 250–500 karakter total). Visual logo 70% dominan.",
       "subject": "Deskripsi bentuk simbol/logomark dan logotype secara presisi",
       "sceneDescription": "Latar belakang mockup visual logo + badge di pojok",
       "visualEmphasis": "Elemen paling ikonis dari desain logo",

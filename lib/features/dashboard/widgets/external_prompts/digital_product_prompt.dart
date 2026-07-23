@@ -86,7 +86,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     {
       "slideNumber": 1,
       "headline": "Judul Produk Digital + Mockup 3D Memukau (Hook Slide 1)",
-      "description": "NARASI PRODUK PANJANG MENDALAM minimal 100 kata: detail kurikulum/isi, masalah yang diselesaikan, kredit riset tren industri digital 2026, kemudahan akses instan.",
+      "description": "Ringkasan nilai produk digital (40–70 kata / 250–500 karakter total). Visual 70% dominan, Teks 30% ringkas.",
       "subject": "Deskripsi susunan mockup 3D (laptop + tablet + phone + boxset)",
       "sceneDescription": "Latar belakang 3D studio dan pencahayaan futuristik + badge di pojok",
       "visualEmphasis": "Tampilan mockup 3D yang paling bernilai tinggi",

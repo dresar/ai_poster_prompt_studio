@@ -86,7 +86,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     {
       "slideNumber": 1,
       "headline": "Pertanyaan masalah audiens yang memicu rasa penasaran 'Pernah ngalamin ini?' (Hook Slide 1)",
-      "description": "NARASI PERSUASIF PANJANG minimal 100 kata: jabarkan masalah audiens secara mendalam, data riset konsumen 2026 dengan KREDIT SUMBER, mengapa cara lama gagal, dan bagaimana produk ini jadi jawaban mutlak.",
+      "description": "Ringkasan manfaat utama (40–70 kata / 250–500 karakter total). GAMBAR = POIN INTI & PRODUK 70% VISUAL, CAPTION = PENJELASAN PERSUASIF LENGKAP.",
       "subject": "Visual produk/ekspresi orang yang mewakili masalah",
       "sceneDescription": "Detail visual slide promosi + badge di pojok",
       "visualEmphasis": "Penekanan pada masalah atau hasil transformasi",

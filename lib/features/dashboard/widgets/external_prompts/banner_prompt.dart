@@ -86,7 +86,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     {
       "slideNumber": 1,
       "headline": "Headline dengan stopping power maksimal (Hook Slide 1)",
-      "description": "STRATEGI BANNER MENDALAM minimal 100 kata: mengapa desain dan pesan ini dipilih, psikologi persuasi 2026, unique value proposition, kredit riset pasar, rekomendasi A/B testing.",
+      "description": "Ringkasan promo/penawaran (40–70 kata / 250–500 karakter total). Visual 70% dominan, Teks 30% ringkas.",
       "subject": "Visual utama: produk/model/ilustrasi dengan detail pose, ekspresi, posisi",
       "sceneDescription": "Latar dan suasana visual banner + badge nomor variasi di pojok atas",
       "visualEmphasis": "Focal point dan strategi visual hierarchy",

@@ -89,7 +89,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     {
       "slideNumber": 1,
       "headline": "Teks baliho MAX 7 KATA, font Bold, ukuran sangat besar (Hook Slide 1)",
-      "description": "KONSEP BALIHO MENDALAM minimal 100 kata: filosofi desain, hierarki visual, pilihan tipografi/warna, riset outdoor 2026 dengan kredit sumber, rekomendasi material cetak terbaik.",
+      "description": "Ringkasan pesan utama spanduk (40–70 kata / 250–500 karakter total). Visual 70% dominan outdoor, Teks 30% ringkas & jelas dari kejauhan.",
       "subject": "Subjek visual: model/produk/ilustrasi + deskripsi pose dan ukuran relatif",
       "sceneDescription": "Latar visual dan suasana keseluruhan baliho + badge di pojok",
       "visualEmphasis": "Focal point utama terlihat pertama dari 100m",

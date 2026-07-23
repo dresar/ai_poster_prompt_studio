@@ -86,7 +86,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA adegan wajib ditulis PENUH)
       "segmentNumber": 1,
       "timecode": "00:00 - 00:05",
       "headline": "Judul Adegan Pembuka (Hook Sinematik Adegan 1)",
-      "description": "PENGARAHAN SUTRADARA LENGKAP minimal 100-150 kata: pergerakan kamera sinematik, lighting, aksi aktor/karakter, atmosfer suara, riset konteks 2026 dengan KREDIT SUMBER, dan dorongan emosional penonton.",
+      "description": "Pengarahan adegan video sinematik ringkas (40–70 kata). Visual adegan 70% dominan.",
       "subject": "Aksi, busana, ekspresi emosi karakter utama secara mendetail",
       "sceneDescription": "Deskripsi lingkungan, cuaca, dan efek visual sinematik + badge di pojok",
       "visualEmphasis": "Penekanan fokus sinematik adegan ini",

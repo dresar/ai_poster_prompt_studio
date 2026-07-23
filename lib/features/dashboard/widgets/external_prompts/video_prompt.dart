@@ -86,7 +86,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA segmen wajib ditulis PENUH)
       "segmentNumber": 1,
       "timecode": "00:00 - 00:03",
       "headline": "Teks Hook Melayang di Layar 3 Detik Pertama (Hook Segmen 1)",
-      "description": "SKENARIO DAN SUTRADARA MENDALAM minimal 100 kata: detail aksi karakter, sudut kamera, transisi, audio/voiceover lengkap, data riset 2026 dengan KREDIT SUMBER, dan strategi retensi penonton.",
+      "description": "Pengarahan adegan video ringkas & sinematik (40–70 kata). Visual adegan 70% dominan.",
       "subject": "Aksi dan ekspresi subjek utama dalam gerak kamera",
       "sceneDescription": "Detail visual adegan video sinematik + badge nomor segmen di pojok",
       "visualEmphasis": "Gerakan atau efek visual yang menghentikan scroll penonton",

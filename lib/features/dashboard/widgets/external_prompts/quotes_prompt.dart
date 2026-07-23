@@ -87,7 +87,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     {
       "slideNumber": 1,
       "headline": "Kutipan/Quotes utama yang sangat puitis dan impactful (Hook Slide 1)",
-      "description": "RENUNGAN DAN ANALISIS MENDALAM minimal 100 kata: tafsir filosofis, filosofi hidup 2026, penerapan konkret dalam kehidupan sehari-hari, refleksi emosional, kredit referensi.",
+      "description": "Kutipan / kata mutiara singkat & estetis (20–50 kata). Visual 70% pendukung suasana emosional, Teks 30% ringkas.",
       "subject": "Elemen visual/simbolis yang merepresentasikan makna kutipan",
       "sceneDescription": "Suasana latar visual dan pencahayaan puitis + badge di pojok",
       "visualEmphasis": "Penekanan pada kata kunci dalam kutipan",

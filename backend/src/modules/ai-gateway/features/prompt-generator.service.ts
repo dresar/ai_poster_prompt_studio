@@ -13,7 +13,8 @@ export class PromptGeneratorService {
   ) {}
 
   private buildPromptVariables(fullFormState: any) {
-    const slideCount = fullFormState.slideCount || 1;
+    const isBanner = fullFormState.feature === 'banner' || fullFormState.mode === 'banner' || fullFormState.category === 'banner' || fullFormState.feature === 'poster' || fullFormState.category === 'poster';
+    const slideCount = isBanner ? 1 : (fullFormState.slideCount || 1);
     const useManualLogo = fullFormState.useManualLogo === true;
     const watermarkText = (fullFormState.watermark || '').trim();
 

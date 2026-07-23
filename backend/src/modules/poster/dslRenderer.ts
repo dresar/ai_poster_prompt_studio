@@ -364,7 +364,7 @@ export function compileEdukasiMasterPrompt(
       negative_prompt: payload.renderingBlueprint?.negativePrompt || "watermark, blur, teks berantakan, kualitas buruk, anatomi aneh, font aneh, terlalu ramai"
     },
     layout_media_sosial_global: {
-      pojok_kiri_atas: `Overlay kotak berwarna biru berisi nomor slide (format 'X/${slidesCount}'), sesuaikan angka per slide.`,
+      pojok_kiri_atas: `ATURAN WAJIB NOMOR SLIDE: Pada SLIDE 1 (COVER/HOOK), DILARANG KERAS MENAMPILKAN NOMOR SLIDE APA PUN ('1/${slidesCount}', '1/5', dsb). Area pojok kiri atas pada Slide 1 WAJIB KOSONG BERSIH. Nomor slide BARU WAJIB DITAMPILKAN MULAI SLIDE 2 DENGAN FORMAT '2/${slidesCount}', '3/${slidesCount}', dst. hingga '${slidesCount}/${slidesCount}'.`,
       pojok_kanan_atas: "Overlay warna konsisten berisi teks ajakan follow: 'Jangan lupa follow!'.",
       tengah_atas_footer: "Ikon atau teks navigasi swipe ('Swipe right' / panah kanan) untuk ajak audiens geser slide.",
       footer_bawah: watermarkInstruction || "Terpusat, minimalis, tanpa label teks pengantar (ikon langsung diikuti teks)"
@@ -372,13 +372,16 @@ export function compileEdukasiMasterPrompt(
     daftar_slide: slides.map((slide: any, idx: number) => {
       const num = slide.slideNumber || (idx + 1);
       let role = `POIN EDUKASI #${num - 1}`;
-      let urutan = `Step ${num} dari ${slidesCount}: Penjelasan Materi`;
+      let urutan = `Step ${num} dari ${slidesCount}: Penjelasan Materi (Tampilkan Overlay Nomor Slide '${num}/${slidesCount}' di Pojok Kiri Atas)`;
+      let overlayNomorSlide = `Pojok Kiri Atas: Tampilkan overlay badge nomor slide '${num}/${slidesCount}'.`;
+
       if (num === 1) {
         role = "HOOK & COVER EDUKASI (Slide Pembuka)";
-        urutan = `Step 1 dari ${slidesCount}: Pengenalan & Hook`;
+        urutan = `Step 1 dari ${slidesCount}: Pengenalan & Hook (COVER - ATURAN KETAT: DILARANG MENAMPILKAN NOMOR SLIDE '1/${slidesCount}')`;
+        overlayNomorSlide = `Pojok Kiri Atas: WAJIB KOSONG BERSIH TANPA NOMOR SLIDE APA PUN (DILARANG KERAS MENULIS '1/${slidesCount}' ATAU NOMOR SLIDE PADA SLIDE 1 COVER)!`;
       } else if (num === slidesCount) {
         role = "PENUTUP & AJAK INTERAKSI (Slide Terakhir)";
-        urutan = `Step ${slidesCount} dari ${slidesCount}: Kesimpulan & CTA`;
+        urutan = `Step ${slidesCount} dari ${slidesCount}: Kesimpulan & CTA (Tampilkan Overlay Nomor Slide '${slidesCount}/${slidesCount}' di Pojok Kiri Atas)`;
       }
 
       let visualObj = slide.subject || '';
@@ -393,6 +396,7 @@ export function compileEdukasiMasterPrompt(
         slideNumber: num,
         role,
         urutan_alur_belajar: urutan,
+        aturan_overlay_nomor_slide: overlayNomorSlide,
         objek_visual: visualObj,
         teks_dalam_gambar: {
           headline: slide.headline || "",

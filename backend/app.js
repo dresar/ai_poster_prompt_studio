@@ -64843,7 +64843,7 @@ ALUR KERJA WAJIB:
 3. BERHENTI DENGAN SEGERA setelah 1 gambar slide selesai. Jangan buat slide selanjutnya sampai diminta.
 4. KONSISTENSI KARAKTER & VISUAL (FITUR WAJIB): Simpan metadata visual (warna dominan, ciri fisik karakter, pakaian, jenis lighting, environment/background) di ingatanmu untuk slide berikutnya.
 5. KONSISTENSI UI/OVERLAY: Pastikan nomor slide (mulai slide 2), CTA follow, dan footer diletakkan pada posisi pixel yang identik di setiap gambar.
-6. ATURAN LATAR/BACKGROUND: WAJIB gunakan latar belakang dengan nuansa Putih Bersih di seluruh slide.`,
+6. ATURAN LATAR/BACKGROUND & PALET WARNA: WAJIB TEMA TERANG PUTIH & ABU-ABU MUDA (LIGHT THEME) DI SELURUH SLIDE. DILARANG KERAS TEMA GELAP / DARK MODE! Desain simpel, tidak norak, tanpa banyak warna mencolok, tanpa embel-embel ornamen menumpuk, sangat estetik dan enak dilihat.`,
     aturan_global: {
       platform_target: "Instagram Carousel Post",
       peran: "Kamu adalah Senior Graphic Designer & Art Director yang mengetahui kombinasi warna, tipografi, dan estetika visual premium.",

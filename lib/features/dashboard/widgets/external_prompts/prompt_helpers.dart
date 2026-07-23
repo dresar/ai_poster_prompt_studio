@@ -86,10 +86,10 @@ String styleBlock(String style, String characterFocus) {
       characterFocus.isEmpty;
 
   final sRule = isStyleAuto
-      ? 'GAYA VISUAL (AI BEBAS MERANCANG): Pengguna memilih otomatis. Anda WAJIB merancang '
-          'gaya visual yang SEDERHANA, ELEGAN, TIDAK MENCOLOK BERLEBIHAN, TIDAK NORAK, '
-          'namun SANGAT PROFESIONAL DAN BERKELAS (mis: Swiss minimal design, clean modern typography grid, '
-          'subtle 3D illustration, elegant dark mode). Teks wajib 100% sempurna, presisi, dan mudah dibaca.'
+      ? 'GAYA VISUAL OTOMATIS AI (WAJIB TEMA TERANG PUTIH & ABU-ABU): Pengguna memilih otomatis. '
+          'Anda WAJIB merancang gaya visual yang SUPER SIMPEL, BERSIH, ELEGAN, TIDAK NORAK, DAN TIDAK BANYAK WARNA. '
+          'TEMA WARNA WAJIB TERANG (PALET PUTIH BERSIM, OFF-WHITE, DAN ABU-ABU MUDA / LIGHT GREY). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE! '
+          'Hindari embel-embel ornamen menumpuk yang tidak perlu — buat visual yang sederhana, clean, minimalis, namun sangat profesional, berkelas, dan enak dilihat. Teks wajib 100% mudah dibaca.'
       : 'GAYA VISUAL (SUDAH DIPILIH MANUAL = "$style"): JANGAN rancang gaya visual baru. '
           'KOSONGKAN field "designSystem" dan "visualBlueprint" dengan: '
           '{"note":"SYSTEM_INJECTED - gaya dari backend: $style"}. '

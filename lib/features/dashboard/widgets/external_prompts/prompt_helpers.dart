@@ -110,24 +110,24 @@ String styleBlock(String style, String characterFocus) {
 
   final sRule = isStyleAuto
       ? 'GAYA VISUAL OTOMATIS AI (TEMA TERANG HIDUP & ELEGAN):\n'
-          '- URL SLUG REFERENSI PANDUAN GAYA VISUAL: $styleUrl\n'
-          '- PERINTAH UTAMA AI: Bacalah file teks panduan gaya visual dari URL di atas terlebih dahulu! AI WAJIB membaca file ini untuk memahami struktur layout, palet warna, tipografi, pencahayaan, dan estetika visual presisi, lalu rekomendasikan seluruh struktur sesuai gaya visual tersebut.\n'
-          '- TEMA WARNA BASE TERANG (PUTIH BERSIM, OFF-WHITE, DAN ABU-ABU MUDA / LIGHT GREY). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE!\n'
-          '- JANGAL FULL PUTIH POLOS MONOTON: Wajib padukan dengan 1–2 sentuhan warna aksen segar yang harmonis (misal: aksen pastel segar, warm highlight, atau sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.\n'
-          '- JANGAL BANYAK WARNA (TIDAK NORAK): Batasi warna aksen hanya 1–2 warna saja agar tidak ramai bertabrakan. Buat visual yang simpel, clean, estetik, namun berkelas dan sangat hidup saat dilihat.'
-      : 'GAYA VISUAL (SUDAH DIPILIH MANUAL = "$style"):\n'
-          '- URL SLUG REFERENSI PROMPT GAYA VISUAL: $styleUrl\n'
-          '- PERINTAH AI: AI dan AI Image Generator WAJIB membaca file teks gaya visual di URL di atas terlebih dahulu untuk panduan render presisi!\n'
-          '- KOSONGKAN field "designSystem" dan "visualBlueprint" dengan: {"note":"SYSTEM_INJECTED - gaya dari backend: $style", "styleReferenceUrl": "$styleUrl"}.';
+          '- PANDUAN TEKS INLINE (WAJIB TULIS PENUH DI DALAM JSON): Rancang gaya visual terang hidup di field "designSystem" & "visualBlueprint". Tuliskan palet warna (base putih/off-white/light grey + 1-2 warna aksen segar), tipografi, lighting studio, dan layout secara eksplisit di dalam JSON!\n'
+          '- TEMA WARNA BASE TERANG: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG KERAS MENGGUNAKAN TEMA GELAP / DARK MODE!\n'
+          '- JANGAN FULL PUTIH POLOS MONOTON: Wajib padukan dengan 1–2 sentuhan warna aksen segar yang harmonis (misal: aksen pastel segar, warm highlight, atau sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.\n'
+          '- JANGAN BANYAK WARNA (TIDAK NORAK): Batasi warna aksen hanya 1–2 warna saja agar tidak ramai bertabrakan. Buat visual yang simpel, clean, estetik, namun berkelas dan sangat hidup saat dilihat.\n'
+          '- URL SLUG REFERENSI OPSIONAL: $styleUrl'
+      : 'GAYA VISUAL MANUAL = "$style":\n'
+          '- PANDUAN TEKS INLINE (WAJIB TULIS EKSPLISIT DI DALAM JSON): Karena AI Gambar (DALL-E 3 / Midjourney / Flux) TIDAK DAPAT melakukan browsing HTTP URL saat render gambar, Anda WAJIB menuliskankan instruksi visual gaya "$style" secara LENGKAP DAN EKSPLISIT di dalam field "designSystem" dan "visualBlueprint" agar AI Gambar dapat langsung membacanya!\n'
+          '- URL SLUG REFERENSI OPSIONAL: $styleUrl\n'
+          '- Isi field "designSystem" dengan deskripsi lengkap gaya visual "$style" + menyertakan field "styleReferenceUrl": "$styleUrl".';
 
   final cRule = isCharAuto
       ? 'KARAKTER/SUBJEK (AI BEBAS):\n'
-          '- URL SLUG REFERENSI BIBLE KARAKTER: $charUrl\n'
-          '- PERINTAH AI: Rancang karakter/subjek visual yang konsisten dan menarik.'
-      : 'KARAKTER/SUBJEK (MANUAL="$characterFocus"):\n'
-          '- URL SLUG REFERENSI BIBLE KARAKTER: $charUrl\n'
-          '- PERINTAH AI: AI dan AI Image Generator WAJIB membaca file teks bible karakter di URL $charUrl terlebih dahulu untuk memahami ekspresi, bentuk fisik, pakaian, pose, dan ciri khas karakter secara presisi sebelum merender gambar!\n'
-          '- Isi "character": {"note":"SYSTEM_INJECTED", "characterReferenceUrl": "$charUrl"}.';
+          '- PANDUAN TEKS INLINE: Rancang deskripsi subjek visual yang konsisten dan menarik secara eksplisit di dalam JSON.\n'
+          '- URL SLUG REFERENSI BIBLE KARAKTER OPSIONAL: $charUrl'
+      : 'KARAKTER/SUBJEK MANUAL = "$characterFocus":\n'
+          '- PANDUAN TEKS INLINE (WAJIB TULIS EKSPLISIT DI DALAM JSON): Tuliskan deskripsi karakter, bentuk fisik, pakaian, pose, dan ekspresi "$characterFocus" secara LENGKAP DAN EKSPLISIT di dalam JSON field "character" agar AI Gambar dapat langsung membacanya tanpa perlu fetch internet!\n'
+          '- URL SLUG REFERENSI BIBLE KARAKTER OPSIONAL: $charUrl\n'
+          '- Isi field "character" dengan deskripsi detail karakter "$characterFocus" + menyertakan field "characterReferenceUrl": "$charUrl".';
 
   return '$sRule\n$cRule';
 }

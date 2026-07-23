@@ -14,6 +14,7 @@ import historyRoutes from './modules/history/history.routes';
 import dropdownRoutes from './modules/dropdown/dropdown.routes';
 import adminRoutes from './modules/admin/admin.routes';
 import developerRoutes from './modules/developer/developer.routes';
+import syncRoutes from './modules/sync/sync.routes';
 import templatesRoutes from './modules/templates/templates.routes';
 import formInfoRoutes from './modules/formInfo/formInfo.routes';
 import promptsRoutes from './modules/prompts/prompts.routes';

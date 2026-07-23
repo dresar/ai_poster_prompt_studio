@@ -18081,17 +18081,17 @@ var require_router = __commonJS({
     var toString = Object.prototype.toString;
     var proto = module2.exports = function(options) {
       var opts = options || {};
-      function router10(req, res, next) {
-        router10.handle(req, res, next);
+      function router11(req, res, next) {
+        router11.handle(req, res, next);
       }
-      setPrototypeOf(router10, proto);
-      router10.params = {};
-      router10._params = [];
-      router10.caseSensitive = opts.caseSensitive;
-      router10.mergeParams = opts.mergeParams;
-      router10.strict = opts.strict;
-      router10.stack = [];
-      return router10;
+      setPrototypeOf(router11, proto);
+      router11.params = {};
+      router11._params = [];
+      router11.caseSensitive = opts.caseSensitive;
+      router11.mergeParams = opts.mergeParams;
+      router11.strict = opts.strict;
+      router11.stack = [];
+      return router11;
     };
     proto.param = function param(name, fn) {
       if (typeof name === "function") {
@@ -18800,14 +18800,14 @@ var require_etag = __commonJS({
   "node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto10 = require("crypto");
+    var crypto11 = require("crypto");
     var Stats = require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto10.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto11.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -20684,7 +20684,7 @@ var require_application = __commonJS({
   "node_modules/express/lib/application.js"(exports2, module2) {
     "use strict";
     var finalhandler = require_finalhandler();
-    var Router10 = require_router();
+    var Router11 = require_router();
     var methods = require_methods();
     var middleware = require_init();
     var query = require_query();
@@ -20749,7 +20749,7 @@ var require_application = __commonJS({
     };
     app2.lazyrouter = function lazyrouter() {
       if (!this._router) {
-        this._router = new Router10({
+        this._router = new Router11({
           caseSensitive: this.enabled("case sensitive routing"),
           strict: this.enabled("strict routing")
         });
@@ -20758,17 +20758,17 @@ var require_application = __commonJS({
       }
     };
     app2.handle = function handle(req, res, callback) {
-      var router10 = this._router;
+      var router11 = this._router;
       var done = callback || finalhandler(req, res, {
         env: this.get("env"),
         onerror: logerror.bind(this)
       });
-      if (!router10) {
+      if (!router11) {
         debug("no routes defined on app");
         done();
         return;
       }
-      router10.handle(req, res, done);
+      router11.handle(req, res, done);
     };
     app2.use = function use(fn) {
       var offset = 0;
@@ -20788,15 +20788,15 @@ var require_application = __commonJS({
         throw new TypeError("app.use() requires a middleware function");
       }
       this.lazyrouter();
-      var router10 = this._router;
+      var router11 = this._router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router10.use(path6, fn2);
+          return router11.use(path6, fn2);
         }
         debug(".use app under %s", path6);
         fn2.mountpath = path6;
         fn2.parent = this;
-        router10.use(path6, function mounted_app(req, res, next) {
+        router11.use(path6, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             setPrototypeOf(req, orig.request);
@@ -21700,11 +21700,11 @@ var require_request = __commonJS({
 // node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/cookie-signature/index.js"(exports2) {
-    var crypto10 = require("crypto");
+    var crypto11 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto10.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto11.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21713,7 +21713,7 @@ var require_cookie_signature = __commonJS({
       return sha1(mac) == sha1(val) ? str : false;
     };
     function sha1(str) {
-      return crypto10.createHash("sha1").update(str).digest("hex");
+      return crypto11.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -22613,7 +22613,7 @@ var require_express = __commonJS({
     var mixin = require_merge_descriptors();
     var proto = require_application();
     var Route = require_route();
-    var Router10 = require_router();
+    var Router11 = require_router();
     var req = require_request();
     var res = require_response();
     exports2 = module2.exports = createApplication;
@@ -22636,7 +22636,7 @@ var require_express = __commonJS({
     exports2.request = req;
     exports2.response = res;
     exports2.Route = Route;
-    exports2.Router = Router10;
+    exports2.Router = Router11;
     exports2.json = bodyParser.json;
     exports2.query = require_query();
     exports2.raw = bodyParser.raw;
@@ -23033,7 +23033,7 @@ var require_main = __commonJS({
     var fs5 = require("fs");
     var path6 = require("path");
     var os2 = require("os");
-    var crypto10 = require("crypto");
+    var crypto11 = require("crypto");
     var packageJson = require_package();
     var version2 = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -23252,7 +23252,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto10.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto11.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error) {
@@ -33927,7 +33927,7 @@ var require_winston = __commonJS({
 var require_object_hash = __commonJS({
   "node_modules/object-hash/index.js"(exports2, module2) {
     "use strict";
-    var crypto10 = require("crypto");
+    var crypto11 = require("crypto");
     exports2 = module2.exports = objectHash;
     function objectHash(object, options) {
       options = applyDefaults(object, options);
@@ -33945,7 +33945,7 @@ var require_object_hash = __commonJS({
     exports2.keysMD5 = function(object) {
       return objectHash(object, { algorithm: "md5", encoding: "hex", excludeValues: true });
     };
-    var hashes = crypto10.getHashes ? crypto10.getHashes().slice() : ["sha1", "md5"];
+    var hashes = crypto11.getHashes ? crypto11.getHashes().slice() : ["sha1", "md5"];
     hashes.push("passthrough");
     var encodings = ["buffer", "hex", "binary", "base64"];
     function applyDefaults(object, sourceOptions) {
@@ -33991,7 +33991,7 @@ var require_object_hash = __commonJS({
     function hash(object, options) {
       var hashingStream;
       if (options.algorithm !== "passthrough") {
-        hashingStream = crypto10.createHash(options.algorithm);
+        hashingStream = crypto11.createHash(options.algorithm);
       } else {
         hashingStream = new PassThrough();
       }
@@ -38308,7 +38308,7 @@ var require_FileStreamRotator = __commonJS({
     var fs5 = require("fs");
     var path6 = require("path");
     var moment = require_moment();
-    var crypto10 = require("crypto");
+    var crypto11 = require("crypto");
     var EventEmitter = require("events");
     var FileStreamRotator = {};
     module2.exports = FileStreamRotator;
@@ -38437,7 +38437,7 @@ var require_FileStreamRotator = __commonJS({
       }
     };
     function removeFile(file, verbose) {
-      if (file.hash === crypto10.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")) {
+      if (file.hash === crypto11.createHash(file.hashType).update(file.name + "LOG_FILE" + file.date).digest("hex")) {
         try {
           if (fs5.existsSync(file.name)) {
             fs5.unlinkSync(file.name);
@@ -38503,7 +38503,7 @@ var require_FileStreamRotator = __commonJS({
         audit.files.push({
           date: time2,
           name: logfile,
-          hash: crypto10.createHash(audit.hashType).update(logfile + "LOG_FILE" + time2).digest("hex")
+          hash: crypto11.createHash(audit.hashType).update(logfile + "LOG_FILE" + time2).digest("hex")
         });
         if (audit.keep.days) {
           var oldestDate = moment().subtract(audit.keep.amount, "days").valueOf();
@@ -54950,14 +54950,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto10 = require("crypto");
+    var crypto11 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util2 = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto10.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto11.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -55047,17 +55047,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto10.createHmac("sha" + bits, secret);
+        var hmac = crypto11.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto10 ? function timingSafeEqual2(a2, b2) {
+    var timingSafeEqual = "timingSafeEqual" in crypto11 ? function timingSafeEqual2(a2, b2) {
       if (a2.byteLength !== b2.byteLength) {
         return false;
       }
-      return crypto10.timingSafeEqual(a2, b2);
+      return crypto11.timingSafeEqual(a2, b2);
     } : function timingSafeEqual2(a2, b2) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -55074,7 +55074,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto10.createSign("RSA-SHA" + bits);
+        var signer = crypto11.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -55084,7 +55084,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto10.createVerify("RSA-SHA" + bits);
+        var verifier = crypto11.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -55093,11 +55093,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto10.createSign("RSA-SHA" + bits);
+        var signer = crypto11.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto10.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto10.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -55107,12 +55107,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto10.createVerify("RSA-SHA" + bits);
+        var verifier = crypto11.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto10.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto10.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto11.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto11.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -58831,7 +58831,7 @@ var require_kill_port = __commonJS({
 });
 
 // src/server.ts
-var import_express10 = __toESM(require_express2());
+var import_express11 = __toESM(require_express2());
 var import_cors = __toESM(require_lib3());
 var import_path5 = __toESM(require("path"));
 var import_fs4 = __toESM(require("fs"));
@@ -69108,12 +69108,46 @@ router6.get("/content-ideas", validate({ query: getIdeasSchema }), getContentIde
 router6.get("/generate-hooks", validate({ query: getHooksSchema }), getHooks);
 var developer_routes_default = router6;
 
-// src/modules/templates/templates.routes.ts
+// src/modules/sync/sync.routes.ts
 var import_express7 = __toESM(require_express2());
+
+// src/modules/sync/sync.controller.ts
 init_db2();
 init_schema2();
+var import_crypto9 = __toESM(require("crypto"));
+var getSyncChecksum = async (req, res, next) => {
+  try {
+    const dropdowns = await db.select({ id: dropdownOptions.id, value: dropdownOptions.value }).from(dropdownOptions).where(eq(dropdownOptions.isActive, true)).orderBy(asc(dropdownOptions.id));
+    const styles = await db.select({ id: visualStyles.id, name: visualStyles.name }).from(visualStyles).where(eq(visualStyles.isActive, true)).orderBy(asc(visualStyles.id));
+    const chars = await db.select({ id: characters.id, name: characters.name }).from(characters).where(eq(characters.isActive, true)).orderBy(asc(characters.id));
+    const dataString = JSON.stringify({ dropdowns, styles, chars });
+    const checksum = import_crypto9.default.createHash("md5").update(dataString).digest("hex");
+    res.status(200).json({
+      success: true,
+      checksum,
+      counts: {
+        dropdownOptions: dropdowns.length,
+        visualStyles: styles.length,
+        characters: chars.length
+      },
+      checkedAt: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// src/modules/sync/sync.routes.ts
 var router7 = (0, import_express7.Router)();
-router7.get("/", authenticate, async (req, res, next) => {
+router7.get("/checksum", getSyncChecksum);
+var sync_routes_default = router7;
+
+// src/modules/templates/templates.routes.ts
+var import_express8 = __toESM(require_express2());
+init_db2();
+init_schema2();
+var router8 = (0, import_express8.Router)();
+router8.get("/", authenticate, async (req, res, next) => {
   try {
     const { search, category } = req.query;
     const conditions = [eq(promptTemplates.isActive, true)];
@@ -69135,7 +69169,7 @@ router7.get("/", authenticate, async (req, res, next) => {
     next(error);
   }
 });
-router7.get("/categories", authenticate, async (req, res, next) => {
+router8.get("/categories", authenticate, async (req, res, next) => {
   try {
     const rows = await db.selectDistinct({ category: promptTemplates.category }).from(promptTemplates).where(eq(promptTemplates.isActive, true));
     const categories = rows.map((r) => r.category).filter(Boolean);
@@ -69144,7 +69178,7 @@ router7.get("/categories", authenticate, async (req, res, next) => {
     next(error);
   }
 });
-router7.get("/:id", authenticate, async (req, res, next) => {
+router8.get("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const rows = await db.select().from(promptTemplates).where(eq(promptTemplates.id, id)).limit(1);
@@ -69156,14 +69190,14 @@ router7.get("/:id", authenticate, async (req, res, next) => {
     next(error);
   }
 });
-var templates_routes_default = router7;
+var templates_routes_default = router8;
 
 // src/modules/formInfo/formInfo.routes.ts
-var import_express8 = __toESM(require_express2());
+var import_express9 = __toESM(require_express2());
 init_db2();
 init_schema2();
-var router8 = (0, import_express8.Router)();
-router8.get("/", async (req, res, next) => {
+var router9 = (0, import_express9.Router)();
+router9.get("/", async (req, res, next) => {
   try {
     const list = await db.select().from(formDescriptions);
     res.json({ success: true, data: list });
@@ -69171,7 +69205,7 @@ router8.get("/", async (req, res, next) => {
     next(error);
   }
 });
-router8.put("/:key", authenticate, requireRole(["ADMIN"]), async (req, res, next) => {
+router9.put("/:key", authenticate, requireRole(["ADMIN"]), async (req, res, next) => {
   try {
     const { key } = req.params;
     const { title, description } = req.body;
@@ -69189,10 +69223,10 @@ router8.put("/:key", authenticate, requireRole(["ADMIN"]), async (req, res, next
     next(error);
   }
 });
-var formInfo_routes_default = router8;
+var formInfo_routes_default = router9;
 
 // src/modules/prompts/prompts.routes.ts
-var import_express9 = __toESM(require_express2());
+var import_express10 = __toESM(require_express2());
 
 // src/modules/prompts/prompts.controller.ts
 var import_path4 = __toESM(require("path"));
@@ -69371,19 +69405,19 @@ TIPE: Clean Light Theme Prompt Reference (Putih & Abu-abu Muda)
 };
 
 // src/modules/prompts/prompts.routes.ts
-var router9 = (0, import_express9.Router)();
-router9.get("/styles/:slug.txt", getStylePromptFile);
-router9.get("/styles/:slug", getStylePromptFile);
-router9.get("/characters/:slug.txt", getCharacterPromptFile);
-router9.get("/characters/:slug", getCharacterPromptFile);
-router9.get("/:slug.txt", getUniversalTextPromptFile);
-router9.get("/:slug", getUniversalTextPromptFile);
-var prompts_routes_default = router9;
+var router10 = (0, import_express10.Router)();
+router10.get("/styles/:slug.txt", getStylePromptFile);
+router10.get("/styles/:slug", getStylePromptFile);
+router10.get("/characters/:slug.txt", getCharacterPromptFile);
+router10.get("/characters/:slug", getCharacterPromptFile);
+router10.get("/:slug.txt", getUniversalTextPromptFile);
+router10.get("/:slug", getUniversalTextPromptFile);
+var prompts_routes_default = router10;
 
 // src/server.ts
 var import_kill_port = __toESM(require_kill_port());
 init_image_cleanup();
-var app = (0, import_express10.default)();
+var app = (0, import_express11.default)();
 var ALLOWED_ORIGINS = [
   "https://porto.apprentice.cyou",
   "https://full-feature-showcase.vercel.app",
@@ -69415,13 +69449,13 @@ app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "no-referrer");
   next();
 });
-app.use(import_express10.default.json({ limit: "50mb" }));
-app.use(import_express10.default.urlencoded({ limit: "50mb", extended: true }));
+app.use(import_express11.default.json({ limit: "50mb" }));
+app.use(import_express11.default.urlencoded({ limit: "50mb", extended: true }));
 var uploadsDir = import_path5.default.join(process.cwd(), "uploads");
 if (!import_fs4.default.existsSync(uploadsDir)) {
   import_fs4.default.mkdirSync(uploadsDir, { recursive: true });
 }
-app.use("/uploads", import_express10.default.static(uploadsDir));
+app.use("/uploads", import_express11.default.static(uploadsDir));
 app.use((req, res, next) => {
   logger.http(`${req.method} ${req.originalUrl} - IP: ${req.ip}`);
   next();
@@ -69461,7 +69495,7 @@ app.use("/api/history", history_routes_default);
 app.use("/api/dropdown-options", dropdown_routes_default);
 app.use("/api/admin", admin_routes_default);
 app.use("/api/v1", developer_routes_default);
-app.use("/api/sync", syncRoutes);
+app.use("/api/sync", sync_routes_default);
 app.use("/api/templates", templates_routes_default);
 app.use("/api/form-infos", formInfo_routes_default);
 app.use("/txt", prompts_routes_default);

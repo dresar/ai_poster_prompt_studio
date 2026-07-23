@@ -1,0 +1,22 @@
+# cPanel .htaccess Rules for Public AI Plain Text Prompt Endpoints
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+    Header set Access-Control-Allow-Headers "*"
+    Header set Content-Type "text/plain; charset=utf-8"
+    Header set X-Robots-Tag "all"
+</IfModule>
+
+# Force text/plain MIME type for all .txt files
+<FilesMatch "\.(txt)$">
+    ForceType text/plain
+    Header set Content-Type "text/plain; charset=utf-8"
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Allow GPTBot, ChatGPT-User, ClaudeBot, PerplexityBot explicitly
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP_USER_AGENT} (GPTBot|ChatGPT-User|ClaudeBot|PerplexityBot|Googlebot) [NC]
+    RewriteRule ^ - [L]
+</IfModule>

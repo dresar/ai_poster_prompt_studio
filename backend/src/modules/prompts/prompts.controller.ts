@@ -10,11 +10,43 @@ const basePromptsDir = path.join(process.cwd(), 'prompts');
 const stylesDir = path.join(basePromptsDir, 'styles');
 const charactersDir = path.join(basePromptsDir, 'characters');
 
+// Additional public cPanel static directories
+const cpanelPublicDirs = [
+  path.join(process.cwd(), 'public', 'txt'),
+  path.join(process.cwd(), 'public_html', 'txt'),
+  path.join(process.cwd(), 'uploads', 'txt'),
+];
+
+// Helper to write file safely to all possible cPanel directories
+function writeTxtToAllLocations(subPath: string, content: string) {
+  const targetDirs = [
+    basePromptsDir,
+    path.join(process.cwd(), 'public', 'txt'),
+    path.join(process.cwd(), 'public_html', 'txt'),
+    path.join(process.cwd(), 'uploads', 'txt'),
+  ];
+
+  targetDirs.forEach((dir) => {
+    try {
+      const fullFilePath = path.join(dir, subPath);
+      const parentDir = path.dirname(fullFilePath);
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+      fs.writeFileSync(fullFilePath, content, 'utf8');
+    } catch (e) {
+      // Ignore individual directory creation errors (e.g. if public_html is read-only)
+    }
+  });
+}
+
 // Ensure prompt directories exist
-[basePromptsDir, stylesDir, charactersDir].forEach((dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+[basePromptsDir, stylesDir, charactersDir, ...cpanelPublicDirs].forEach((dir) => {
+  try {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  } catch (e) {}
 });
 
 // Helper to set maximal permissive headers for AI crawlers & web fetchers
@@ -47,33 +79,28 @@ export async function syncPromptFilesToDisk() {
     for (const style of activeStyles) {
       const styleSlug = slugify(style.name) || style.id;
       const fileName = `${styleSlug}.txt`;
-      const filePath = path.join(stylesDir, fileName);
-      const rootFilePath = path.join(basePromptsDir, fileName);
       const content = `GAYA VISUAL REFERENSI: ${style.name}\n` +
         `ID: ${style.id}\n` +
         `TEMA WARNA & ESTETIKA: Tema Terang Putih & Abu-Abu Muda Clean minimalis\n\n` +
         `PANDUAN PROMPTING LENGKAP:\n${style.promptTemplate}\n`;
-      fs.writeFileSync(filePath, content, 'utf8');
-      fs.writeFileSync(rootFilePath, content, 'utf8');
+      writeTxtToAllLocations(`styles/${fileName}`, content);
+      writeTxtToAllLocations(fileName, content);
     }
 
     // Default style fallback
-    const defaultStylePath = path.join(stylesDir, 'auto.txt');
-    const defaultRootStylePath = path.join(basePromptsDir, 'auto.txt');
     const defaultStyleContent = `GAYA VISUAL OTOMATIS: Lively Clean Light Theme\n` +
       `TEMA WARNA BASE: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG TEMA GELAP / DARK MODE!\n` +
       `WARNA AKSEN SEGAR: Wajib padukan 1-2 sentuhan warna aksen segar yang selaras (misal: soft pastel accent, warm highlight, sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.\n` +
       `ESTETIKA: Sederhana, bersih, tidak norak, jangan banyak warna yang bertabrakan, tanpa embel-embel ornamen menumpuk.\n` +
       `KETERBACAAN: Tipografi Swiss grid modern, kontras tinggi, sangat profesional dan berkelas.\n`;
-    fs.writeFileSync(defaultStylePath, defaultStyleContent, 'utf8');
-    fs.writeFileSync(defaultRootStylePath, defaultStyleContent, 'utf8');
+    writeTxtToAllLocations('styles/auto.txt', defaultStyleContent);
+    writeTxtToAllLocations('auto.txt', defaultStyleContent);
 
     // 2. Sync characters
     const activeChars = await db.select().from(characters).where(eq(characters.isActive, true));
     for (const char of activeChars) {
       const charSlug = slugify(char.name) || char.id;
       const fileName = `${charSlug}.txt`;
-      const filePath = path.join(charactersDir, fileName);
       const content = `KARAKTER REFERENSI BIBLE: ${char.name}\n` +
         `ID: ${char.id}\n` +
         `DESKRIPSI: ${char.description}\n\n` +
@@ -81,17 +108,14 @@ export async function syncPromptFilesToDisk() {
         `MASTER PROMPT:\n${char.masterPrompt || char.positivePrompt || ''}\n\n` +
         `POSITIVE PROMPT:\n${char.positivePrompt || ''}\n\n` +
         `NEGATIVE PROMPT:\n${char.negativePrompt || ''}\n`;
-      fs.writeFileSync(filePath, content, 'utf8');
+      writeTxtToAllLocations(`characters/${fileName}`, content);
     }
 
     // Default character fallback
-    const defaultCharPath = path.join(charactersDir, 'auto.txt');
-    if (!fs.existsSync(defaultCharPath)) {
-      const defaultCharContent = `KARAKTER OTOMATIS: 3D Friendly Professional Mascot\n` +
-        `DESKRIPSI: Karakter 3D modern ramah dengan proporsi seimbang, ekspresi hangat, busana kasual profesional.\n` +
-        `KONSISTENSI VISUAL: Pertahankan warna baju, gaya rambut, ciri fisik, dan lighting studio konsisten di semua slide.\n`;
-      fs.writeFileSync(defaultCharPath, defaultCharContent, 'utf8');
-    }
+    const defaultCharContent = `KARAKTER OTOMATIS: 3D Friendly Professional Mascot\n` +
+      `DESKRIPSI: Karakter 3D modern ramah dengan proporsi seimbang, ekspresi hangat, busana kasual profesional.\n` +
+      `KONSISTENSI VISUAL: Pertahankan warna baju, gaya rambut, ciri fisik, dan lighting studio konsisten di semua slide.\n`;
+    writeTxtToAllLocations('characters/auto.txt', defaultCharContent);
 
     logger.info(`[PromptsSync] Synced ${activeStyles.length} styles & ${activeChars.length} characters to disk as plain text files.`);
   } catch (error) {
@@ -125,13 +149,15 @@ export const getStylePromptFile = async (req: Request, res: Response, next: Next
       const content = `GAYA VISUAL REFERENSI: ${style.name}\n` +
         `ID: ${style.id}\n` +
         `PANDUAN PROMPTING LENGKAP:\n${style.promptTemplate}\n`;
-      fs.writeFileSync(filePath, content, 'utf8');
+      writeTxtToAllLocations(`styles/${safeSlug}.txt`, content);
+      writeTxtToAllLocations(`${safeSlug}.txt`, content);
       return res.status(200).send(content);
     }
 
     // Generic fallback for any style slug
     const fallbackText = `GAYA VISUAL REFERENSI: ${rawSlug}\n` +
       `ESTETIKA: Clean Minimalist Light Theme (Putih & Abu-abu), simpel, profesional, tanpa ornamen menumpuk.\n`;
+    writeTxtToAllLocations(`styles/${safeSlug}.txt`, fallbackText);
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);
@@ -165,13 +191,14 @@ export const getCharacterPromptFile = async (req: Request, res: Response, next: 
         `DESKRIPSI: ${char.description}\n\n` +
         `KONSISTENSI VISUAL:\n${char.promptConsistency}\n\n` +
         `MASTER PROMPT:\n${char.masterPrompt || char.positivePrompt || ''}\n`;
-      fs.writeFileSync(filePath, content, 'utf8');
+      writeTxtToAllLocations(`characters/${safeSlug}.txt`, content);
       return res.status(200).send(content);
     }
 
     // Generic fallback for any character slug
     const fallbackText = `KARAKTER REFERENSI BIBLE: ${rawSlug}\n` +
       `DESKRIPSI: Subjek karakter 3D modern ramah, konsisten dalam pose, ekspresi, dan pakaian.\n`;
+    writeTxtToAllLocations(`characters/${safeSlug}.txt`, fallbackText);
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);

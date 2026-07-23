@@ -47,27 +47,37 @@ app.get('/robots.txt', (req, res) => {
 
 // Serve static text files directly via express.static at root /txt and /prompts
 const basePromptsDir = path.join(process.cwd(), 'prompts');
-if (!fs.existsSync(basePromptsDir)) {
-  fs.mkdirSync(basePromptsDir, { recursive: true });
-}
-app.use('/txt', express.static(basePromptsDir, {
-  setHeaders: (res) => {
+const publicTxtDir = path.join(process.cwd(), 'public', 'txt');
+const uploadsTxtDir = path.join(process.cwd(), 'uploads', 'txt');
+
+[basePromptsDir, publicTxtDir, uploadsTxtDir].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    try { fs.mkdirSync(dir, { recursive: true }); } catch (e) {}
+  }
+});
+
+const staticTextOptions = {
+  setHeaders: (res: any) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('X-Robots-Tag', 'all');
   }
-}));
-app.use('/prompts', express.static(basePromptsDir, {
-  setHeaders: (res) => {
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-  }
-}));
+};
+
+app.use('/txt', express.static(publicTxtDir, staticTextOptions));
+app.use('/txt', express.static(basePromptsDir, staticTextOptions));
+app.use('/txt', express.static(uploadsTxtDir, staticTextOptions));
+
+app.use('/prompts', express.static(publicTxtDir, staticTextOptions));
+app.use('/prompts', express.static(basePromptsDir, staticTextOptions));
+app.use('/prompts', express.static(uploadsTxtDir, staticTextOptions));
 
 // Mount dynamic prompt routes before restrictive CORS
 app.use('/txt', promptsRoutes);
 app.use('/prompts', promptsRoutes);
+app.use('/api/txt', promptsRoutes);
+app.use('/api/prompts', promptsRoutes);
 
 // Middlewares
 const ALLOWED_ORIGINS = [

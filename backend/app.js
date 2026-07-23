@@ -69270,9 +69270,36 @@ init_logger();
 var basePromptsDir = import_path4.default.join(process.cwd(), "prompts");
 var stylesDir = import_path4.default.join(basePromptsDir, "styles");
 var charactersDir = import_path4.default.join(basePromptsDir, "characters");
-[basePromptsDir, stylesDir, charactersDir].forEach((dir) => {
-  if (!import_fs3.default.existsSync(dir)) {
-    import_fs3.default.mkdirSync(dir, { recursive: true });
+var cpanelPublicDirs = [
+  import_path4.default.join(process.cwd(), "public", "txt"),
+  import_path4.default.join(process.cwd(), "public_html", "txt"),
+  import_path4.default.join(process.cwd(), "uploads", "txt")
+];
+function writeTxtToAllLocations(subPath, content) {
+  const targetDirs = [
+    basePromptsDir,
+    import_path4.default.join(process.cwd(), "public", "txt"),
+    import_path4.default.join(process.cwd(), "public_html", "txt"),
+    import_path4.default.join(process.cwd(), "uploads", "txt")
+  ];
+  targetDirs.forEach((dir) => {
+    try {
+      const fullFilePath = import_path4.default.join(dir, subPath);
+      const parentDir = import_path4.default.dirname(fullFilePath);
+      if (!import_fs3.default.existsSync(parentDir)) {
+        import_fs3.default.mkdirSync(parentDir, { recursive: true });
+      }
+      import_fs3.default.writeFileSync(fullFilePath, content, "utf8");
+    } catch (e) {
+    }
+  });
+}
+[basePromptsDir, stylesDir, charactersDir, ...cpanelPublicDirs].forEach((dir) => {
+  try {
+    if (!import_fs3.default.existsSync(dir)) {
+      import_fs3.default.mkdirSync(dir, { recursive: true });
+    }
+  } catch (e) {
   }
 });
 function setAiCrawlerHeaders(res) {
@@ -69292,8 +69319,6 @@ async function syncPromptFilesToDisk() {
     for (const style of activeStyles) {
       const styleSlug = slugify(style.name) || style.id;
       const fileName = `${styleSlug}.txt`;
-      const filePath = import_path4.default.join(stylesDir, fileName);
-      const rootFilePath = import_path4.default.join(basePromptsDir, fileName);
       const content = `GAYA VISUAL REFERENSI: ${style.name}
 ID: ${style.id}
 TEMA WARNA & ESTETIKA: Tema Terang Putih & Abu-Abu Muda Clean minimalis
@@ -69301,24 +69326,21 @@ TEMA WARNA & ESTETIKA: Tema Terang Putih & Abu-Abu Muda Clean minimalis
 PANDUAN PROMPTING LENGKAP:
 ${style.promptTemplate}
 `;
-      import_fs3.default.writeFileSync(filePath, content, "utf8");
-      import_fs3.default.writeFileSync(rootFilePath, content, "utf8");
+      writeTxtToAllLocations(`styles/${fileName}`, content);
+      writeTxtToAllLocations(fileName, content);
     }
-    const defaultStylePath = import_path4.default.join(stylesDir, "auto.txt");
-    const defaultRootStylePath = import_path4.default.join(basePromptsDir, "auto.txt");
     const defaultStyleContent = `GAYA VISUAL OTOMATIS: Lively Clean Light Theme
 TEMA WARNA BASE: Putih Bersih (Clean White), Off-White, Abu-Abu Muda (Light Grey). DILARANG TEMA GELAP / DARK MODE!
 WARNA AKSEN SEGAR: Wajib padukan 1-2 sentuhan warna aksen segar yang selaras (misal: soft pastel accent, warm highlight, sentuhan gradient lembut) agar gambar terasa HIDUP, BERDIKARI, DAN DINAMIS.
 ESTETIKA: Sederhana, bersih, tidak norak, jangan banyak warna yang bertabrakan, tanpa embel-embel ornamen menumpuk.
 KETERBACAAN: Tipografi Swiss grid modern, kontras tinggi, sangat profesional dan berkelas.
 `;
-    import_fs3.default.writeFileSync(defaultStylePath, defaultStyleContent, "utf8");
-    import_fs3.default.writeFileSync(defaultRootStylePath, defaultStyleContent, "utf8");
+    writeTxtToAllLocations("styles/auto.txt", defaultStyleContent);
+    writeTxtToAllLocations("auto.txt", defaultStyleContent);
     const activeChars = await db.select().from(characters).where(eq(characters.isActive, true));
     for (const char2 of activeChars) {
       const charSlug = slugify(char2.name) || char2.id;
       const fileName = `${charSlug}.txt`;
-      const filePath = import_path4.default.join(charactersDir, fileName);
       const content = `KARAKTER REFERENSI BIBLE: ${char2.name}
 ID: ${char2.id}
 DESKRIPSI: ${char2.description}
@@ -69335,16 +69357,13 @@ ${char2.positivePrompt || ""}
 NEGATIVE PROMPT:
 ${char2.negativePrompt || ""}
 `;
-      import_fs3.default.writeFileSync(filePath, content, "utf8");
+      writeTxtToAllLocations(`characters/${fileName}`, content);
     }
-    const defaultCharPath = import_path4.default.join(charactersDir, "auto.txt");
-    if (!import_fs3.default.existsSync(defaultCharPath)) {
-      const defaultCharContent = `KARAKTER OTOMATIS: 3D Friendly Professional Mascot
+    const defaultCharContent = `KARAKTER OTOMATIS: 3D Friendly Professional Mascot
 DESKRIPSI: Karakter 3D modern ramah dengan proporsi seimbang, ekspresi hangat, busana kasual profesional.
 KONSISTENSI VISUAL: Pertahankan warna baju, gaya rambut, ciri fisik, dan lighting studio konsisten di semua slide.
 `;
-      import_fs3.default.writeFileSync(defaultCharPath, defaultCharContent, "utf8");
-    }
+    writeTxtToAllLocations("characters/auto.txt", defaultCharContent);
     logger.info(`[PromptsSync] Synced ${activeStyles.length} styles & ${activeChars.length} characters to disk as plain text files.`);
   } catch (error) {
     logger.error("[PromptsSync] Error syncing prompt files to disk:", error);
@@ -69367,12 +69386,14 @@ ID: ${style.id}
 PANDUAN PROMPTING LENGKAP:
 ${style.promptTemplate}
 `;
-      import_fs3.default.writeFileSync(filePath, content, "utf8");
+      writeTxtToAllLocations(`styles/${safeSlug}.txt`, content);
+      writeTxtToAllLocations(`${safeSlug}.txt`, content);
       return res.status(200).send(content);
     }
     const fallbackText = `GAYA VISUAL REFERENSI: ${rawSlug}
 ESTETIKA: Clean Minimalist Light Theme (Putih & Abu-abu), simpel, profesional, tanpa ornamen menumpuk.
 `;
+    writeTxtToAllLocations(`styles/${safeSlug}.txt`, fallbackText);
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);
@@ -69399,12 +69420,13 @@ ${char2.promptConsistency}
 MASTER PROMPT:
 ${char2.masterPrompt || char2.positivePrompt || ""}
 `;
-      import_fs3.default.writeFileSync(filePath, content, "utf8");
+      writeTxtToAllLocations(`characters/${safeSlug}.txt`, content);
       return res.status(200).send(content);
     }
     const fallbackText = `KARAKTER REFERENSI BIBLE: ${rawSlug}
 DESKRIPSI: Subjek karakter 3D modern ramah, konsisten dalam pose, ekspresi, dan pakaian.
 `;
+    writeTxtToAllLocations(`characters/${safeSlug}.txt`, fallbackText);
     return res.status(200).send(fallbackText);
   } catch (error) {
     next(error);
@@ -69477,25 +69499,34 @@ Sitemap: https://porto.apprentice.cyou/sitemap.xml
 `);
 });
 var basePromptsDir2 = import_path5.default.join(process.cwd(), "prompts");
-if (!import_fs4.default.existsSync(basePromptsDir2)) {
-  import_fs4.default.mkdirSync(basePromptsDir2, { recursive: true });
-}
-app.use("/txt", import_express11.default.static(basePromptsDir2, {
+var publicTxtDir = import_path5.default.join(process.cwd(), "public", "txt");
+var uploadsTxtDir = import_path5.default.join(process.cwd(), "uploads", "txt");
+[basePromptsDir2, publicTxtDir, uploadsTxtDir].forEach((dir) => {
+  if (!import_fs4.default.existsSync(dir)) {
+    try {
+      import_fs4.default.mkdirSync(dir, { recursive: true });
+    } catch (e) {
+    }
+  }
+});
+var staticTextOptions = {
   setHeaders: (res) => {
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("X-Robots-Tag", "all");
   }
-}));
-app.use("/prompts", import_express11.default.static(basePromptsDir2, {
-  setHeaders: (res) => {
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Cache-Control", "public, max-age=86400");
-  }
-}));
+};
+app.use("/txt", import_express11.default.static(publicTxtDir, staticTextOptions));
+app.use("/txt", import_express11.default.static(basePromptsDir2, staticTextOptions));
+app.use("/txt", import_express11.default.static(uploadsTxtDir, staticTextOptions));
+app.use("/prompts", import_express11.default.static(publicTxtDir, staticTextOptions));
+app.use("/prompts", import_express11.default.static(basePromptsDir2, staticTextOptions));
+app.use("/prompts", import_express11.default.static(uploadsTxtDir, staticTextOptions));
 app.use("/txt", prompts_routes_default);
 app.use("/prompts", prompts_routes_default);
+app.use("/api/txt", prompts_routes_default);
+app.use("/api/prompts", prompts_routes_default);
 var ALLOWED_ORIGINS = [
   "https://porto.apprentice.cyou",
   "https://full-feature-showcase.vercel.app",

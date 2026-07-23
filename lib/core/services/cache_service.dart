@@ -1,6 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+
+import 'package:flutter/foundation.dart';
 
 /// CacheService handles image pre-caching for instant dropdown display.
 /// Priority order for images:
@@ -11,6 +15,34 @@ class CacheService {
   static final CacheService instance = CacheService._();
 
   bool _hasPreloaded = false;
+  String? _cacheDirPath;
+
+  /// Initialize and resolve visual_style_images cache directory in memory
+  Future<void> init() async {
+    if (kIsWeb) return;
+    try {
+      final cacheRoot = await getApplicationCacheDirectory();
+      _cacheDirPath = p.join(cacheRoot.path, 'visual_style_images');
+      final dir = Directory(_cacheDirPath!);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+    } catch (e) {
+      debugPrint('[CacheService] init error: $e');
+    }
+  }
+
+  /// Check if local cached file exists for a given network URL
+  String? getLocalCachePathFor(String url) {
+    if (kIsWeb || _cacheDirPath == null) return null;
+    final fileName = url.hashCode.abs().toString() + '_vs.jpg';
+    final path = p.join(_cacheDirPath!, fileName);
+    final file = File(path);
+    if (file.existsSync()) {
+      return path;
+    }
+    return null;
+  }
 
   /// Returns the appropriate [ImageProvider] for an icon URL.
   /// Checks if a local file path is available (from SQLite cache),
@@ -19,13 +51,22 @@ class CacheService {
     String? localPath,
     required String networkUrl,
   }) {
-    if (localPath != null && localPath.isNotEmpty) {
+    if (!kIsWeb && localPath != null && localPath.isNotEmpty) {
       final cleanPath = localPath.replaceFirst('file://', '');
       final file = File(cleanPath);
       if (file.existsSync()) {
         return FileImage(file);
       }
     }
+    
+    // Dynamic cache check
+    if (!kIsWeb) {
+      final localCachedPath = getLocalCachePathFor(networkUrl);
+      if (localCachedPath != null) {
+        return FileImage(File(localCachedPath));
+      }
+    }
+    
     return NetworkImage(networkUrl);
   }
 
@@ -35,6 +76,7 @@ class CacheService {
     required BuildContext context,
     required List<({String url, String? localPath})> images,
   }) async {
+    if (kIsWeb) return;
     if (_hasPreloaded) return;
     _hasPreloaded = true;
 

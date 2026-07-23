@@ -106,7 +106,7 @@ class _EnhancePhotoFormState extends State<EnhancePhotoForm> {
         const SizedBox(height: 32),
 
         NeoPrimaryButton(
-          text: '⚡ GENERATE RETOUCH PHOTO (1 Kredit)',
+          text: '⚡ GENERATE',
           onPressed: _enhanceImage == null ? null : _submit,
         ),
       ],

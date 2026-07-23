@@ -8,6 +8,8 @@ import '../../core/services/local_db_service.dart';
 import '../../shared/widgets/neo_buttons.dart';
 import '../../core/utils/file_directory_helper.dart';
 import '../saved_codes/saved_codes_screen.dart';
+import 'template_detail_page.dart';
+import '../../shared/widgets/image_carousel_modal.dart';
 
 
 class TemplatesScreen extends StatefulWidget {
@@ -93,23 +95,11 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   }
 
   void _openTemplate(Map<String, dynamic> template, String displayTitle) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: NeoTheme.bgBase,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-        side: BorderSide(color: NeoTheme.borderStrong, width: 2.5),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.95,
-        minChildSize: 0.85,
-        maxChildSize: 0.98,
-        expand: false,
-        builder: (context, scrollController) => _TemplateDetailSheet(
-          template: template,
-          displayTitle: displayTitle,
-          scrollController: scrollController,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TemplateDetailPage(
+          templateData: template,
           onUseTemplate: widget.onUseTemplate,
         ),
       ),
@@ -150,53 +140,57 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
               decoration: InputDecoration(
                 hintText: 'Cari template...',
                 prefixIcon: const Icon(Icons.search, color: Colors.black),
-                border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: const BorderSide(color: Colors.black, width: 2.5)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: const BorderSide(color: Colors.black, width: 2.5)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: const BorderSide(color: NeoTheme.accentPink, width: 2.5)),
-                filled: true,
                 fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black, width: 2),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black, width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),
             ),
           ),
 
-          // Category chips
-          if (_categories.length > 1)
-            SizedBox(
-              height: 44,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _categories.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, i) {
-                  final cat = _categories[i];
-                  final isSelected = _selectedCategory == cat;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => _selectedCategory = cat);
-                      _fetchTemplates();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected ? NeoTheme.accentPink : Colors.white,
-                        border: Border.all(color: Colors.black, width: 2),
-                        borderRadius: BorderRadius.zero,
-                        boxShadow: isSelected ? null : const [BoxShadow(color: Colors.black, offset: Offset(2, 2))],
-                      ),
-                      child: Text(
-                        cat,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 12,
-                          color: isSelected ? Colors.white : Colors.black,
-                        ),
+          // Category Chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              children: _categories.map((cat) {
+                final isSelected = _selectedCategory == cat;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(
+                      cat.toUpperCase(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? Colors.white : Colors.black,
+                        fontSize: 12,
                       ),
                     ),
-                  );
-                },
-              ),
+                    selected: isSelected,
+                    selectedColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: const BorderSide(color: Colors.black, width: 1.5),
+                    ),
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() => _selectedCategory = cat);
+                        _fetchTemplates();
+                      }
+                    },
+                  ),
+                );
+              }).toList(),
             ),
+          ),
           const SizedBox(height: 12),
 
           // Templates grid / list
@@ -228,14 +222,17 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   Widget _buildTemplateCard(Map<String, dynamic> tpl) {
     final category = tpl['category'] ?? '';
     final previewImageUrl = tpl['previewImageUrl'] as String?;
+    final payloadJson = tpl['payloadJson'] is Map ? Map<String, dynamic>.from(tpl['payloadJson']) : {};
+    final formState = payloadJson['formState'] is Map ? Map<String, dynamic>.from(payloadJson['formState']) : {};
 
-    // Build display title: e.g. "Template Poster #1"
-    final categoryTemplates = _templates.where((t) => t['category'] == category).toList();
-    final indexInCategory = categoryTemplates.indexOf(tpl);
-    final catLabel = category.isNotEmpty
-        ? '${category.substring(0, 1).toUpperCase()}${category.substring(1)}'
+    final catLabel = category.toString().isNotEmpty
+        ? '${category.toString().substring(0, 1).toUpperCase()}${category.toString().substring(1)}'
         : 'Template';
-    final displayTitle = 'Template $catLabel #${indexInCategory != -1 ? indexInCategory + 1 : 1}';
+
+    final topic = tpl['title'] ?? formState['topic'] ?? payloadJson['topic'] ?? '';
+    final displayTitle = topic.toString().trim().isNotEmpty
+        ? topic.toString().trim()
+        : 'Template $catLabel';
 
     return GestureDetector(
       onTap: () => _openTemplate(tpl, displayTitle),
@@ -245,29 +242,38 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image (clean, no overlay text) ──
+            // ── Image (Clean, click image opens fullscreen lightbox) ──
             Expanded(
-              child: previewImageUrl != null && previewImageUrl.isNotEmpty
-                  ? Image.network(
-                      previewImageUrl,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(catLabel),
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Container(
-                          color: const Color(0xFFF3F3F3),
-                          child: const Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: NeoTheme.accentPink),
+              child: GestureDetector(
+                onTap: () {
+                  if (previewImageUrl != null && previewImageUrl.isNotEmpty) {
+                    ImageCarouselModal.show(context, [previewImageUrl]);
+                  } else {
+                    _openTemplate(tpl, displayTitle);
+                  }
+                },
+                child: previewImageUrl != null && previewImageUrl.isNotEmpty
+                    ? Image.network(
+                        previewImageUrl,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(catLabel),
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return Container(
+                            color: const Color(0xFFF3F3F3),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: NeoTheme.accentPink),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    )
-                  : _buildImagePlaceholder(catLabel),
+                          );
+                        },
+                      )
+                    : _buildImagePlaceholder(catLabel),
+              ),
             ),
 
             // ── Title ──

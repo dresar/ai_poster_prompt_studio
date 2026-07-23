@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/neo_theme.dart';
+import '../../core/services/cache_service.dart';
 
 class NeoDropdownOption {
   final String id;
@@ -43,6 +44,14 @@ class NeoDropdownField extends StatelessWidget {
 
   static Widget buildImageWidget(String path, {BoxFit fit = BoxFit.cover, double? errorSize = 24}) {
     if (path.startsWith('http')) {
+      final localCachedPath = CacheService.instance.getLocalCachePathFor(path);
+      if (localCachedPath != null) {
+        return Image.file(
+          File(localCachedPath),
+          fit: fit,
+          errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: errorSize, color: NeoTheme.textMuted),
+        );
+      }
       return CachedNetworkImage(
         imageUrl: path,
         fit: fit,

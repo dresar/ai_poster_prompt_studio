@@ -3,6 +3,7 @@ import {
   getDashboardStats,
   getGeminiKeys,
   createGeminiKey,
+  bulkImportGeminiKeys,
   updateGeminiKey,
   deleteGeminiKey,
   encryptOldKey,
@@ -50,6 +51,7 @@ router.get('/stats', getDashboardStats);
 
 router.get('/keys', getGeminiKeys);
 router.post('/keys', createGeminiKey);
+router.post('/keys/bulk-import', bulkImportGeminiKeys);
 router.post('/keys/test-all', testAllGeminiKeys);
 router.post('/keys/:id/test', testGeminiKey);
 router.patch('/keys/:id', updateGeminiKey);

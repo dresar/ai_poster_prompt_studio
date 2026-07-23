@@ -15,6 +15,7 @@ class QuotesForm extends StatefulWidget {
   final bool isGenerating;
   final bool isAnalyzing;
   final Future<void> Function(Map<String, dynamic> payload) onGenerate;
+  final void Function(Map<String, dynamic> payload) onGenerateExternal;
   final Future<Map<String, String>?> Function(String topic) onAnalyzeCerdas;
 
   const QuotesForm({
@@ -25,6 +26,7 @@ class QuotesForm extends StatefulWidget {
     required this.isGenerating,
     required this.isAnalyzing,
     required this.onGenerate,
+    required this.onGenerateExternal,
     required this.onAnalyzeCerdas,
   });
 
@@ -49,6 +51,10 @@ class _QuotesFormState extends State<QuotesForm> {
   bool _useManualLogo = false;
   bool _includeCaption = false;
   String _watermarkText = '';
+  bool _autoCta = false;
+  final _hookController = TextEditingController();
+  bool _autoHook = false;
+  bool _showSlideCountCard = true;
 
   @override
   void dispose() {
@@ -56,6 +62,7 @@ class _QuotesFormState extends State<QuotesForm> {
     _descController.dispose();
     _extraController.dispose();
     _ctaController.dispose();
+    _hookController.dispose();
     super.dispose();
   }
 
@@ -67,6 +74,12 @@ class _QuotesFormState extends State<QuotesForm> {
       setState(() {
         _descController.text = result['description'] ?? '';
         _extraController.text = result['extraDetails'] ?? '';
+        if (_autoHook && result['hook'] != null && result['hook']!.isNotEmpty) {
+          _hookController.text = result['hook']!;
+        }
+        if (_autoCta && result['cta'] != null && result['cta']!.isNotEmpty) {
+          _ctaController.text = result['cta']!;
+        }
       });
     }
   }
@@ -77,6 +90,27 @@ class _QuotesFormState extends State<QuotesForm> {
       'topic': _topicController.text.trim(),
       'description': _descController.text.trim(),
       'extraDetails': _extraController.text.trim(),
+      'hook': _hookController.text.trim(),
+      'callToAction': _ctaController.text.trim(),
+      'watermark': _watermarkText,
+      'useManualLogo': _useManualLogo,
+      'includeCaption': true,
+      'style': _selectedStyle?.value ?? 'auto',
+      'theme': _selectedTheme?.value ?? 'auto',
+      'aspectRatio': _selectedRatio?.value ?? '9:16',
+      'colorPalette': _selectedColor?.value ?? 'auto',
+      'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'slideCount': _slideCount,
+    });
+  }
+
+  void _submitExternal() {
+    widget.onGenerateExternal({
+      'feature': 'quotes',
+      'topic': _topicController.text.trim(),
+      'description': _descController.text.trim(),
+      'extraDetails': _extraController.text.trim(),
+      'hook': _hookController.text.trim(),
       'callToAction': _ctaController.text.trim(),
       'watermark': _watermarkText,
       'useManualLogo': _useManualLogo,
@@ -120,6 +154,13 @@ class _QuotesFormState extends State<QuotesForm> {
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
+              NeoTextField(
+                key: const ValueKey('quotes_hook'),
+                label: 'Hook / Kalimat Pemikat',
+                placeholder: 'mis: Mau tahu rahasia sukses? (Opsional)',
+                controller: _hookController,
+              ),
+              const SizedBox(height: 16),
                Wrap(
                 alignment: WrapAlignment.end,
                 spacing: 10,
@@ -131,9 +172,15 @@ class _QuotesFormState extends State<QuotesForm> {
                     onPressed: () => IdeasHelper.showIdeasDialog(
                       context: context,
                       defaultCategory: 'quotes',
-                      onIdeaSelected: (idea) {
+                       onIdeaSelected: (idea, {slideCount, autoHook = false, autoCta = false}) {
                         setState(() {
                           _topicController.text = idea;
+                          _autoHook = autoHook;
+                          _autoCta = autoCta;
+                          if (slideCount != null) {
+                            _slideCount = slideCount;
+                            _showSlideCountCard = false;
+                          }
                         });
                         _runAnalyze();
                       },
@@ -151,49 +198,97 @@ class _QuotesFormState extends State<QuotesForm> {
           ),
         ),
         const SizedBox(height: 20),
-        const SizedBox(height: 20),
 
-        NeoSectionCard(
-          title: 'Jumlah Slide',
-          emoji: '📱',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Pilih Jumlah Slide (Max 10):', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Container(
-                    decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    child: Text('$_slideCount Slide', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        if (_showSlideCountCard)
+          NeoSectionCard(
+            title: 'Jumlah Slide',
+            emoji: '📱',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Pilih Jumlah Slide (Max 10):', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Container(
+                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      child: Text('$_slideCount Slide', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Slider(
+                  value: _slideCount.toDouble(),
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  activeColor: Colors.black,
+                  inactiveColor: Colors.grey[300],
+                  label: '$_slideCount Slide',
+                  onChanged: (val) => setState(() => _slideCount = val.round()),
+                ),
+              ],
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F9F9),
+                      border: Border.all(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Jumlah Slide: $_slideCount Slide',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        GestureDetector(
+                          onTap: () => setState(() => _showSlideCountCard = true),
+                          child: const Text(
+                            'Ubah',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: NeoTheme.accentPink,
+                              fontSize: 13,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Slider(
-                value: _slideCount.toDouble(),
-                min: 1,
-                max: 10,
-                divisions: 9,
-                activeColor: Colors.black,
-                inactiveColor: Colors.grey[300],
-                label: '$_slideCount Slide',
-                onChanged: (val) => setState(() => _slideCount = val.round()),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-        ),
         const SizedBox(height: 20),
 
         NeoSectionCard(
           title: 'Catatan Penafsiran (Opsional)',
           emoji: '📝',
+          trailing: NeoFullscreenButton(
+            onTap: () => NeoTextField.showExpandedModal(
+              context,
+              controller: _descController,
+              label: 'Catatan Penafsiran',
+              placeholder: 'Penjelasan tambahan tentang mood quotes, dsb...',
+            ),
+          ),
           child: NeoTextField(
-            label: 'Catatan Visual Tambahan',
+            label: '',
             placeholder: 'Penjelasan tambahan tentang mood quotes, dsb...',
             controller: _descController,
             maxLines: 2,
+            showFullScreenButton: false,
           ),
         ),
         const SizedBox(height: 20),
@@ -271,39 +366,49 @@ class _QuotesFormState extends State<QuotesForm> {
                     isVisualGrid: true,
                   ),
                  NeoSelectedPreview(option: _selectedCharFocus, height: 120),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        NeoSectionCard(
-          title: 'Logo',
-          emoji: '🛡️',
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              SwitchListTile(
-                title: const Text('⚠️ Gunakan Logo (Upload Manual)', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Instruksi ke AI agar memberi tempat kosong untuk logo.', style: TextStyle(fontSize: 12)),
-                value: _useManualLogo,
-                activeColor: Colors.black,
-                onChanged: (val) => setState(() => _useManualLogo = val),
-              ),
-              const SizedBox(height: 12),
-              NeoWatermarkListField(
-                initialValue: _watermarkText,
-                onChanged: (val) => setState(() => _watermarkText = val),
-              ),
+                 const SizedBox(height: 16),
+                 const Divider(color: Colors.black, thickness: 1.5),
+                 const SizedBox(height: 16),
+                 const Align(
+                   alignment: Alignment.centerLeft,
+                   child: Text('Pengaturan Branding & Watermark', style: TextStyle(fontWeight: FontWeight.bold)),
+                 ),
+                 const SizedBox(height: 8),
+                 SwitchListTile(
+                   title: const Text('⚠️ Gunakan Logo (Upload Manual)', style: TextStyle(fontWeight: FontWeight.bold)),
+                   subtitle: const Text('Instruksi ke AI agar memberi tempat kosong untuk logo.', style: TextStyle(fontSize: 12)),
+                   value: _useManualLogo,
+                   activeColor: Colors.black,
+                   onChanged: (val) => setState(() => _useManualLogo = val),
+                 ),
+                 const SizedBox(height: 12),
+                 NeoWatermarkListField(
+                   initialValue: _watermarkText,
+                   onChanged: (val) => setState(() => _watermarkText = val),
+                 ),
+               ],
             ],
           ),
         ),
         const SizedBox(height: 32),
 
-        NeoPrimaryButton(
-          text: '⚡ GENERATE QUOTES (1 Kredit)',
-          isLoading: widget.isGenerating,
-          onPressed: _submit,
+        Row(
+          children: [
+            Expanded(
+              child: NeoPrimaryButton(
+                text: '⚡ GENERATE (AI BAWAAN)',
+                isLoading: widget.isGenerating,
+                onPressed: _submit,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: NeoPrimaryButton(
+                text: '📋 SALIN PROMPT (AI LAIN)',
+                onPressed: _submitExternal,
+              ),
+            ),
+          ],
         ),
       ],
     );

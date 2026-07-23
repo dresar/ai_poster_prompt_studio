@@ -91,7 +91,7 @@ class _ResultViewState extends State<ResultView> {
     if (isVideo) {
       slidesOrSegmentsRaw = payload['segmentsContent'] ?? payload['output']?['segments'] ?? [];
     } else {
-      slidesOrSegmentsRaw = payload['output']?['slides'] ?? [];
+      slidesOrSegmentsRaw = payload['slidesContent'] ?? payload['output']?['slides'] ?? [];
     }
     if (slidesOrSegmentsRaw is List) {
       _slides = slidesOrSegmentsRaw.map((e) => Map<String, dynamic>.from(e as Map)).toList();

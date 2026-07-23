@@ -139,6 +139,67 @@ export const createGeminiKey = async (req: Request, res: Response, next: NextFun
   }
 };
 
+export const bulkImportGeminiKeys = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { rawKeys, provider = 'gemini' } = req.body;
+    if (!rawKeys || typeof rawKeys !== 'string' || rawKeys.trim().length === 0) {
+      throw new AppError('Daftar API Key (rawKeys) tidak boleh kosong.', 400, 'BAD_REQUEST');
+    }
+
+    // Split by newlines, commas, or semicolons
+    const keysArray = rawKeys
+      .split(/[\n,\;\r]+/)
+      .map(k => k.trim())
+      .filter(k => k.length > 10);
+
+    if (keysArray.length === 0) {
+      throw new AppError('Tidak ada API Key valid yang ditemukan dalam teks import.', 400, 'NO_VALID_KEYS');
+    }
+
+    const encryptionKey = getEncryptionKey();
+    const shouldEncrypt = !!encryptionKey;
+
+    const existingKeys = await db.select().from(geminiApiKeys).where(eq(geminiApiKeys.provider, provider.toLowerCase()));
+    let startPriority = existingKeys.length > 0 ? Math.max(...existingKeys.map(k => k.priority || 0)) + 1 : 0;
+
+    let addedCount = 0;
+    const insertedKeys = [];
+
+    for (const key of keysArray) {
+      const finalKey = shouldEncrypt ? encrypt(key) : key;
+      const [newKey] = await db.insert(geminiApiKeys).values({
+        id: crypto.randomUUID(),
+        keyEncrypted: finalKey,
+        isEncrypted: shouldEncrypt,
+        priority: startPriority++,
+        isActive: true,
+        healthStatus: 'healthy',
+        provider: provider.toLowerCase(),
+      }).returning();
+
+      insertedKeys.push(newKey);
+      addedCount++;
+    }
+
+    if (req.user?.id) {
+      await db.insert(logs).values({
+        id: crypto.randomUUID(),
+        userId: req.user.id,
+        action: 'bulk_import_gemini_keys',
+        detail: { addedCount, provider },
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Berhasil mengimpor ${addedCount} API Key ${provider.toUpperCase()}!`,
+      data: { addedCount, keys: insertedKeys },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateGeminiKey = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
@@ -878,13 +939,14 @@ export const getPromptTemplates = async (req: Request, res: Response, next: Next
 
 export const createPromptTemplate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { category, template, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
+    const { title, category, template, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
     if (!category || !template) {
       throw new AppError('Kategori dan template wajib diisi', 400, 'BAD_REQUEST');
     }
 
     const [newTpl] = await db.insert(promptTemplates).values({
       id: crypto.randomUUID(),
+      title: title || payloadJson?.formState?.topic || payloadJson?.topic || null,
       category,
       template,
       isActive: true,
@@ -909,9 +971,10 @@ export const createPromptTemplate = async (req: Request, res: Response, next: Ne
 export const updatePromptTemplate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { category, template, isActive, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
+    const { title, category, template, isActive, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
 
     const [updated] = await db.update(promptTemplates).set({
+      ...(title !== undefined ? { title } : {}),
       ...(category !== undefined ? { category } : {}),
       ...(template !== undefined ? { template } : {}),
       ...(isActive !== undefined ? { isActive } : {}),

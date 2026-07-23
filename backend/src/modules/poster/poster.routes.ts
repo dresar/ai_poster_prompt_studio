@@ -13,6 +13,10 @@ import {
   activateLicense,
   chat,
   analyzeStoryboard,
+  importExternalPrompt,
+  saveExternalDraft,
+  suggestCharacter,
+  suggestVisualStyle,
 } from './poster.controller';
 import {
   analyzeTopicSchema,
@@ -22,6 +26,8 @@ import {
   getHooksSchema,
   improvePromptSchema,
   analyzeStoryboardSchema,
+  importExternalPromptSchema,
+  saveExternalDraftSchema,
 } from './poster.schema';
 import { validate } from '../../middlewares/validator';
 import { authenticate } from '../../middlewares/auth';
@@ -47,5 +53,10 @@ router.post('/chat', chat);
 router.get('/ideas', validate({ query: getIdeasSchema }), getContentIdeas);
 router.get('/hooks', validate({ query: getHooksSchema }), getHooks);
 router.post('/improve', validate({ body: improvePromptSchema }), improvePrompt);
+router.post('/import-external', validate({ body: importExternalPromptSchema }), importExternalPrompt);
+router.post('/save-external-draft', validate({ body: saveExternalDraftSchema }), saveExternalDraft);
+
+router.get('/suggest-character', suggestCharacter);
+router.get('/suggest-visual-style', suggestVisualStyle);
 
 export default router;

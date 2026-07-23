@@ -1,4 +1,4 @@
-import 'dart:convert' show JsonEncoder, base64Encode;
+import 'dart:convert' show JsonEncoder, jsonDecode, base64Encode;
 import 'dart:io' as io;
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +11,7 @@ import '../../core/theme/neo_theme.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/utils/clipboard_helper.dart';
 import '../../core/utils/file_directory_helper.dart';
+import '../../shared/widgets/image_carousel_modal.dart';
 
 
 class HistoryDetailPage extends StatefulWidget {
@@ -91,7 +92,23 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
       _referenceImageUrls = [_previewImageUrl!];
     }
 
-    final payload = widget.promptData['payloadJson'] ?? {};
+    final rawPayload = widget.promptData['payloadJson'];
+    Map<String, dynamic> payload = {};
+    if (rawPayload is Map) {
+      payload = Map<String, dynamic>.from(rawPayload);
+    } else if (rawPayload is String && rawPayload.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawPayload);
+        if (decoded is Map) {
+          payload = Map<String, dynamic>.from(decoded);
+        }
+      } catch (_) {}
+    }
+
+    if (payload.isEmpty) {
+      payload = Map<String, dynamic>.from(widget.promptData);
+    }
+
     _feature = payload['feature'] ?? widget.promptData['feature'] ?? '';
     _logoExplanation = payload['output']?['logoExplanation'] ?? '';
     _analysisShortcomings = payload['output']?['analysisShortcomings'] ?? '';
@@ -109,7 +126,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
     if (isVideo) {
       slidesOrSegmentsRaw = payload['segmentsContent'] ?? payload['output']?['segments'] ?? [];
     } else {
-      slidesOrSegmentsRaw = payload['output']?['slides'] ?? [];
+      slidesOrSegmentsRaw = payload['slidesContent'] ?? payload['output']?['slides'] ?? [];
     }
     if (slidesOrSegmentsRaw is List) {
       _slides = slidesOrSegmentsRaw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
@@ -124,7 +141,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
       'engagement': widget.promptData['viralScore'] != null ? 85 : 0,
     };
 
-    _payloadJsonString = _prettyJson(payload);
+    _payloadJsonString = _prettyJson(payload.isNotEmpty ? payload : widget.promptData);
 
     // Image evaluations extraction
     final output = payload['output'] ?? {};
@@ -173,6 +190,10 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
       }
       
       _analyzerReport = payload['analyzerReport'] ?? {};
+    }
+
+    if (_feature == 'karakter' || _feature == 'gaya_visual') {
+      _viewTab = 20;
     }
   }
 
@@ -420,6 +441,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
     setState(() => _isSavingTemplate = true);
     try {
       final response = await dioClient.post('/admin/templates', data: {
+        'title': topic,
         'category': selectedCategory,
         'template': _promptFinal,
         'previewImageUrl': _previewImageUrl,
@@ -536,6 +558,8 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
     final showSlidesTab = _slides.isNotEmpty;
     final showCaptionTab = _socialMediaCaption.isNotEmpty;
 
+    final isKarakterOrGaya = _feature == 'karakter' || _feature == 'gaya_visual';
+
     final List<Map<String, dynamic>> tabs = _feature == 'advanced_video' ? [
       {'label': 'STORYBOARD', 'index': 10},
       {'label': 'OPTIMIZED PROMPTS', 'index': 11},
@@ -543,6 +567,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
       {'label': 'SMART AUDITOR', 'index': 13},
       {'label': 'PAYLOAD JSON', 'index': 2},
     ] : [
+      if (isKarakterOrGaya) {'label': _feature == 'karakter' ? '📋 PROMPT KARAKTER' : '📋 PROMPT GAYA VISUAL', 'index': 20},
       {'label': 'DSL CODE', 'index': 0},
       if (showSlidesTab) {'label': _feature == 'video' ? 'SEGMENTS' : 'SLIDES', 'index': 4},
       if (showCaptionTab) {'label': 'CAPTION', 'index': 5},
@@ -731,12 +756,15 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Image.network(
-                                _referenceImageUrls[index],
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  color: Colors.grey[200],
-                                  child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+                              child: GestureDetector(
+                                onTap: () => ImageCarouselModal.show(context, _referenceImageUrls, initialIndex: index),
+                                child: Image.network(
+                                  _referenceImageUrls[index],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: Colors.grey[200],
+                                    child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+                                  ),
                                 ),
                               ),
                             ),
@@ -1069,10 +1097,12 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
             constraints: const BoxConstraints(minHeight: 200),
             decoration: NeoTheme.neoBoxDecoration(color: Colors.white, borderRadius: 16, hasShadow: true),
             padding: const EdgeInsets.all(16),
-            child: _viewTab == 10
-                ? _buildAdvancedVideoStoryboard()
-                : _viewTab == 11
-                    ? _buildAdvancedVideoOptimizedPrompts()
+            child: _viewTab == 20
+                ? _buildKarakterGayaVisualPromptView()
+                : _viewTab == 10
+                    ? _buildAdvancedVideoStoryboard()
+                    : _viewTab == 11
+                        ? _buildAdvancedVideoOptimizedPrompts()
                     : _viewTab == 12
                         ? _buildAdvancedVideoContinuity()
                         : _viewTab == 13
@@ -1185,7 +1215,10 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
                   text: 'Salin JSON',
                   icon: Icons.code,
                   onTap: () {
-                    _copyText(_payloadJsonString, 'JSON disalin!');
+                    final jsonStr = _payloadJsonString.trim().isNotEmpty
+                        ? _payloadJsonString
+                        : _prettyJson(widget.promptData);
+                    _copyText(jsonStr, 'JSON Payload disalin!');
                   },
                 ),
               ),
@@ -1246,6 +1279,79 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
         ),
         const SizedBox(width: 8),
         Text('$value', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
+      ],
+    );
+  }
+
+  Widget _buildKarakterGayaVisualPromptView() {
+    final title = _feature == 'karakter' ? '🎭 MASTER PROMPT BIBLE KARAKTER' : '🎨 MASTER PROMPT DESIGN SYSTEM';
+    final payload = widget.promptData['payloadJson'] ?? {};
+    
+    String promptText = _promptFinal;
+    if (payload['aiPrompts'] != null) {
+      final aiP = payload['aiPrompts'];
+      if (aiP['masterPositivePrompt'] != null && aiP['masterPositivePrompt'].toString().isNotEmpty) {
+        promptText = aiP['masterPositivePrompt'].toString();
+      } else if (aiP['midjourney'] != null && aiP['midjourney'].toString().isNotEmpty) {
+        promptText = aiP['midjourney'].toString();
+      }
+    }
+    
+    if (promptText.isEmpty) {
+      promptText = _promptFinal;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(_feature == 'karakter' ? Icons.face_retouching_natural : Icons.palette, color: Colors.black, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.black, width: 2),
+          ),
+          child: SelectableText(
+            promptText,
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 12,
+              color: Color(0xFF4FC3F7),
+              height: 1.5,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => _copyText(promptText, '📋 Master Prompt berhasil disalin!'),
+            icon: const Icon(Icons.copy_all, color: Colors.white, size: 18),
+            label: const Text('📋 SALIN PROMPT SUPER DETAIL', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 12)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9800),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: const BorderSide(color: Colors.black, width: 2),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

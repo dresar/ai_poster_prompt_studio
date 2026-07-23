@@ -45,6 +45,8 @@ function KeysPage() {
 
   // Pool Keys States
   const [open, setOpen] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [rawKeys, setRawKeys] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [priority, setPriority] = useState(1);
   const [provider, setProvider] = useState("gemini");
@@ -100,6 +102,18 @@ function KeysPage() {
       setApiKey("");
       setPriority(1);
       setProvider("gemini");
+      qc.invalidateQueries({ queryKey: ["admin", "keys"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const bulkImportMut = useMutation({
+    mutationFn: () =>
+      api("/admin/keys/bulk-import", { method: "POST", body: { rawKeys, provider: "gemini" } }),
+    onSuccess: (res: any) => {
+      toast.success(res.message || "Berhasil mengimpor API Key massal!");
+      setShowBulkModal(false);
+      setRawKeys("");
       qc.invalidateQueries({ queryKey: ["admin", "keys"] });
     },
     onError: (e: any) => toast.error(e.message),
@@ -220,6 +234,12 @@ function KeysPage() {
               >
                 <RefreshCw className={`w-4 h-4 mr-2 inline ${testAllMut.isPending ? "animate-spin" : ""}`} />
                 {testAllMut.isPending ? "MENGUJI…" : "TES SEMUA KUNCI"}
+              </button>
+              <button
+                onClick={() => setShowBulkModal(true)}
+                className={`${nb.btn} bg-[var(--nb-yellow)] border-2 border-black !text-black !py-2 !px-4 text-sm font-bold`}
+              >
+                ⚡ IMPORT MASSAL GEMINI KEYS
               </button>
               <button onClick={() => { setProvider(providerTab); setOpen(true); }} className={`${nb.btn} ${nb.btnPink}`}>
                 <Plus className="w-4 h-4" /> Tambah Kunci Pool
@@ -649,6 +669,40 @@ function KeysPage() {
                   className={`${nb.btn} ${nb.btnGreen} w-full`}
                 >
                   {createDevKeyMut.isPending ? "MEMBUAT…" : "BUAT API KEY"}
+                </button>
+              </form>
+            </Modal>
+          )}
+
+          {showBulkModal && (
+            <Modal onClose={() => setShowBulkModal(false)} title="⚡ Import Massal API Key Gemini">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  bulkImportMut.mutate();
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className={nb.label}>Paste Daftar API Key Gemini (Satu per baris / Dipisah koma)</label>
+                  <textarea
+                    required
+                    rows={6}
+                    value={rawKeys}
+                    onChange={(e) => setRawKeys(e.target.value)}
+                    className={`${nb.input} font-mono text-xs`}
+                    placeholder={`AIzaSyA1...\nAIzaSyB2...\nAIzaSyC3...`}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1 font-mono">
+                    Sistem akan secara otomatis menyaring key Gemini valid, memberikan prioritas rotasi berurutan, dan mengenkripsi key secara otomatis.
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={bulkImportMut.isPending || !rawKeys.trim()}
+                  className={`${nb.btn} bg-[var(--nb-yellow)] text-black font-bold w-full`}
+                >
+                  {bulkImportMut.isPending ? "MENGIMPOR…" : "🚀 PROSES IMPORT MASSAL"}
                 </button>
               </form>
             </Modal>

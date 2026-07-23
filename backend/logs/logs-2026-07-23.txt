@@ -1,0 +1,4 @@
+[2026-07-23 13:57:04:574] info: Cleared port 3000
+[2026-07-23 13:57:04:574] info: Server is running in development mode on port 3000
+[2026-07-23 13:57:47:5747] info: Cleared port 3000
+[2026-07-23 13:57:47:5747] info: Server is running in development mode on port 3000

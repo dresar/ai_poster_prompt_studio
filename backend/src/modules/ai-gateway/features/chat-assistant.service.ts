@@ -7,7 +7,7 @@ import { eq, and, desc } from 'drizzle-orm';
 export class ChatAssistantService {
   constructor(private geminiClient: GeminiClient, private groqClient: GroqClient) {}
 
-  async generateContentIdeas(userId: string, category: string, provider: 'gemini' | 'groq'): Promise<string[]> {
+  async generateContentIdeas(userId: string, category: string, provider: 'gemini' | 'groq', slideCount?: number): Promise<string[]> {
     const history = await db.select({ topic: prompts.topic }).from(prompts)
       .where(and(eq(prompts.userId, userId), eq(prompts.category, category)))
       .orderBy(desc(prompts.createdAt)).limit(10);
@@ -17,7 +17,13 @@ export class ChatAssistantService {
       ? `Topik yang pernah dibuat sebelumnya (HINDARI ide yang mirip): ${historyTopics.join(', ')}`
       : 'User belum pernah membuat topik untuk kategori ini.';
 
-    const prompt = `Berikan 5 ide topik konten poster yang kreatif, segar, dan sangat berpotensi viral untuk kategori: "${category}".
+    let slideInstructions = '';
+    if (slideCount && slideCount > 1) {
+      const contentSlides = slideCount - 1;
+      slideInstructions = `\nTopik harus dirancang khusus untuk format carousel dengan TEPAT ${slideCount} slide, di mana slide pertama didedikasikan untuk Cover & Hook utama. Oleh karena itu, buatlah ide topik yang memiliki tepat ${contentSlides} cara / langkah / tips / fakta penting (misalnya: "5 Cara...", "5 Langkah...", "5 Tips...").`;
+    }
+
+    const prompt = `Berikan 5 ide topik konten poster/carousel yang kreatif, segar, dan sangat berpotensi viral untuk kategori: "${category}".${slideInstructions}
 Konteks riwayat user:
 ${historyContext}
 
@@ -36,7 +42,7 @@ Tulis ide topik dalam Bahasa Indonesia yang singkat, padat, dan menarik perhatia
         const parsed = JSON.parse(this.groqClient.sanitizeJson(text));
         if (Array.isArray(parsed)) return parsed;
         for (const val of Object.values(parsed)) {
-          if (Array.isArray(val)) return val;
+          if (Array.isArray(val)) return val as string[];
         }
         return [];
       });
@@ -50,7 +56,7 @@ Tulis ide topik dalam Bahasa Indonesia yang singkat, padat, dan menarik perhatia
         const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
         if (Array.isArray(parsed)) return parsed;
         for (const val of Object.values(parsed)) {
-          if (Array.isArray(val)) return val;
+          if (Array.isArray(val)) return val as string[];
         }
         return [];
       });

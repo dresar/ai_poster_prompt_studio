@@ -4,11 +4,16 @@ import 'core/theme/neo_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/network/dio_client.dart';
 
-void main() {
+import 'core/services/cache_service.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Setup dio network request headers and token auth interceptors
   setupDioInterceptors();
+
+  // Initialize background image cache directory
+  await CacheService.instance.init();
 
   runApp(
     const ProviderScope(

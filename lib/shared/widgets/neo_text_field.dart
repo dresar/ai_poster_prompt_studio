@@ -9,6 +9,7 @@ class NeoTextField extends StatelessWidget {
   final int maxLines;
   final TextInputType keyboardType;
   final FormFieldValidator<String>? validator;
+  final bool showFullScreenButton;
 
   const NeoTextField({
     super.key,
@@ -19,9 +20,24 @@ class NeoTextField extends StatelessWidget {
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.validator,
+    this.showFullScreenButton = true,
   });
 
   void _showExpandedModal(BuildContext context) {
+    showExpandedModal(
+      context,
+      controller: controller,
+      label: label.isEmpty ? 'Konten' : label,
+      placeholder: placeholder,
+    );
+  }
+
+  static void showExpandedModal(
+    BuildContext context, {
+    required TextEditingController controller,
+    required String label,
+    required String placeholder,
+  }) {
     final tempController = TextEditingController(text: controller.text);
     showDialog(
       context: context,
@@ -43,9 +59,9 @@ class NeoTextField extends StatelessWidget {
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: NeoTheme.accentPink,
+                    color: Colors.black,
+                    shape: BoxShape.circle,
                     border: Border.all(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(8),
                   ),
                   padding: const EdgeInsets.all(4),
                   child: const Icon(Icons.close, color: Colors.white, size: 16),
@@ -110,53 +126,59 @@ class NeoTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasHeader = label.isNotEmpty || (maxLines > 1 && showFullScreenButton);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-            ),
-            if (maxLines > 1)
-              GestureDetector(
-                onTap: () => _showExpandedModal(context),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black,
-                        offset: Offset(2, 2),
+        if (hasHeader) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (label.isNotEmpty)
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
                       ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.fullscreen, size: 16, color: Colors.black),
-                      SizedBox(width: 4),
-                      Text(
-                        'Perbesar',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
+                )
+              else
+                const SizedBox.shrink(),
+              if (maxLines > 1 && showFullScreenButton)
+                GestureDetector(
+                  onTap: () => _showExpandedModal(context),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: const [
+                        BoxShadow(
                           color: Colors.black,
+                          offset: Offset(2, 2),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.fullscreen, size: 16, color: Colors.black),
+                        SizedBox(width: 4),
+                        Text(
+                          'Perbesar',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
         Container(
           decoration: NeoTheme.neoBoxDecoration(
             color: Colors.white,

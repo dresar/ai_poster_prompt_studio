@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../../config/db';
 import { prompts, users } from '../../db/schema';
-import { eq, and, or, ilike, desc, sql } from 'drizzle-orm';
+import { eq, ne, and, or, ilike, desc, sql } from 'drizzle-orm';
 import { AppError } from '../../middlewares/errorHandler';
 import crypto from 'crypto';
 
 export const getHistory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    const { page = '1', limit = '10', search, mode, category, favorite } = req.query;
+    const { page = '1', limit = '10', search, mode, category, favorite, type } = req.query;
 
     const pageNum = parseInt(String(page), 10);
     const limitNum = parseInt(String(limit), 10);
@@ -16,7 +16,15 @@ export const getHistory = async (req: Request, res: Response, next: NextFunction
 
     // Build filter conditions
     const conditions = [eq(prompts.userId, userId)];
-    if (mode) conditions.push(eq(prompts.mode, String(mode)));
+    if (type === 'draft') {
+      conditions.push(eq(prompts.mode, 'external_draft'));
+    } else {
+      // For type='result' or default queries, ALWAYS exclude external_draft
+      conditions.push(ne(prompts.mode, 'external_draft'));
+      if (mode) {
+        conditions.push(eq(prompts.mode, String(mode)));
+      }
+    }
     if (category) conditions.push(eq(prompts.category, String(category)));
     if (favorite === 'true') conditions.push(eq(prompts.isFavorite, true));
     if (search) {

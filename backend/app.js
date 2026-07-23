@@ -52762,6 +52762,7 @@ var init_schema2 = __esm({
     });
     promptTemplates = pgTable("PromptTemplate", {
       id: text("id").primaryKey(),
+      title: text("title"),
       category: text("category").notNull(),
       template: text("template").notNull(),
       isActive: boolean("isActive").default(true).notNull(),
@@ -63399,10 +63400,6 @@ var auth_routes_default = router;
 // src/modules/poster/poster.routes.ts
 var import_express2 = __toESM(require_express2());
 
-// src/modules/ai-gateway/ai-gateway.service.ts
-init_db2();
-init_schema2();
-
 // node_modules/@google/generative-ai/dist/index.mjs
 var SchemaType;
 (function(SchemaType2) {
@@ -64399,7 +64396,11 @@ function formatAiError(rawError, provider = "gemini") {
 // src/modules/ai-gateway/core/gemini-client.ts
 var GeminiClient = class {
   async getHealthyKeys() {
-    return await db.select().from(geminiApiKeys).where(and(eq(geminiApiKeys.provider, "gemini"), eq(geminiApiKeys.isActive, true), eq(geminiApiKeys.healthStatus, "healthy"))).orderBy(asc(geminiApiKeys.priority));
+    return await db.select().from(geminiApiKeys).where(and(
+      eq(geminiApiKeys.provider, "gemini"),
+      eq(geminiApiKeys.isActive, true),
+      eq(geminiApiKeys.healthStatus, "healthy")
+    )).orderBy(asc(geminiApiKeys.priority));
   }
   sanitizeJson(text2) {
     const jsonMatch = text2.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -64413,6 +64414,9 @@ var GeminiClient = class {
     }
     return text2.trim();
   }
+  /**
+   * Primary Native Multi-API Key Auto-Rotation execution using GoogleGenerativeAI SDK
+   */
   async executeWithKey(fn) {
     const keys = await this.getHealthyKeys();
     const keyPool = [...keys];
@@ -64425,7 +64429,7 @@ var GeminiClient = class {
       });
     }
     if (keyPool.length === 0) {
-      throw new AppError("Terjadi kendala koneksi dengan server AI. Silakan coba lagi nanti.", 500, "NO_API_KEYS");
+      throw new AppError("Terjadi kendala koneksi: Tidak ada API Key Gemini yang aktif. Silakan tambahkan API Key di Admin Panel.", 500, "NO_API_KEYS");
     }
     let lastError = null;
     for (const keyObj of keyPool) {
@@ -64451,9 +64455,9 @@ var GeminiClient = class {
       } catch (error) {
         lastError = error;
         const errorMessage = error?.message || String(error);
-        logger.warn(`Gemini call failed with key ID ${keyObj.id}. Error: ${errorMessage}`);
-        const isQuotaError = errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("Quota");
-        const isNetworkOrTimeout = errorMessage.includes("timeout") || errorMessage.includes("FETCH_ERROR") || errorMessage.includes("500") || errorMessage.includes("503");
+        logger.warn(`Gemini native call failed with key ID ${keyObj.id}. Error: ${errorMessage}`);
+        const isQuotaError = errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("Quota") || errorMessage.includes("LIMIT");
+        const isNetworkOrTimeout = errorMessage.includes("timeout") || errorMessage.includes("FETCH_ERROR") || errorMessage.includes("500") || errorMessage.includes("503") || errorMessage.includes("API_KEY_INVALID");
         if ((isQuotaError || isNetworkOrTimeout) && keyObj.id !== "env_fallback") {
           const newStatus = isQuotaError ? "limited" : "error";
           await db.update(geminiApiKeys).set({
@@ -64466,7 +64470,7 @@ var GeminiClient = class {
             detail: {
               provider: "gemini",
               keyId: keyObj.id,
-              reason: isQuotaError ? "API Rate Limit (429)" : "API Error/Timeout",
+              reason: isQuotaError ? "API Rate Limit (429)" : "API Key Error/Invalid",
               error: errorMessage,
               newStatus,
               demotedToPriority: 100
@@ -64477,10 +64481,46 @@ var GeminiClient = class {
     }
     const cleanErr = lastError?.message || String(lastError);
     throw new AppError(
-      `Gagal memproses permintaan Anda. Kendala: ${formatGeminiError(cleanErr)}`,
+      `Gagal memproses permintaan AI. Kendala: ${formatGeminiError(cleanErr)}`,
       502,
       "AI_SERVICE_ERROR"
     );
+  }
+  /**
+   * Helper method for text & chat completion using native Gemini SDK with model fallback
+   */
+  async generateChatCompletion(messages, options = {}) {
+    const requestedModel = options.model || "gemini-3.1-flash-lite";
+    const fallbackModels = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const candidateModels = Array.from(/* @__PURE__ */ new Set([requestedModel, ...fallbackModels]));
+    const systemMsg = messages.find((m2) => m2.role === "system")?.content || "";
+    const userMsgs = messages.filter((m2) => m2.role !== "system").map((m2) => m2.content).join("\n\n");
+    const fullPrompt = systemMsg ? `${systemMsg}
+
+${userMsgs}` : userMsgs;
+    return await this.executeWithKey(async (genAI) => {
+      let lastModelError = null;
+      for (const modelName of candidateModels) {
+        try {
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            generationConfig: {
+              temperature: options.temperature ?? 0.7,
+              maxOutputTokens: options.max_tokens ?? 4096
+            }
+          });
+          const result = await model.generateContent(fullPrompt);
+          const text2 = result.response.text();
+          if (text2 && text2.trim().length > 0) {
+            return text2.trim();
+          }
+        } catch (err) {
+          logger.warn(`Native Gemini model ${modelName} failed: ${err?.message || err}`);
+          lastModelError = err;
+        }
+      }
+      throw lastModelError || new Error("All native Gemini models failed for key.");
+    });
   }
 };
 
@@ -64691,15 +64731,42 @@ var TopicAnalyzerService = class {
   }
   geminiClient;
   groqClient;
-  async analyzeTopic(topic, provider) {
-    const prompt = `Berikan analisis mendalam dan ide konten untuk topik poster berikut: "${topic}".
+  async analyzeTopic(topic, category, provider) {
+    const isEdukasi = category === "edukasi";
+    const isVideo = category === "video";
+    let typeName = "poster/infografis";
+    if (isEdukasi) typeName = "carousel edukasi";
+    else if (isVideo) typeName = "video";
+    else if (category) typeName = category;
+    const prompt = `Berikan analisis mendalam dan ide konten untuk topik ${typeName} berikut: "${topic}".
 Output harus berformat JSON dengan struktur berikut:
 {
-  "description": "Deskripsi lengkap isi infografis/poster yang menarik untuk audiens",
-  "keyPoints": ["Poin penting 1", "Poin penting 2", "Poin penting 3 (maksimal 5 poin)"],
-  "visualRecommendation": "Rekomendasi gaya gambar, tata letak, dan mood visual yang paling cocok untuk topik ini"
+  "description": "Penjelasan dan ringkasan materi secara SANGAT mendalam, komprehensif, panjang, dan detail (berupa deskripsi detail yang komprehensif, minimal 3 paragraf panjang atau 150-250 kata). Uraikan latar belakang topik, masalah utama yang dibahas, urgensi dari topik tersebut, serta rangkuman lengkap solusinya. DILARANG keras menggunakan kata 'poster' atau 'infografis' jika kategori bukan poster.",
+  "keyPoints": [
+    "Poin penting 1: Tuliskan nama poin/sub-topik diikuti dengan penjelasan konsep yang SANGAT mendalam, detail, dan komprehensif (minimal 50-80 kata per poin). Jelaskan secara gamblang latar belakang poin ini, bagaimana cara kerjanya, contoh konkret penerapannya, serta apa manfaat/dampaknya bagi pembaca. Uraikan sedetail mungkin.",
+    "Poin penting 2: (lakukan penjelasan mendalam yang sama seperti poin 1)",
+    "Poin penting 3: (lakukan penjelasan mendalam yang sama seperti poin 1)",
+    "Poin penting 4 (jika ada, lakukan penjelasan mendalam)",
+    "Poin penting 5 (jika ada, lakukan penjelasan mendalam)"
+  ],
+  "visualRecommendation": "Rekomendasi konsep visual, tata letak, mood, pencahayaan, objek utama, dan palet warna yang paling cocok secara detail (minimal 2-3 kalimat lengkap)",
+  "hook": "Satu kalimat Hook / Kalimat Pemikat yang sangat menarik perhatian, relevan, memicu rasa penasaran, atau viral untuk topik ini",
+  "cta": "Satu kalimat Call to Action (CTA) / ajakan yang kuat dan persuasif yang relevan dengan topik ini"
 }
+Aturan Penting:
+1. Bagian 'description' harus berupa penjelasan ringkasan materi secara SANGAT mendalam, detail, dan lengkap (minimal 3 paragraf atau 150-250 kata). Dilarang menulis penjelasan singkat atau sekadar ringkasan ringkas. Dilarang menyebut kata 'poster' atau 'infografis' di dalamnya (kecuali jika tipe/kategori adalah poster).
+2. Bagian 'keyPoints' harus berupa penjelasan detail untuk masing-masing poin (bukan hanya judul singkat saja, melainkan judul diikuti penjelasan rinci, contoh konkret, dan dampak informatif yang sangat detail, minimal 50-80 kata per poin).
+3. Hasilkan juga 'hook' (kalimat pemikat yang menarik minat pembaca) dan 'cta' (kalimat ajakan bertindak) yang sesuai dengan materi/topik.
 Tulis respons hanya dalam format JSON yang valid, gunakan bahasa Indonesia.`;
+    const cleanAnalysis = (data) => {
+      console.log("cleanAnalysis called. category:", category, "description type:", typeof data?.description);
+      if (data && typeof data.description === "string" && category && category !== "poster") {
+        const oldDesc = data.description;
+        data.description = data.description.replace(/\bposter\b/gi, "materi").replace(/\binfografis\b/gi, "materi");
+        console.log("cleanAnalysis regex replacement. Old:", oldDesc, "New:", data.description);
+      }
+      return data;
+    };
     if (provider === "groq") {
       return this.groqClient.executeWithKey(async (apiKey) => {
         const response = await this.groqClient.post(apiKey, {
@@ -64714,16 +64781,18 @@ Tulis respons hanya dalam format JSON yang valid, gunakan bahasa Indonesia.`;
           ]
         });
         const text2 = response.choices[0]?.message?.content || "{}";
-        return JSON.parse(this.groqClient.sanitizeJson(text2));
+        const parsed = JSON.parse(this.groqClient.sanitizeJson(text2));
+        return cleanAnalysis(parsed);
       });
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
         const model = genAI.getGenerativeModel({
-          model: "gemini-3.1-flash-lite-preview",
+          model: "gemini-1.5-pro",
           generationConfig: { responseMimeType: "application/json" }
         });
         const response = await model.generateContent(prompt);
-        return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+        const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+        return cleanAnalysis(parsed);
       });
     }
   }
@@ -66367,11 +66436,17 @@ var ChatAssistantService = class {
   }
   geminiClient;
   groqClient;
-  async generateContentIdeas(userId, category, provider) {
+  async generateContentIdeas(userId, category, provider, slideCount) {
     const history = await db.select({ topic: prompts.topic }).from(prompts).where(and(eq(prompts.userId, userId), eq(prompts.category, category))).orderBy(desc(prompts.createdAt)).limit(10);
     const historyTopics = history.map((h) => h.topic);
     const historyContext = historyTopics.length > 0 ? `Topik yang pernah dibuat sebelumnya (HINDARI ide yang mirip): ${historyTopics.join(", ")}` : "User belum pernah membuat topik untuk kategori ini.";
-    const prompt = `Berikan 5 ide topik konten poster yang kreatif, segar, dan sangat berpotensi viral untuk kategori: "${category}".
+    let slideInstructions = "";
+    if (slideCount && slideCount > 1) {
+      const contentSlides = slideCount - 1;
+      slideInstructions = `
+Topik harus dirancang khusus untuk format carousel dengan TEPAT ${slideCount} slide, di mana slide pertama didedikasikan untuk Cover & Hook utama. Oleh karena itu, buatlah ide topik yang memiliki tepat ${contentSlides} cara / langkah / tips / fakta penting (misalnya: "5 Cara...", "5 Langkah...", "5 Tips...").`;
+    }
+    const prompt = `Berikan 5 ide topik konten poster/carousel yang kreatif, segar, dan sangat berpotensi viral untuk kategori: "${category}".${slideInstructions}
 Konteks riwayat user:
 ${historyContext}
 
@@ -66503,124 +66578,22 @@ var AIGatewayService = class {
   chatAssistant = new ChatAssistantService(this.geminiClient, this.groqClient);
   viralScoreService = new ViralScoreService(this.geminiClient, this.groqClient);
   async getProvider() {
-    try {
-      const settingsArr = await db.select().from(appSettings).where(eq(appSettings.key, "system_settings")).limit(1);
-      const settings = settingsArr[0];
-      const val = settings?.value;
-      return val?.defaultAIProvider === "groq" ? "groq" : "gemini";
-    } catch {
-      return "gemini";
-    }
+    return "gemini";
   }
   async analyzeReferenceImage(imageUrl) {
-    const provider = await this.getProvider();
-    try {
-      return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, fallback);
-    }
+    return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, "gemini");
   }
-  async analyzeTopic(topic) {
-    const provider = await this.getProvider();
-    try {
-      return await this.topicAnalyzer.analyzeTopic(topic, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.topicAnalyzer.analyzeTopic(topic, fallback);
-    }
+  async analyzeTopic(topic, category) {
+    return await this.topicAnalyzer.analyzeTopic(topic, category, "gemini");
   }
-  async analyzeStoryboard(topic, duration) {
-    const provider = await this.getProvider();
-    try {
-      return await this.topicAnalyzer.generateStoryboard(topic, duration, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.topicAnalyzer.generateStoryboard(topic, duration, fallback);
-    }
+  async generatePosterPrompts(formState) {
+    return await this.promptGenerator.generatePosterPrompts(formState, "gemini");
   }
-  async generatePrompt(fullFormState, previousError) {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.generatePrompt(fullFormState, previousError, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.promptGenerator.generatePrompt(fullFormState, previousError, fallback);
-    }
+  async generateChatResponse(messages, systemInstruction) {
+    return await this.chatAssistant.generateChatResponse(messages, "gemini", systemInstruction);
   }
-  async generateContentIdeas(userId, category) {
-    const provider = await this.getProvider();
-    try {
-      return await this.chatAssistant.generateContentIdeas(userId, category, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.chatAssistant.generateContentIdeas(userId, category, fallback);
-    }
-  }
-  async generateHooks(topic) {
-    const provider = await this.getProvider();
-    try {
-      return await this.topicAnalyzer.generateHooks(topic, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.topicAnalyzer.generateHooks(topic, fallback);
-    }
-  }
-  async improvePrompt(promptDraft) {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.improvePrompt(promptDraft, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.promptGenerator.improvePrompt(promptDraft, fallback);
-    }
-  }
-  async generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes) {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.promptGenerator.generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes, fallback);
-    }
-  }
-  async scoreViral(promptFinal) {
-    const provider = await this.getProvider();
-    try {
-      return await this.viralScoreService.scoreViral(promptFinal, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.viralScoreService.scoreViral(promptFinal, fallback);
-    }
-  }
-  async chat(message, history) {
-    const provider = await this.getProvider();
-    try {
-      return await this.chatAssistant.chat(message, history, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.chatAssistant.chat(message, history, fallback);
-    }
-  }
-  async generatePromptTemplate(category, idea) {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.generatePromptTemplate(category, idea, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === "groq" ? "gemini" : "groq";
-      return await this.promptGenerator.generatePromptTemplate(category, idea, fallback);
-    }
+  async evaluateViralScore(payload) {
+    return await this.viralScoreService.evaluateViralScore(payload, "gemini");
   }
 };
 
@@ -66857,6 +66830,85 @@ var AdvancedVideoPayloadSchema = external_exports.object({
   }).optional()
 });
 
+// src/utils/jsonRepair.ts
+function repairJson(rawInput) {
+  if (typeof rawInput !== "string") return rawInput;
+  let text2 = rawInput.trim();
+  text2 = text2.replace(/^```json\s*/i, "");
+  text2 = text2.replace(/^```\s*/, "");
+  text2 = text2.replace(/\s*```$/, "");
+  text2 = text2.trim();
+  const firstBrace = text2.indexOf("{");
+  const firstBracket = text2.indexOf("[");
+  let startIdx = -1;
+  if (firstBrace !== -1 && firstBracket !== -1) {
+    startIdx = Math.min(firstBrace, firstBracket);
+  } else if (firstBrace !== -1) {
+    startIdx = firstBrace;
+  } else if (firstBracket !== -1) {
+    startIdx = firstBracket;
+  }
+  if (startIdx !== -1) {
+    text2 = text2.substring(startIdx);
+  }
+  try {
+    return JSON.parse(text2);
+  } catch (_) {
+  }
+  text2 = text2.replace(/,\s*([\}\]])/g, "$1");
+  try {
+    return JSON.parse(text2);
+  } catch (_) {
+  }
+  let inString = false;
+  let isEscaped = false;
+  const stack = [];
+  let repaired = "";
+  for (let i = 0; i < text2.length; i++) {
+    const char2 = text2[i];
+    if (isEscaped) {
+      isEscaped = false;
+      repaired += char2;
+      continue;
+    }
+    if (char2 === "\\") {
+      isEscaped = true;
+      repaired += char2;
+      continue;
+    }
+    if (char2 === '"') {
+      inString = !inString;
+      repaired += char2;
+      continue;
+    }
+    if (!inString) {
+      if (char2 === "{" || char2 === "[") {
+        stack.push(char2);
+      } else if (char2 === "}" && stack.length > 0 && stack[stack.length - 1] === "{") {
+        stack.pop();
+      } else if (char2 === "]" && stack.length > 0 && stack[stack.length - 1] === "[") {
+        stack.pop();
+      }
+    }
+    repaired += char2;
+  }
+  if (inString) {
+    repaired += '"';
+  }
+  repaired = repaired.replace(/,\s*$/, "");
+  while (stack.length > 0) {
+    const lastOpen = stack.pop();
+    if (lastOpen === "{") repaired += "}";
+    else if (lastOpen === "[") repaired += "]";
+  }
+  repaired = repaired.replace(/,\s*([\}\]])/g, "$1");
+  try {
+    return JSON.parse(repaired);
+  } catch (err) {
+    throw new Error(`Gagal memperbaiki JSON otomatis: ${err.message}`);
+  }
+}
+
 // src/modules/poster/poster.controller.ts
 var import_https2 = __toESM(require("https"));
 var import_crypto5 = __toESM(require("crypto"));
@@ -66873,12 +66925,12 @@ async function checkQuota(userId) {
 }
 var analyzeTopic = async (req, res, next) => {
   try {
-    const { topic } = req.body;
-    const analysis = await aiService.analyzeTopic(topic);
-    res.status(200).json({
-      success: true,
-      data: analysis
-    });
+    const { topic, category } = req.body;
+    if (!topic) {
+      throw new AppError("Topic is required", 400, "BAD_REQUEST");
+    }
+    const analysis = await aiService.analyzeTopic(topic, category);
+    res.status(200).json({ success: true, data: analysis });
   } catch (error) {
     next(error);
   }
@@ -67151,11 +67203,12 @@ var generateEnhance = async (req, res, next) => {
 };
 var getContentIdeas = async (req, res, next) => {
   try {
-    const { category } = req.query;
+    const { category, slideCount } = req.query;
     const userId = req.user.id;
     const ideas = await aiService.generateContentIdeas(
       userId,
-      String(category)
+      String(category),
+      slideCount ? Number(slideCount) : void 0
     );
     await Promise.all(
       ideas.map(
@@ -67540,10 +67593,387 @@ var analyzeStoryboard = async (req, res, next) => {
     next(error);
   }
 };
+var importExternalPrompt = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError("Unauthorized access", 401);
+    }
+    const formState = req.body;
+    await checkQuota(userId);
+    let payloadJson;
+    try {
+      if (typeof formState.externalJson === "string") {
+        payloadJson = repairJson(formState.externalJson);
+      } else {
+        payloadJson = formState.externalJson;
+      }
+    } catch (e) {
+      throw new AppError(`Gagal membaca atau memperbaiki JSON: ${e.message}`, 400);
+    }
+    if (!payloadJson || typeof payloadJson !== "object") {
+      throw new AppError("Format JSON tidak valid atau kosong.", 400);
+    }
+    let schema = PayloadSchema;
+    if (formState.feature === "video") schema = VideoPayloadSchema;
+    else if (formState.feature === "advanced_video") schema = AdvancedVideoPayloadSchema;
+    const parsedData = schema.safeParse(payloadJson);
+    if (parsedData.success) {
+      payloadJson = parsedData.data;
+    } else {
+      logger.warn(`External JSON soft validation notice: ${parsedData.error.message}. Normalizing structure...`);
+      if (!payloadJson.systemInit) payloadJson.systemInit = { mission: `Materi ${formState.feature || "visual"}` };
+      if (!payloadJson.contentPayload) payloadJson.contentPayload = { topic: formState.topic || "Untitled" };
+      if (!payloadJson.contentPayload.topic) payloadJson.contentPayload.topic = formState.topic || "Untitled";
+      if (!payloadJson.slidesContent && payloadJson.slides) {
+        payloadJson.slidesContent = payloadJson.slides;
+      }
+      if (!payloadJson.segmentsContent && payloadJson.segments) {
+        payloadJson.segmentsContent = payloadJson.segments;
+      }
+      if (!payloadJson.output) payloadJson.output = { viralScore: 90 };
+    }
+    const getDropdownHelperText = async (value) => {
+      if (!value || value === "auto" || value === "random") return "";
+      const optionArr = await db.select({ helperText: dropdownOptions.helperText }).from(dropdownOptions).where(and(eq(dropdownOptions.value, value), eq(dropdownOptions.isActive, true))).limit(1);
+      return optionArr[0]?.helperText || value;
+    };
+    const resolvedColorPalette = await getDropdownHelperText(formState.colorPalette);
+    const resolvedMood = await getDropdownHelperText(formState.mood || formState.theme);
+    const resolvedAspectRatio = await getDropdownHelperText(formState.aspectRatio);
+    const resolvedLayout = await getDropdownHelperText(formState.layout);
+    const resolvedTextRule = await getDropdownHelperText(formState.textRule || formState.textRules);
+    const resolvedCta = await getDropdownHelperText(formState.cta || formState.callToAction);
+    const dropdownSpecs = [];
+    if (resolvedColorPalette) dropdownSpecs.push(`Color Palette: ${resolvedColorPalette}.`);
+    if (resolvedMood) dropdownSpecs.push(`Mood/Vibe: ${resolvedMood}.`);
+    if (resolvedAspectRatio) dropdownSpecs.push(`Aspect Ratio: ${resolvedAspectRatio}.`);
+    if (resolvedLayout) dropdownSpecs.push(`Layout Format: ${resolvedLayout}.`);
+    if (resolvedTextRule) dropdownSpecs.push(`Typography/Text Rule: ${resolvedTextRule}.`);
+    if (resolvedCta) dropdownSpecs.push(`Call-to-Action (CTA) Rule: ${resolvedCta}.`);
+    const resolvedDropdownPrompt = dropdownSpecs.join(" ");
+    let styleTemplate = "";
+    if (formState.style && formState.style !== "auto") {
+      const visualStyleObjArr = await db.select().from(visualStyles).where(and(eq(visualStyles.name, formState.style), eq(visualStyles.isActive, true))).limit(1);
+      const visualStyleObj = visualStyleObjArr[0];
+      if (visualStyleObj) {
+        styleTemplate = visualStyleObj.promptTemplate;
+      }
+    }
+    let resolvedCharacterPrompt = "";
+    if (formState.characterFocus && !["auto", "random", "product_only"].includes(formState.characterFocus)) {
+      const characterObjArr = await db.select().from(characters).where(and(eq(characters.id, formState.characterFocus), eq(characters.isActive, true))).limit(1);
+      const characterObj = characterObjArr[0];
+      if (characterObj) {
+        let charPrompt = `Character Name: ${characterObj.name}.`;
+        if (characterObj.masterPrompt) {
+          charPrompt += ` STRICT MASTER PROMPT: ${characterObj.masterPrompt}.`;
+        } else if (characterObj.promptConsistency) {
+          charPrompt += ` Visual Consistency Rule: ${characterObj.promptConsistency}.`;
+        }
+        if (characterObj.positivePrompt) {
+          charPrompt += ` POSITIVE TAGS: ${characterObj.positivePrompt}.`;
+        }
+        if (characterObj.negativePrompt) {
+          charPrompt += ` NEGATIVE TAGS (DO NOT DRAW): ${characterObj.negativePrompt}.`;
+        }
+        resolvedCharacterPrompt = charPrompt;
+      }
+    }
+    const watermarkText = (formState.watermark || "").trim();
+    let watermarkInstruction = "";
+    if (watermarkText) {
+      watermarkInstruction = `Tampilkan teks watermark berikut secara rapi di bagian bawah gambar: "${watermarkText}"`;
+    }
+    let promptFinal = "";
+    const isEdukasi = formState.feature === "edukasi" || formState.mode === "edukasi" || formState.category === "edukasi";
+    const isVideo = formState.feature === "video";
+    if (isEdukasi) {
+      promptFinal = compileEdukasiMasterPrompt(
+        payloadJson,
+        { aspectRatio: formState.aspectRatio || "3:4" },
+        styleTemplate,
+        resolvedCharacterPrompt,
+        resolvedDropdownPrompt,
+        watermarkInstruction
+      );
+    } else if (isVideo) {
+      promptFinal = compileFinalVideoPrompt(
+        payloadJson,
+        1,
+        // Default active segment 1
+        styleTemplate,
+        resolvedCharacterPrompt,
+        resolvedDropdownPrompt,
+        "veo"
+      );
+    } else {
+      promptFinal = compileFinalPrompt(
+        payloadJson,
+        1,
+        // Default active slide 1
+        styleTemplate,
+        resolvedCharacterPrompt,
+        resolvedDropdownPrompt,
+        "flux"
+      );
+    }
+    if (payloadJson.slidesContent) {
+      payloadJson.slidesContent = payloadJson.slidesContent.map((s) => {
+        const slidePrompt = isEdukasi ? compileEdukasiMasterPrompt(
+          payloadJson,
+          { aspectRatio: formState.aspectRatio || "3:4" },
+          styleTemplate,
+          resolvedCharacterPrompt,
+          resolvedDropdownPrompt,
+          watermarkInstruction
+        ) : compileFinalPrompt(
+          payloadJson,
+          s.slideNumber,
+          styleTemplate,
+          resolvedCharacterPrompt,
+          resolvedDropdownPrompt,
+          "flux"
+        );
+        return {
+          ...s,
+          prompt: slidePrompt
+        };
+      });
+      if (!payloadJson.output) payloadJson.output = {};
+      payloadJson.output.slides = payloadJson.slidesContent.map((s) => ({
+        slideNumber: s.slideNumber,
+        prompt: s.prompt
+      }));
+    }
+    if (payloadJson.segmentsContent) {
+      payloadJson.segmentsContent = payloadJson.segmentsContent.map((s) => ({
+        ...s,
+        prompt: compileFinalVideoPrompt(
+          payloadJson,
+          s.segmentNumber,
+          styleTemplate,
+          resolvedCharacterPrompt,
+          resolvedDropdownPrompt,
+          "veo"
+        )
+      }));
+      if (!payloadJson.output) payloadJson.output = {};
+      payloadJson.output.segments = payloadJson.segmentsContent.map((s) => ({
+        segmentNumber: s.segmentNumber,
+        prompt: s.prompt
+      }));
+    }
+    const viralData = await aiService.scoreViral(promptFinal);
+    const generatedHooks = payloadJson.output?.hooks || [];
+    const fallbackHooks = await aiService.generateHooks(formState.topic);
+    const finalHooks = generatedHooks.length > 0 ? generatedHooks : fallbackHooks;
+    if (!payloadJson.output) payloadJson.output = {};
+    payloadJson.output = {
+      ...payloadJson.output,
+      promptFinal,
+      viralScore: viralData.score,
+      viralBreakdown: viralData.breakdown,
+      hooks: finalHooks
+    };
+    payloadJson.viralBreakdown = viralData.breakdown;
+    const promptId = import_crypto5.default.randomUUID();
+    const [savedPrompt] = await db.insert(prompts).values({
+      id: promptId,
+      userId,
+      mode: formState.feature || "poster",
+      topic: formState.topic || "Untitled",
+      payloadJson,
+      promptFinal,
+      referenceImageUrl: formState.referenceImageUrl || null,
+      category: formState.feature || "poster",
+      hooks: finalHooks,
+      viralScore: viralData.score,
+      schemaVersion: "v2"
+    }).returning();
+    const foundUsers = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const user = foundUsers[0];
+    if (user && user.role !== "ADMIN") {
+      const currentCredits = user.credits ?? 0;
+      if (currentCredits > 0) {
+        await db.update(users).set({ credits: currentCredits - 1 }).where(eq(users.id, userId));
+      }
+    }
+    if (req.body.draftId) {
+      try {
+        const [existingDraft] = await db.select().from(prompts).where(eq(prompts.id, req.body.draftId)).limit(1);
+        if (existingDraft) {
+          const currentPayload = existingDraft.payloadJson || {};
+          await db.update(prompts).set({
+            payloadJson: {
+              ...currentPayload,
+              isImported: true,
+              importedPromptId: savedPrompt.id,
+              importedPromptData: savedPrompt
+            }
+          }).where(eq(prompts.id, req.body.draftId));
+        }
+      } catch (e) {
+        console.error("Error updating draft import status:", e);
+      }
+    }
+    res.status(200).json({
+      success: true,
+      data: savedPrompt
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+var saveExternalDraft = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { draftId, formState, instructionsText } = req.body;
+    const topic = formState.topic || "Draf Prompt Eksternal";
+    const category = formState.feature || "poster";
+    let savedPrompt;
+    if (draftId) {
+      const existing = await db.select().from(prompts).where(and(eq(prompts.id, draftId), eq(prompts.userId, userId))).limit(1);
+      if (existing.length > 0) {
+        const [updated] = await db.update(prompts).set({
+          topic,
+          category,
+          promptFinal: instructionsText,
+          payloadJson: {
+            formState,
+            instructionsText,
+            isImported: false
+          }
+        }).where(eq(prompts.id, draftId)).returning();
+        savedPrompt = updated;
+      }
+    }
+    if (!savedPrompt) {
+      const newId = draftId || import_crypto5.default.randomUUID();
+      const [inserted] = await db.insert(prompts).values({
+        id: newId,
+        userId,
+        mode: "external_draft",
+        topic,
+        category,
+        promptFinal: instructionsText,
+        payloadJson: {
+          formState,
+          instructionsText,
+          isImported: false
+        },
+        schemaVersion: "v2"
+      }).returning();
+      savedPrompt = inserted;
+    }
+    res.status(200).json({
+      success: true,
+      message: "Draf prompt eksternal berhasil disimpan",
+      data: savedPrompt
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+var suggestCharacter = async (req, res, next) => {
+  try {
+    const prompt = `Generate 1 unique, creative, high-quality character concept in JSON format.
+Return ONLY raw JSON with keys:
+"nama": (unique creative name in Indonesian, e.g. "Astra si Kucing Astronot", "Mimi si Kelinci Botanis"),
+"spesies": (specific species description in Indonesian),
+"jenis": (Hewan, Manusia, Makhluk Fantasi, or Robot),
+"kategori": (Maskot Brand, Karakter Edukasi, Tokoh Cerita, Karakter Game, or Influencer Virtual),
+"gaya": (3D Pixar Disney Style, 3D Cute Isometric, 2D Flat Vector, Anime Chibi Style, or Claymation 3D),
+"usia": (Anak-anak, Remaja, Dewasa, or Lansia),
+"kepribadian": (3 adjectives, e.g. "Ceria, Energik, Ramah"),
+"warna": (auto, Kuning & Biru, Merah & Oranye, Hijau Tropis, or Ungu Pastel & Pink),
+"platform": (Poster, Logo, Banner & Video, Poster Edukasi, Logo & Brand Mascot, Banner 16:9, or YouTube 16:9 Widescreen),
+"desc": (detailed description of outfit, accessories, and distinct visual features in 2-3 short Indonesian sentences).`;
+    try {
+      const rawRes = await aiService.geminiClient.generateChatCompletion([
+        { role: "system", content: "Kamu adalah asisten AI pembuat karakter visual kreatif." },
+        { role: "user", content: prompt }
+      ]);
+      const cleanJson = aiService.geminiClient.sanitizeJson(rawRes);
+      const parsed = JSON.parse(cleanJson);
+      return res.status(200).json({
+        success: true,
+        data: parsed
+      });
+    } catch (aiErr) {
+      logger.warn("AI suggest character API fallback: " + aiErr?.message);
+    }
+    const fallbackIdeas = [
+      {
+        nama: "Astra si Kucing Astronot",
+        spesies: "Kucing Persia Putih Salju",
+        jenis: "Hewan",
+        kategori: "Maskot Brand",
+        gaya: "3D Pixar Disney Style",
+        usia: "Anak-anak",
+        kepribadian: "Pemberani, Cerdas, Ceria",
+        warna: "Kuning & Biru",
+        platform: "Poster, Logo, Banner & Video",
+        desc: "Kucing putih imut memakai baju astronot futuristik perak bertransparansi kaca helmet, membawa bendera bintang emas."
+      }
+    ];
+    const pick = fallbackIdeas[Math.floor(Math.random() * fallbackIdeas.length)];
+    res.status(200).json({ success: true, data: pick });
+  } catch (error) {
+    next(error);
+  }
+};
+var suggestVisualStyle = async (req, res, next) => {
+  try {
+    const prompt = `Generate 1 unique creative visual design system concept in JSON format.
+Return ONLY raw JSON with keys:
+"nama": (unique style name, e.g. "Cyberpunk Glassmorphism 2026", "Minimalist Earthy Terracotta"),
+"kategori": (Modern Minimalis, Cyberpunk Neon, Retro Vintage, Organic Nature, Luxury Gold, or Pixel Art Gaming),
+"mood": (Elegan & Profesional, Energetik & Dynamic, Misterius & Atmospheric, Soft & Calming Pastel, or Bold & Impactful),
+"medium": (3D Studio Render, 2D Swiss Vector Grid, Hyperrealistic Photography, Oil Painting Fine Art, or Collage Paper Cutout),
+"warna": (Dark Mode & Neon Accent, Light Mode Monochrome, Vibrant Pastel, Warm Earth Tone, or Deep Ocean Cyan),
+"cahaya": (Cinematic Studio Light, Natural Golden Hour, Volumetric Rim Light, or Studio Rim Neon Glow),
+"tekstur": (Smooth Glassmorphism & Matte, Rough Paper & Grain, Metallic Chrome Reflection, or Soft Clay Fabric),
+"desc": (detailed description of visual aesthetic and grid layout in 2 short Indonesian sentences),
+"extra": (additional visual notes in 1 short sentence).`;
+    try {
+      const rawRes = await aiService.geminiClient.generateChatCompletion([
+        { role: "system", content: "Kamu adalah asisten AI perancang gaya visual desainer." },
+        { role: "user", content: prompt }
+      ]);
+      const cleanJson = aiService.geminiClient.sanitizeJson(rawRes);
+      const parsed = JSON.parse(cleanJson);
+      return res.status(200).json({
+        success: true,
+        data: parsed
+      });
+    } catch (aiErr) {
+      logger.warn("AI suggest visual style API fallback: " + aiErr?.message);
+    }
+    const fallbackStyles = [
+      {
+        nama: "Cyberpunk Glassmorphism 2026",
+        kategori: "Cyberpunk Neon",
+        mood: "Bold & Impactful",
+        medium: "3D Studio Render",
+        warna: "Dark Mode & Neon Accent",
+        cahaya: "Studio Rim Neon Glow",
+        tekstur: "Smooth Glassmorphism & Matte",
+        desc: "Perpaduan grid tipografi Swiss kontemporer dengan efek kaca frosting miring dan aksen neon cyan. Memberikan kesan sangat futuristik dan mewah.",
+        extra: "Tipografi san-serif bold presisi tinggi dengan bayangan neon lembut."
+      }
+    ];
+    const pick = fallbackStyles[Math.floor(Math.random() * fallbackStyles.length)];
+    res.status(200).json({ success: true, data: pick });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // src/modules/poster/poster.schema.ts
 var analyzeTopicSchema = external_exports.object({
-  topic: external_exports.string().min(1, "Topic is required")
+  topic: external_exports.string().min(1, "Topic is required"),
+  category: external_exports.string().optional()
 });
 var generatePosterSchema = external_exports.object({
   feature: external_exports.string().optional(),
@@ -67586,7 +68016,8 @@ var generateEnhanceSchema = external_exports.object({
   notes: external_exports.string().optional()
 });
 var getIdeasSchema = external_exports.object({
-  category: external_exports.string().min(1, "Category is required")
+  category: external_exports.string().min(1, "Category is required"),
+  slideCount: external_exports.string().optional()
 });
 var getHooksSchema = external_exports.object({
   topic: external_exports.string().min(1, "Topic is required")
@@ -67597,6 +68028,29 @@ var improvePromptSchema = external_exports.object({
 var analyzeStoryboardSchema = external_exports.object({
   topic: external_exports.string().min(1, "Topic is required"),
   duration: external_exports.number().optional()
+});
+var importExternalPromptSchema = external_exports.object({
+  feature: external_exports.string().optional(),
+  slideCount: external_exports.number().optional(),
+  topic: external_exports.string().min(1, "Topic is required"),
+  description: external_exports.string().optional(),
+  extraDetails: external_exports.string().optional(),
+  style: external_exports.string().optional(),
+  layout: external_exports.string().optional(),
+  aspectRatio: external_exports.string().optional(),
+  textRule: external_exports.string().optional(),
+  characterFocus: external_exports.string().optional(),
+  colorPalette: external_exports.string().optional(),
+  mood: external_exports.string().optional(),
+  watermark: external_exports.string().optional(),
+  referenceImageUrl: external_exports.string().optional(),
+  useManualLogo: external_exports.boolean().optional(),
+  externalJson: external_exports.union([external_exports.string(), external_exports.record(external_exports.any())])
+});
+var saveExternalDraftSchema = external_exports.object({
+  draftId: external_exports.string().optional(),
+  formState: external_exports.record(external_exports.any()),
+  instructionsText: external_exports.string().min(1, "Instructions text is required")
 });
 
 // src/middlewares/spamBlocker.ts
@@ -67671,6 +68125,10 @@ router2.post("/chat", chat);
 router2.get("/ideas", validate({ query: getIdeasSchema }), getContentIdeas);
 router2.get("/hooks", validate({ query: getHooksSchema }), getHooks);
 router2.post("/improve", validate({ body: improvePromptSchema }), improvePrompt);
+router2.post("/import-external", validate({ body: importExternalPromptSchema }), importExternalPrompt);
+router2.post("/save-external-draft", validate({ body: saveExternalDraftSchema }), saveExternalDraft);
+router2.get("/suggest-character", suggestCharacter);
+router2.get("/suggest-visual-style", suggestVisualStyle);
 var poster_routes_default = router2;
 
 // src/modules/history/history.routes.ts
@@ -67683,12 +68141,19 @@ var import_crypto7 = __toESM(require("crypto"));
 var getHistory = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { page = "1", limit = "10", search, mode, category, favorite } = req.query;
+    const { page = "1", limit = "10", search, mode, category, favorite, type } = req.query;
     const pageNum = parseInt(String(page), 10);
     const limitNum = parseInt(String(limit), 10);
     const skip = (pageNum - 1) * limitNum;
     const conditions = [eq(prompts.userId, userId)];
-    if (mode) conditions.push(eq(prompts.mode, String(mode)));
+    if (type === "draft") {
+      conditions.push(eq(prompts.mode, "external_draft"));
+    } else {
+      conditions.push(ne(prompts.mode, "external_draft"));
+      if (mode) {
+        conditions.push(eq(prompts.mode, String(mode)));
+      }
+    }
     if (category) conditions.push(eq(prompts.category, String(category)));
     if (favorite === "true") conditions.push(eq(prompts.isFavorite, true));
     if (search) {
@@ -68219,6 +68684,53 @@ var createGeminiKey = async (req, res, next) => {
       success: true,
       message: "Key added successfully",
       data: newKey
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+var bulkImportGeminiKeys = async (req, res, next) => {
+  try {
+    const { rawKeys, provider = "gemini" } = req.body;
+    if (!rawKeys || typeof rawKeys !== "string" || rawKeys.trim().length === 0) {
+      throw new AppError("Daftar API Key (rawKeys) tidak boleh kosong.", 400, "BAD_REQUEST");
+    }
+    const keysArray = rawKeys.split(/[\n,\;\r]+/).map((k) => k.trim()).filter((k) => k.length > 10);
+    if (keysArray.length === 0) {
+      throw new AppError("Tidak ada API Key valid yang ditemukan dalam teks import.", 400, "NO_VALID_KEYS");
+    }
+    const encryptionKey = getEncryptionKey();
+    const shouldEncrypt = !!encryptionKey;
+    const existingKeys = await db.select().from(geminiApiKeys).where(eq(geminiApiKeys.provider, provider.toLowerCase()));
+    let startPriority = existingKeys.length > 0 ? Math.max(...existingKeys.map((k) => k.priority || 0)) + 1 : 0;
+    let addedCount = 0;
+    const insertedKeys = [];
+    for (const key of keysArray) {
+      const finalKey = shouldEncrypt ? encrypt(key) : key;
+      const [newKey] = await db.insert(geminiApiKeys).values({
+        id: import_crypto9.default.randomUUID(),
+        keyEncrypted: finalKey,
+        isEncrypted: shouldEncrypt,
+        priority: startPriority++,
+        isActive: true,
+        healthStatus: "healthy",
+        provider: provider.toLowerCase()
+      }).returning();
+      insertedKeys.push(newKey);
+      addedCount++;
+    }
+    if (req.user?.id) {
+      await db.insert(logs).values({
+        id: import_crypto9.default.randomUUID(),
+        userId: req.user.id,
+        action: "bulk_import_gemini_keys",
+        detail: { addedCount, provider }
+      });
+    }
+    res.status(201).json({
+      success: true,
+      message: `Berhasil mengimpor ${addedCount} API Key ${provider.toUpperCase()}!`,
+      data: { addedCount, keys: insertedKeys }
     });
   } catch (error) {
     next(error);
@@ -68822,12 +69334,13 @@ var getPromptTemplates = async (req, res, next) => {
 };
 var createPromptTemplate = async (req, res, next) => {
   try {
-    const { category, template, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
+    const { title, category, template, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
     if (!category || !template) {
       throw new AppError("Kategori dan template wajib diisi", 400, "BAD_REQUEST");
     }
     const [newTpl] = await db.insert(promptTemplates).values({
       id: import_crypto9.default.randomUUID(),
+      title: title || payloadJson?.formState?.topic || payloadJson?.topic || null,
       category,
       template,
       isActive: true,
@@ -68849,8 +69362,9 @@ var createPromptTemplate = async (req, res, next) => {
 var updatePromptTemplate = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { category, template, isActive, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
+    const { title, category, template, isActive, previewImageUrl, viralScore, viralBreakdown, payloadJson, hooks, analysis } = req.body;
     const [updated] = await db.update(promptTemplates).set({
+      ...title !== void 0 ? { title } : {},
       ...category !== void 0 ? { category } : {},
       ...template !== void 0 ? { template } : {},
       ...isActive !== void 0 ? { isActive } : {},
@@ -68902,6 +69416,7 @@ router5.use(authenticate, requireRole(["ADMIN"]));
 router5.get("/stats", getDashboardStats);
 router5.get("/keys", getGeminiKeys);
 router5.post("/keys", createGeminiKey);
+router5.post("/keys/bulk-import", bulkImportGeminiKeys);
 router5.post("/keys/test-all", testAllGeminiKeys);
 router5.post("/keys/:id/test", testGeminiKey);
 router5.patch("/keys/:id", updateGeminiKey);

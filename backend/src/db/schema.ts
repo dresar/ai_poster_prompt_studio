@@ -57,6 +57,7 @@ export const dropdownOptions = pgTable('DropdownOption', {
 
 export const promptTemplates = pgTable('PromptTemplate', {
   id: text('id').primaryKey(),
+  title: text('title'),
   category: text('category').notNull(),
   template: text('template').notNull(),
   isActive: boolean('isActive').default(true).notNull(),

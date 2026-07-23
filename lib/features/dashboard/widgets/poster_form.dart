@@ -18,6 +18,7 @@ class PosterForm extends StatefulWidget {
   final bool isGenerating;
   final bool isAnalyzing;
   final Future<void> Function(Map<String, dynamic> payload) onGenerate;
+  final void Function(Map<String, dynamic> payload) onGenerateExternal;
   final Future<Map<String, String>?> Function(String topic) onAnalyzeCerdas;
 
   const PosterForm({
@@ -28,6 +29,7 @@ class PosterForm extends StatefulWidget {
     required this.isGenerating,
     required this.isAnalyzing,
     required this.onGenerate,
+    required this.onGenerateExternal,
     required this.onAnalyzeCerdas,
   });
 
@@ -41,6 +43,7 @@ class _PosterFormState extends State<PosterForm> {
   final _descController = TextEditingController();
   final _extraController = TextEditingController();
   final _ctaController = TextEditingController();
+  final _hookController = TextEditingController();
   String _watermarkText = '';
 
   NeoDropdownOption? _selectedStyle;
@@ -55,6 +58,9 @@ class _PosterFormState extends State<PosterForm> {
   bool _useManualLogo = false;
   bool _includeCaption = false;
   bool _showAdvanced = false;
+  bool _showSlideCountCard = true;
+  bool _autoHook = false;
+  bool _autoCta = false;
 
   @override
   void dispose() {
@@ -62,6 +68,7 @@ class _PosterFormState extends State<PosterForm> {
     _descController.dispose();
     _extraController.dispose();
     _ctaController.dispose();
+    _hookController.dispose();
     super.dispose();
   }
 
@@ -73,11 +80,15 @@ class _PosterFormState extends State<PosterForm> {
       setState(() {
         _descController.text = result['description'] ?? '';
         _extraController.text = result['extraDetails'] ?? '';
+        if (_autoHook && result['hook'] != null && result['hook']!.isNotEmpty) {
+          _hookController.text = result['hook']!;
+        }
+        if (_autoCta && result['cta'] != null && result['cta']!.isNotEmpty) {
+          _ctaController.text = result['cta']!;
+        }
       });
     }
   }
-
-
 
   void _submit() {
     widget.onGenerate({
@@ -85,6 +96,30 @@ class _PosterFormState extends State<PosterForm> {
       'topic': _topicController.text.trim(),
       'description': _descController.text.trim(),
       'extraDetails': _extraController.text.trim(),
+      'hook': _hookController.text.trim(),
+      'callToAction': _ctaController.text.trim(),
+      'watermark': _watermarkText,
+      'referenceImage': _refImage,
+      'style': _selectedStyle?.value ?? 'auto',
+      'layout': _selectedLayout?.value ?? 'auto',
+      'aspectRatio': _selectedRatio?.value ?? '1:1',
+      'colorPalette': _selectedColor?.value ?? 'auto',
+      'mood': _selectedMood?.value ?? 'bright_cheerful',
+      'textRule': _selectedTextRule?.value ?? 'flexible',
+      'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'slideCount': _slideCount,
+      'useManualLogo': _useManualLogo,
+      'includeCaption': true,
+    });
+  }
+
+  void _submitExternal() {
+    widget.onGenerateExternal({
+      'feature': 'poster',
+      'topic': _topicController.text.trim(),
+      'description': _descController.text.trim(),
+      'extraDetails': _extraController.text.trim(),
+      'hook': _hookController.text.trim(),
       'callToAction': _ctaController.text.trim(),
       'watermark': _watermarkText,
       'referenceImage': _refImage,
@@ -147,6 +182,13 @@ class _PosterFormState extends State<PosterForm> {
                 controller: _topicController,
               ),
               const SizedBox(height: 16),
+              NeoTextField(
+                key: const ValueKey('poster_hook'),
+                label: 'Hook / Kalimat Pemikat',
+                placeholder: 'mis: Kenapa kamu gagal bisnis? (Opsional)',
+                controller: _hookController,
+              ),
+              const SizedBox(height: 16),
               Wrap(
                 alignment: WrapAlignment.end,
                 spacing: 10,
@@ -158,9 +200,15 @@ class _PosterFormState extends State<PosterForm> {
                     onPressed: () => IdeasHelper.showIdeasDialog(
                       context: context,
                       defaultCategory: 'poster',
-                      onIdeaSelected: (idea) {
+                      onIdeaSelected: (idea, {slideCount, autoHook = false, autoCta = false}) {
                         setState(() {
                           _topicController.text = idea;
+                          _autoHook = autoHook;
+                          _autoCta = autoCta;
+                          if (slideCount != null) {
+                            _slideCount = slideCount;
+                            _showSlideCountCard = true;
+                          }
                         });
                         _runAnalyze();
                       },
@@ -182,11 +230,20 @@ class _PosterFormState extends State<PosterForm> {
         NeoSectionCard(
           title: 'Deskripsi Konten',
           emoji: '📝',
+          trailing: NeoFullscreenButton(
+            onTap: () => NeoTextField.showExpandedModal(
+              context,
+              controller: _descController,
+              label: 'Deskripsi Konten',
+              placeholder: 'Tuliskan isi infografis/poster secara detail...',
+            ),
+          ),
           child: NeoTextField(
-            label: 'Detail Konten Poster',
+            label: '',
             placeholder: 'Tuliskan isi infografis/poster secara detail...',
             controller: _descController,
             maxLines: 4,
+            showFullScreenButton: false,
           ),
         ),
         const SizedBox(height: 20),
@@ -194,46 +251,95 @@ class _PosterFormState extends State<PosterForm> {
         NeoSectionCard(
           title: 'Detail Ekstra',
           emoji: '🎨',
+          trailing: NeoFullscreenButton(
+            onTap: () => NeoTextField.showExpandedModal(
+              context,
+              controller: _extraController,
+              label: 'Detail Ekstra',
+              placeholder: 'Contoh: Font tebal sans-serif, background merah muda, dsb.',
+            ),
+          ),
           child: NeoTextField(
-            label: 'Detail & Catatan Tambahan',
+            label: '',
             placeholder: 'Contoh: Font tebal sans-serif, background merah muda, dsb.',
             controller: _extraController,
             maxLines: 3,
+            showFullScreenButton: false,
           ),
         ),
         const SizedBox(height: 20),
 
-        NeoSectionCard(
-          title: 'Jumlah Slide',
-          emoji: '📱',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Pilih Jumlah Slide (Max 10):', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Container(
-                    decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    child: Text('$_slideCount Slide', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        if (_showSlideCountCard)
+          NeoSectionCard(
+            title: 'Jumlah Slide',
+            emoji: '📱',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Pilih Jumlah Slide (Max 10):', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Container(
+                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      child: Text('$_slideCount Slide', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Slider(
+                  value: _slideCount.toDouble(),
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  activeColor: Colors.black,
+                  inactiveColor: Colors.grey[300],
+                  label: '$_slideCount Slide',
+                  onChanged: (val) => setState(() => _slideCount = val.round()),
+                ),
+              ],
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F9F9),
+                      border: Border.all(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Jumlah Slide: $_slideCount Slide',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        GestureDetector(
+                          onTap: () => setState(() => _showSlideCountCard = true),
+                          child: const Text(
+                            'Ubah',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: NeoTheme.accentPink,
+                              fontSize: 13,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Slider(
-                value: _slideCount.toDouble(),
-                min: 1,
-                max: 10,
-                divisions: 9,
-                activeColor: Colors.black,
-                inactiveColor: Colors.grey[300],
-                label: '$_slideCount Slide',
-                onChanged: (val) => setState(() => _slideCount = val.round()),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-        ),
         const SizedBox(height: 20),
 
         NeoSectionCard(
@@ -326,40 +432,49 @@ class _PosterFormState extends State<PosterForm> {
                   onSelected: (opt) => setState(() => _selectedCharFocus = opt),
                   isVisualGrid: true,
                 ),
-                NeoSelectedPreview(option: _selectedCharFocus, height: 120),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        NeoSectionCard(
-          title: 'Logo',
-          emoji: '🛡️',
-          child: Column(
+                 NeoSelectedPreview(option: _selectedCharFocus, height: 120),
+                 const SizedBox(height: 16),
+                 const Divider(color: Colors.black, thickness: 1.5),
+                 const SizedBox(height: 16),
+                 const Align(
+                   alignment: Alignment.centerLeft,
+                   child: Text('Pengaturan Branding & Watermark', style: TextStyle(fontWeight: FontWeight.bold)),
+                 ),
+                 const SizedBox(height: 8),
+                 SwitchListTile(
+                   title: const Text('⚠️ Gunakan Logo (Upload Manual)', style: TextStyle(fontWeight: FontWeight.bold)),
+                   subtitle: const Text('Instruksi ke AI agar memberi tempat kosong untuk logo.', style: TextStyle(fontSize: 12)),
+                   value: _useManualLogo,
+                   activeColor: Colors.black,
+                   onChanged: (val) => setState(() => _useManualLogo = val),
+                 ),
+                 const SizedBox(height: 12),
+                 NeoWatermarkListField(
+                   initialValue: _watermarkText,
+                   onChanged: (val) => setState(() => _watermarkText = val),
+                 ),
+               ],
+             ],
+           ),
+         ),
+         const SizedBox(height: 32),
+          Row(
             children: [
-              const SizedBox(height: 12),
-              SwitchListTile(
-                title: const Text('⚠️ Gunakan Logo (Upload Manual)', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Instruksi ke AI agar memberi tempat kosong untuk logo.', style: TextStyle(fontSize: 12)),
-                value: _useManualLogo,
-                activeColor: Colors.black,
-                onChanged: (val) => setState(() => _useManualLogo = val),
+              Expanded(
+                child: NeoPrimaryButton(
+                  text: '⚡ GENERATE (AI BAWAAN)',
+                  onPressed: _submit,
+                ),
               ),
-              const SizedBox(height: 12),
-              NeoWatermarkListField(
-                initialValue: _watermarkText,
-                onChanged: (val) => setState(() => _watermarkText = val),
+              const SizedBox(width: 12),
+              Expanded(
+                child: NeoPrimaryButton(
+                  text: '📋 SALIN PROMPT (AI LAIN)',
+                  onPressed: _submitExternal,
+                ),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 32),
-
-        NeoPrimaryButton(
-          text: '⚡ GENERATE POSTER (1 Kredit)',
-          onPressed: _submit,
-        ),
       ],
     );
   }

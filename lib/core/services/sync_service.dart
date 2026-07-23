@@ -123,6 +123,19 @@ class SyncService {
           onTimeout: () => null,
         )));
       }
+
+      // Update SQLite local paths for visual styles
+      for (final style in styles) {
+        final id = style['id'] as String?;
+        final url = style['previewImageUrl'] as String?;
+        if (id != null && url != null && url.startsWith('http')) {
+          final fileName = url.hashCode.abs().toString() + '_vs.jpg';
+          final filePath = p.join(cacheDir.path, fileName);
+          if (await File(filePath).exists()) {
+            await LocalDbService.instance.updateVisualStyleLocalPath(id, 'file://' + filePath);
+          }
+        }
+      }
     } catch (e) {
       debugPrint('[SyncService] bgPrecache error: $e');
     }

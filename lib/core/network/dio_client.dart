@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Development API base URL (sesuaikan port jika berbeda)
-const String _localBaseUrl = kIsWeb ? 'http://localhost:3000/api' : 'http://10.0.2.2:3000/api';
+// Development API base URL (Menggunakan IP Wi-Fi Laptop: 10.166.197.180)
+const String _localBaseUrl = 'http://10.166.197.180:3000/api';
 
 // Production API base URL
 const String _productionBaseUrl = 'https://porto.apprentice.cyou/api';

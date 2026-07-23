@@ -1,7 +1,3 @@
-import { db } from '../../config/db';
-import { appSettings } from '../../db/schema';
-import { eq } from 'drizzle-orm';
-
 import { GeminiClient } from './core/gemini-client';
 import { GroqClient } from './core/groq-client';
 
@@ -12,7 +8,7 @@ import { ChatAssistantService } from './features/chat-assistant.service';
 import { ViralScoreService } from './features/viral-score.service';
 
 export class AIGatewayService {
-  private geminiClient = new GeminiClient();
+  public geminiClient = new GeminiClient();
   private groqClient = new GroqClient();
   
   private imageAnalyzer = new ImageAnalyzerService(this.geminiClient, this.groqClient);
@@ -21,166 +17,52 @@ export class AIGatewayService {
   private chatAssistant = new ChatAssistantService(this.geminiClient, this.groqClient);
   private viralScoreService = new ViralScoreService(this.geminiClient, this.groqClient);
 
-  private async getProvider(): Promise<'gemini' | 'groq'> {
-    try {
-      const settingsArr = await db.select().from(appSettings).where(eq(appSettings.key, 'system_settings')).limit(1);
-      const settings = settingsArr[0];
-      const val = settings?.value as any;
-      // Default to gemini if not explicitly set to groq
-      return val?.defaultAIProvider === 'groq' ? 'groq' : 'gemini';
-    } catch {
-      return 'gemini';
-    }
+  private async getProvider(): Promise<'gemini'> {
+    return 'gemini'; // PURE GEMINI ALWAYS
   }
 
   async analyzeReferenceImage(imageUrl: string): Promise<string> {
-    const provider = await this.getProvider();
-    try {
-      return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, fallback);
-    }
+    return await this.imageAnalyzer.analyzeReferenceImage(imageUrl, 'gemini');
   }
 
-  async analyzeTopic(topic: string): Promise<{
+  async analyzeTopic(topic: string, category?: string): Promise<{
     description: string;
     keyPoints: string[];
     visualRecommendation: string;
+    hook?: string;
+    cta?: string;
   }> {
-    const provider = await this.getProvider();
-    try {
-      return await this.topicAnalyzer.analyzeTopic(topic, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.topicAnalyzer.analyzeTopic(topic, fallback);
-    }
+    return await this.topicAnalyzer.analyzeTopic(topic, category, 'gemini');
   }
 
-  async analyzeStoryboard(topic: string, duration: number): Promise<any> {
-    const provider = await this.getProvider();
-    try {
-      return await this.topicAnalyzer.generateStoryboard(topic, duration, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.topicAnalyzer.generateStoryboard(topic, duration, fallback);
-    }
-  }
-
-  async generatePrompt(fullFormState: any, previousError?: string): Promise<{
+  async generatePosterPrompts(formState: any): Promise<{
     payloadJson: any;
-    promptFinal: string;
-  }> {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.generatePrompt(fullFormState, previousError, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.promptGenerator.generatePrompt(fullFormState, previousError, fallback);
-    }
-  }
-
-  async generateContentIdeas(userId: string, category: string): Promise<string[]> {
-    const provider = await this.getProvider();
-    try {
-      return await this.chatAssistant.generateContentIdeas(userId, category, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.chatAssistant.generateContentIdeas(userId, category, fallback);
-    }
-  }
-
-  async generateHooks(topic: string): Promise<string[]> {
-    const provider = await this.getProvider();
-    try {
-      return await this.topicAnalyzer.generateHooks(topic, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.topicAnalyzer.generateHooks(topic, fallback);
-    }
-  }
-
-  async improvePrompt(promptDraft: string): Promise<string> {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.improvePrompt(promptDraft, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.promptGenerator.improvePrompt(promptDraft, fallback);
-    }
-  }
-
-  async generateEnhancePrompt(imageUrl: string, enhanceStyle: string, changeLevel: string, notes: string): Promise<{
-    payloadJson: any;
-    promptFinal: string;
-  }> {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.promptGenerator.generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes, fallback);
-    }
-  }
-
-  async scoreViral(promptFinal: string): Promise<{
-    score: number;
-    breakdown: {
-      hook: number;
-      visual: number;
-      education: number;
-      engagement: number;
-    };
-  }> {
-    const provider = await this.getProvider();
-    try {
-      return await this.viralScoreService.scoreViral(promptFinal, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.viralScoreService.scoreViral(promptFinal, fallback);
-    }
-  }
-
-  async chat(message: string, history: any[]): Promise<string> {
-    const provider = await this.getProvider();
-    try {
-      return await this.chatAssistant.chat(message, history, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.chatAssistant.chat(message, history, fallback);
-    }
-  }
-
-  async generatePromptTemplate(category: string, idea: string): Promise<{
-    template: string;
-    analysis: string;
-    hooks: string[];
-    payloadJson: any;
+    dslCode: string;
+    finalPrompt: string;
     viralScore: number;
-    viralBreakdown: {
-      hook: number;
-      visual: number;
-      education: number;
-      engagement: number;
-    };
+    analysisShortcomings: string;
+    hooks: string[];
+    logoExplanation: string;
+    socialMediaCaption: string;
+    promptScore: number;
+    detailScore: number;
+    creativityScore: number;
+    compositionScore: number;
+    promptImprovement: string;
+    aiSuggestions: string[];
   }> {
-    const provider = await this.getProvider();
-    try {
-      return await this.promptGenerator.generatePromptTemplate(category, idea, provider);
-    } catch (e) {
-      console.error(`${provider} failed, falling back:`, e);
-      const fallback = provider === 'groq' ? 'gemini' : 'groq';
-      return await this.promptGenerator.generatePromptTemplate(category, idea, fallback);
-    }
+    return await this.promptGenerator.generatePosterPrompts(formState, 'gemini');
+  }
+
+  async generateChatResponse(messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>, systemInstruction?: string): Promise<string> {
+    return await this.chatAssistant.generateChatResponse(messages, 'gemini', systemInstruction);
+  }
+
+  async evaluateViralScore(payload: any): Promise<{
+    viralScore: number;
+    breakdown: { hook: number; visual: number; education: number; engagement: number };
+    recommendations: string[];
+  }> {
+    return await this.viralScoreService.evaluateViralScore(payload, 'gemini');
   }
 }

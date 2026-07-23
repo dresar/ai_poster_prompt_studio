@@ -9,7 +9,6 @@ import 'package:dio/dio.dart';
 import '../../core/theme/neo_theme.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/services/cache_service.dart';
-import '../../shared/widgets/neo_info_banner.dart';
 import '../../shared/widgets/neo_dropdown_field.dart';
 import '../../shared/widgets/neo_buttons.dart';
 import '../../shared/widgets/sync_update_banner.dart';
@@ -19,6 +18,7 @@ import 'dropdown_provider.dart';
 import '../result/result_view.dart';
 import '../settings/settings_screen.dart';
 import '../history/history_screen.dart';
+import '../history/history_detail_page.dart';
 import '../settings/system_settings_provider.dart';
 import '../auth/auth_provider.dart';
 import '../templates/templates_screen.dart';
@@ -32,8 +32,11 @@ import 'widgets/baliho_form.dart';
 import 'widgets/logo_form.dart';
 import 'widgets/quotes_form.dart';
 import 'widgets/enhance_photo_form.dart';
-import 'widgets/video_form.dart';
 import 'widgets/advanced_video_form.dart';
+import 'widgets/berita_form.dart';
+import 'widgets/karakter_form.dart';
+import 'widgets/gaya_visual_form.dart';
+import 'widgets/external_prompt_screen.dart';
 import '../chat/ai_chat_assistant.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -272,6 +275,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return null;
   }
 
+  String _getActiveTabCategoryName() {
+    switch (_activeTab) {
+      case 0: return 'poster';
+      case 1: return 'banner';
+      case 2: return 'edukasi';
+      case 3: return 'affiliate';
+      case 4: return 'digital_product';
+      case 5: return 'baliho';
+      case 6: return 'logo';
+      case 7: return 'quotes';
+      case 8: return 'photo_enhance';
+      case 9: return 'video';
+      case 10: return 'berita';
+      case 11: return 'karakter';
+      case 12: return 'gaya_visual';
+      default: return 'poster';
+    }
+  }
+
   Future<Map<String, String>?> _runAnalyzeCerdas(String topic) async {
     setState(() {
       _isAnalyzing = true;
@@ -280,6 +302,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     try {
       final response = await dioClient.post('/poster/analyze-topic', data: {
         'topic': topic,
+        'category': _getActiveTabCategoryName(),
       });
 
       if (response.data['success'] == true) {
@@ -287,10 +310,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         String extra = '';
         if (data['keyPoints'] != null) {
           final points = List<String>.from(data['keyPoints']);
-          extra = 'Poin Utama:\n' + points.map((p) => '- $p').join('\n');
-        }
-        if (data['visualRecommendation'] != null) {
-          extra += '\n\nRekomendasi Visual:\n${data['visualRecommendation']}';
+          extra = points.map((p) => '- $p').join('\n');
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -303,6 +323,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         return {
           'description': data['description'] ?? '',
           'extraDetails': extra,
+          'hook': data['hook'] ?? '',
+          'cta': data['cta'] ?? '',
         };
       }
     } catch (e) {
@@ -359,8 +381,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Future<void> _generatePosterPrompt(Map<String, dynamic> data) async {
-    final authState = ref.read(authProvider);
-
     final topic = (data['topic'] as String).trim();
     if (topic.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -452,9 +472,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
-  Future<void> _generateEnhancePrompt(Map<String, dynamic> data) async {
-    final authState = ref.read(authProvider);
+  void _onGenerateExternal(Map<String, dynamic> formState) async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExternalPromptScreen(
+          formState: formState,
+        ),
+      ),
+    );
+    if (result != null && mounted) {
+      final promptObj = result['prompt'] ?? result;
+      setState(() {
+        _currentBottomTab = 1; // Switch to Riwayat tab
+      });
+      ref.read(authProvider.notifier).fetchUserProfile();
 
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HistoryDetailPage(
+            promptData: Map<String, dynamic>.from(promptObj),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _generateEnhancePrompt(Map<String, dynamic> data) async {
     final XFile? imageFile = data['referenceImage'] as XFile?;
     if (imageFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -521,6 +566,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 1:
@@ -531,6 +577,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 2:
@@ -541,6 +588,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 3:
@@ -551,6 +599,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 4:
@@ -561,6 +610,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 5:
@@ -571,6 +621,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 6:
@@ -581,6 +632,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 7:
@@ -591,6 +643,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       case 8:
@@ -605,7 +658,41 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           isGenerating: _isGenerating,
           isAnalyzing: _isAnalyzing,
           onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
           onAnalyzeStoryboard: _runAnalyzeStoryboard,
+        );
+      case 10:
+        return BeritaForm(
+          dropdownState: dropdownState,
+          dynamicVisualStyles: _dynamicVisualStyles,
+          loadingVisualStyles: _loadingVisualStyles,
+          isGenerating: _isGenerating,
+          isAnalyzing: _isAnalyzing,
+          onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
+          onAnalyzeCerdas: _runAnalyzeCerdas,
+        );
+      case 11:
+        return KarakterForm(
+          dropdownState: dropdownState,
+          dynamicVisualStyles: _dynamicVisualStyles,
+          loadingVisualStyles: _loadingVisualStyles,
+          isGenerating: _isGenerating,
+          isAnalyzing: _isAnalyzing,
+          onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
+          onAnalyzeCerdas: _runAnalyzeCerdas,
+        );
+      case 12:
+        return GayaVisualForm(
+          dropdownState: dropdownState,
+          dynamicVisualStyles: _dynamicVisualStyles,
+          loadingVisualStyles: _loadingVisualStyles,
+          isGenerating: _isGenerating,
+          isAnalyzing: _isAnalyzing,
+          onGenerate: _generatePosterPrompt,
+          onGenerateExternal: _onGenerateExternal,
+          onAnalyzeCerdas: _runAnalyzeCerdas,
         );
       default:
         return const SizedBox.shrink();
@@ -671,8 +758,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final activeMenu = menuItems[activeMenuIndex];
     final activeBody = activeMenu['body'] as Widget?;
 
-    final appName = systemSettings.appName;
-    final footerText = systemSettings.footerText;
     final bannerText = _activeTab == 8
         ? systemSettings.bannerEnhanceInfo
         : systemSettings.bannerPosterInfo;
@@ -687,7 +772,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       'Pembuatan Logo',
       'Kata Mutiara',
       'Percantik Foto',
-      'Video Prompting'
+      'Video Prompting',
+      'Berita Carousel',
+      'Karakter & Maskot',
+      'Gaya Visual System',
     ];
 
     return Scaffold(
@@ -696,23 +784,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               backgroundColor: NeoTheme.bgBase,
               elevation: 0,
               scrolledUnderElevation: 0,
+              titleSpacing: _studioShowForm ? 6 : 16,
+              leadingWidth: _studioShowForm ? 50 : null,
               leading: _studioShowForm
-                  ? IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => setState(() => _studioShowForm = false),
+                  ? Container(
+                      margin: const EdgeInsets.only(left: 12, top: 10, bottom: 10),
+                      decoration: BoxDecoration(
+                        color: NeoTheme.accentYellow,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.black, width: 2),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black, offset: Offset(1.5, 1.5)),
+                        ],
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () => setState(() => _studioShowForm = false),
+                        child: const Center(
+                          child: Icon(Icons.arrow_back_rounded, color: Colors.black, size: 18),
+                        ),
+                      ),
                     )
                   : null,
-              title: Row(
-                children: [
-                  if (!_studioShowForm) ...[
-                    Image.asset('assets/logo.png', height: 48),
-                    const SizedBox(width: 12),
-                  ],
-                  Text(
-                    _studioShowForm ? (tabs.isNotEmpty && _activeTab < tabs.length ? tabs[_activeTab] : 'Studio') : 'AI Studio',
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24),
-                  ),
-                ],
+              title: Text(
+                _studioShowForm ? (tabs.isNotEmpty && _activeTab < tabs.length ? tabs[_activeTab] : 'Studio') : 'AI Studio',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: _studioShowForm ? 15 : 18,
+                  color: Colors.black,
+                ),
               ),
               actions: [
                 IconButton(
@@ -849,27 +949,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
                 const SizedBox(height: 16),
                 _renderActiveForm(dropdownState),
-                const SizedBox(height: 32),
-                Center(
-                  child: Column(
-                    children: [
-                      Text(
-                        appName,
-                        style: const TextStyle(
-                          color: NeoTheme.textMuted,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        footerText,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -1055,6 +1134,33 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         'iconColor': const Color(0xFFC2185B),
         'bgColor': const Color(0xFFFCE4EC),
         'tab': 9
+      },
+      {
+        'icon': Icons.newspaper_outlined,
+        'label': 'Berita Carousel',
+        'subtitle': 'Berita viral & insiden AI Eksternal 2026',
+        'color': const Color(0xFF00B0FF),
+        'iconColor': const Color(0xFF0091EA),
+        'bgColor': const Color(0xFFE1F5FE),
+        'tab': 10
+      },
+      {
+        'icon': Icons.face_retouching_natural_outlined,
+        'label': 'Karakter & Maskot',
+        'subtitle': 'Cetak biru karakter visual & maskot AI',
+        'color': const Color(0xFFFF9800),
+        'iconColor': const Color(0xFFF57C00),
+        'bgColor': const Color(0xFFFFF3E0),
+        'tab': 11
+      },
+      {
+        'icon': Icons.palette_outlined,
+        'label': 'Gaya Visual System',
+        'subtitle': 'Desain sistem & estetika visual AI',
+        'color': const Color(0xFF9C27B0),
+        'iconColor': const Color(0xFF7B1FA2),
+        'bgColor': const Color(0xFFF3E5F5),
+        'tab': 12
       },
     ];
 

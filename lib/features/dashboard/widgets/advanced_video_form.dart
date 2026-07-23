@@ -11,6 +11,7 @@ class AdvancedVideoForm extends StatefulWidget {
   final bool isGenerating;
   final bool isAnalyzing;
   final Future<void> Function(Map<String, dynamic> payload) onGenerate;
+  final void Function(Map<String, dynamic> payload) onGenerateExternal;
   final Future<Map<String, dynamic>?> Function(String topic, int duration) onAnalyzeStoryboard;
 
   const AdvancedVideoForm({
@@ -19,6 +20,7 @@ class AdvancedVideoForm extends StatefulWidget {
     required this.isGenerating,
     required this.isAnalyzing,
     required this.onGenerate,
+    required this.onGenerateExternal,
     required this.onAnalyzeStoryboard,
   });
 
@@ -134,6 +136,29 @@ class _AdvancedVideoFormState extends State<AdvancedVideoForm> {
 
   void _submit() {
     widget.onGenerate({
+      'feature': 'advanced_video',
+      'topic': _topicCtrl.text.trim().isEmpty ? 'Film Tanpa Judul' : _topicCtrl.text.trim(),
+      'description': _sinopsisCtrl.text.trim(),
+      'duration': _durasi,
+      'storyBible': {
+        'storyType': _jenisCerita,
+        'narrative': _sinopsisCtrl.text.trim(),
+        'conflict': _konfliktCtrl.text.trim(),
+        'resolution': _resolusiCtrl.text.trim(),
+        'emotionalArc': _emosiCtrl.text.trim(),
+      },
+      'selectedCharacters': _selectedCharIds,
+      'sceneBreakdown': _scenes,
+      'style': _gaya,
+      'cameraStyle': _kamera,
+      'locationStyle': _lokasi,
+      'transitionStyle': _transisi,
+      'audioMood': _moodAudio,
+    });
+  }
+
+  void _submitExternal() {
+    widget.onGenerateExternal({
       'feature': 'advanced_video',
       'topic': _topicCtrl.text.trim().isEmpty ? 'Film Tanpa Judul' : _topicCtrl.text.trim(),
       'description': _sinopsisCtrl.text.trim(),
@@ -618,10 +643,23 @@ class _AdvancedVideoFormState extends State<AdvancedVideoForm> {
         ),
         const SizedBox(height: 24),
 
-        NeoPrimaryButton(
-          text: '⚡ Generate Video Prompt',
-          isLoading: widget.isGenerating,
-          onPressed: _submit,
+        Row(
+          children: [
+            Expanded(
+              child: NeoPrimaryButton(
+                text: '⚡ GENERATE (AI BAWAAN)',
+                isLoading: widget.isGenerating,
+                onPressed: _submit,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: NeoPrimaryButton(
+                text: '📋 SALIN PROMPT (AI LAIN)',
+                onPressed: _submitExternal,
+              ),
+            ),
+          ],
         ),
       ],
     );

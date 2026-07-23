@@ -17,7 +17,8 @@ import { AppError } from "../../middlewares/errorHandler";
 import { env } from "../../config/env";
 import { logger } from "../../config/logger";
 import { PayloadSchema, VideoPayloadSchema, AdvancedVideoPayloadSchema } from "./payload.schema";
-import { renderDSL } from "./dslRenderer";
+import { renderDSL, compileFinalPrompt, compileFinalVideoPrompt, compileEdukasiMasterPrompt } from "./dslRenderer";
+import { repairJson } from "../../utils/jsonRepair";
 import https from "https";
 import crypto from "crypto";
 import path from "path";
@@ -48,13 +49,13 @@ export const analyzeTopic = async (
   next: NextFunction,
 ) => {
   try {
-    const { topic } = req.body;
-    const analysis = await aiService.analyzeTopic(topic);
+    const { topic, category } = req.body;
+    if (!topic) {
+      throw new AppError("Topic is required", 400, "BAD_REQUEST");
+    }
 
-    res.status(200).json({
-      success: true,
-      data: analysis,
-    });
+    const analysis = await aiService.analyzeTopic(topic, category);
+    res.status(200).json({ success: true, data: analysis });
   } catch (error) {
     next(error);
   }
@@ -427,11 +428,12 @@ export const getContentIdeas = async (
   next: NextFunction,
 ) => {
   try {
-    const { category } = req.query;
+    const { category, slideCount } = req.query;
     const userId = req.user!.id;
     const ideas = await aiService.generateContentIdeas(
       userId,
       String(category),
+      slideCount ? Number(slideCount) : undefined,
     );
 
     // Save each recommended idea to the ContentIdea table
@@ -965,3 +967,481 @@ export const analyzeStoryboard = async (req: Request, res: Response, next: NextF
     next(error);
   }
 };
+
+export const importExternalPrompt = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError("Unauthorized access", 401);
+    }
+
+    const formState = req.body;
+    await checkQuota(userId);
+
+    // 1. Robust parse & repair external JSON content
+    let payloadJson: any;
+    try {
+      if (typeof formState.externalJson === "string") {
+        payloadJson = repairJson(formState.externalJson);
+      } else {
+        payloadJson = formState.externalJson;
+      }
+    } catch (e: any) {
+      throw new AppError(`Gagal membaca atau memperbaiki JSON: ${e.message}`, 400);
+    }
+
+    if (!payloadJson || typeof payloadJson !== "object") {
+      throw new AppError("Format JSON tidak valid atau kosong.", 400);
+    }
+
+    // 2. Validate & normalize payload structure
+    let schema: any = PayloadSchema;
+    if (formState.feature === "video") schema = VideoPayloadSchema;
+    else if (formState.feature === "advanced_video") schema = AdvancedVideoPayloadSchema;
+
+    const parsedData = schema.safeParse(payloadJson);
+    if (parsedData.success) {
+      payloadJson = parsedData.data;
+    } else {
+      logger.warn(`External JSON soft validation notice: ${parsedData.error.message}. Normalizing structure...`);
+      
+      // Auto-fallback structure normalization if schema has missing fields
+      if (!payloadJson.systemInit) payloadJson.systemInit = { mission: `Materi ${formState.feature || 'visual'}` };
+      if (!payloadJson.contentPayload) payloadJson.contentPayload = { topic: formState.topic || 'Untitled' };
+      if (!payloadJson.contentPayload.topic) payloadJson.contentPayload.topic = formState.topic || 'Untitled';
+      
+      if (!payloadJson.slidesContent && payloadJson.slides) {
+        payloadJson.slidesContent = payloadJson.slides;
+      }
+      if (!payloadJson.segmentsContent && payloadJson.segments) {
+        payloadJson.segmentsContent = payloadJson.segments;
+      }
+      if (!payloadJson.output) payloadJson.output = { viralScore: 90 };
+    }
+
+    // 3. Resolve visual and layout options
+    const getDropdownHelperText = async (value: string | undefined): Promise<string> => {
+      if (!value || value === "auto" || value === "random") return "";
+      const optionArr = await db
+        .select({ helperText: dropdownOptions.helperText })
+        .from(dropdownOptions)
+        .where(and(eq(dropdownOptions.value, value), eq(dropdownOptions.isActive, true)))
+        .limit(1);
+      return optionArr[0]?.helperText || value;
+    };
+
+    const resolvedColorPalette = await getDropdownHelperText(formState.colorPalette);
+    const resolvedMood = await getDropdownHelperText(formState.mood || formState.theme);
+    const resolvedAspectRatio = await getDropdownHelperText(formState.aspectRatio);
+    const resolvedLayout = await getDropdownHelperText(formState.layout);
+    const resolvedTextRule = await getDropdownHelperText(formState.textRule || formState.textRules);
+    const resolvedCta = await getDropdownHelperText(formState.cta || formState.callToAction);
+
+    const dropdownSpecs: string[] = [];
+    if (resolvedColorPalette) dropdownSpecs.push(`Color Palette: ${resolvedColorPalette}.`);
+    if (resolvedMood) dropdownSpecs.push(`Mood/Vibe: ${resolvedMood}.`);
+    if (resolvedAspectRatio) dropdownSpecs.push(`Aspect Ratio: ${resolvedAspectRatio}.`);
+    if (resolvedLayout) dropdownSpecs.push(`Layout Format: ${resolvedLayout}.`);
+    if (resolvedTextRule) dropdownSpecs.push(`Typography/Text Rule: ${resolvedTextRule}.`);
+    if (resolvedCta) dropdownSpecs.push(`Call-to-Action (CTA) Rule: ${resolvedCta}.`);
+    const resolvedDropdownPrompt = dropdownSpecs.join(" ");
+
+    // Resolve visual style template
+    let styleTemplate = "";
+    if (formState.style && formState.style !== "auto") {
+      const visualStyleObjArr = await db
+        .select()
+        .from(visualStyles)
+        .where(and(eq(visualStyles.name, formState.style), eq(visualStyles.isActive, true)))
+        .limit(1);
+      const visualStyleObj = visualStyleObjArr[0];
+      if (visualStyleObj) {
+        styleTemplate = visualStyleObj.promptTemplate;
+      }
+    }
+
+    // Resolve character focus prompt consistency
+    let resolvedCharacterPrompt = "";
+    if (formState.characterFocus && !["auto", "random", "product_only"].includes(formState.characterFocus)) {
+      const characterObjArr = await db
+        .select()
+        .from(characters)
+        .where(and(eq(characters.id, formState.characterFocus), eq(characters.isActive, true)))
+        .limit(1);
+      const characterObj = characterObjArr[0];
+      if (characterObj) {
+        let charPrompt = `Character Name: ${characterObj.name}.`;
+        if (characterObj.masterPrompt) {
+          charPrompt += ` STRICT MASTER PROMPT: ${characterObj.masterPrompt}.`;
+        } else if (characterObj.promptConsistency) {
+          charPrompt += ` Visual Consistency Rule: ${characterObj.promptConsistency}.`;
+        }
+        if (characterObj.positivePrompt) {
+          charPrompt += ` POSITIVE TAGS: ${characterObj.positivePrompt}.`;
+        }
+        if (characterObj.negativePrompt) {
+          charPrompt += ` NEGATIVE TAGS (DO NOT DRAW): ${characterObj.negativePrompt}.`;
+        }
+        resolvedCharacterPrompt = charPrompt;
+      }
+    }
+
+    // Build watermark instruction
+    const watermarkText = (formState.watermark || "").trim();
+    let watermarkInstruction = "";
+    if (watermarkText) {
+      watermarkInstruction = `Tampilkan teks watermark berikut secara rapi di bagian bawah gambar: "${watermarkText}"`;
+    }
+
+    // 4. Compile final prompt
+    let promptFinal = "";
+    const isEdukasi = formState.feature === "edukasi" || formState.mode === "edukasi" || formState.category === "edukasi";
+    const isVideo = formState.feature === "video";
+
+    if (isEdukasi) {
+      promptFinal = compileEdukasiMasterPrompt(
+        payloadJson,
+        { aspectRatio: formState.aspectRatio || "3:4" },
+        styleTemplate,
+        resolvedCharacterPrompt,
+        resolvedDropdownPrompt,
+        watermarkInstruction
+      );
+    } else if (isVideo) {
+      promptFinal = compileFinalVideoPrompt(
+        payloadJson,
+        1, // Default active segment 1
+        styleTemplate,
+        resolvedCharacterPrompt,
+        resolvedDropdownPrompt,
+        "veo"
+      );
+    } else {
+      promptFinal = compileFinalPrompt(
+        payloadJson,
+        1, // Default active slide 1
+        styleTemplate,
+        resolvedCharacterPrompt,
+        resolvedDropdownPrompt,
+        "flux"
+      );
+    }
+
+    // Dynamic prompt compilation for each slide/segment on import
+    if (payloadJson.slidesContent) {
+      payloadJson.slidesContent = payloadJson.slidesContent.map((s: any) => {
+        const slidePrompt = isEdukasi
+          ? compileEdukasiMasterPrompt(
+              payloadJson,
+              { aspectRatio: formState.aspectRatio || "3:4" },
+              styleTemplate,
+              resolvedCharacterPrompt,
+              resolvedDropdownPrompt,
+              watermarkInstruction
+            )
+          : compileFinalPrompt(
+              payloadJson,
+              s.slideNumber,
+              styleTemplate,
+              resolvedCharacterPrompt,
+              resolvedDropdownPrompt,
+              "flux"
+            );
+        return {
+          ...s,
+          prompt: slidePrompt
+        };
+      });
+
+      if (!payloadJson.output) payloadJson.output = {};
+      payloadJson.output.slides = payloadJson.slidesContent.map((s: any) => ({
+        slideNumber: s.slideNumber,
+        prompt: s.prompt
+      }));
+    }
+
+    if (payloadJson.segmentsContent) {
+      payloadJson.segmentsContent = payloadJson.segmentsContent.map((s: any) => ({
+        ...s,
+        prompt: compileFinalVideoPrompt(
+          payloadJson,
+          s.segmentNumber,
+          styleTemplate,
+          resolvedCharacterPrompt,
+          resolvedDropdownPrompt,
+          "veo"
+        )
+      }));
+
+      if (!payloadJson.output) payloadJson.output = {};
+      payloadJson.output.segments = payloadJson.segmentsContent.map((s: any) => ({
+        segmentNumber: s.segmentNumber,
+        prompt: s.prompt
+      }));
+    }
+
+    // 5. Calculate viral score & hooks
+    const viralData = await aiService.scoreViral(promptFinal);
+    const generatedHooks = payloadJson.output?.hooks || [];
+    const fallbackHooks = await aiService.generateHooks(formState.topic);
+    const finalHooks = generatedHooks.length > 0 ? generatedHooks : fallbackHooks;
+
+    if (!payloadJson.output) payloadJson.output = {};
+    payloadJson.output = {
+      ...payloadJson.output,
+      promptFinal,
+      viralScore: viralData.score,
+      viralBreakdown: viralData.breakdown,
+      hooks: finalHooks,
+    };
+    payloadJson.viralBreakdown = viralData.breakdown;
+
+    // 6. Save prompt to DB
+    const promptId = crypto.randomUUID();
+    const [savedPrompt] = await db
+      .insert(prompts)
+      .values({
+        id: promptId,
+        userId,
+        mode: formState.feature || "poster",
+        topic: formState.topic || "Untitled",
+        payloadJson: payloadJson,
+        promptFinal: promptFinal,
+        referenceImageUrl: formState.referenceImageUrl || null,
+        category: formState.feature || "poster",
+        hooks: finalHooks,
+        viralScore: viralData.score,
+        schemaVersion: "v2",
+      })
+      .returning();
+
+    // 7. Decrement credits
+    const foundUsers = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    const user = foundUsers[0];
+    if (user && user.role !== "ADMIN") {
+      const currentCredits = user.credits ?? 0;
+      if (currentCredits > 0) {
+        await db
+          .update(users)
+          .set({ credits: currentCredits - 1 })
+          .where(eq(users.id, userId));
+      }
+    }
+
+    if (req.body.draftId) {
+      try {
+        const [existingDraft] = await db
+          .select()
+          .from(prompts)
+          .where(eq(prompts.id, req.body.draftId))
+          .limit(1);
+
+        if (existingDraft) {
+          const currentPayload = (existingDraft.payloadJson as Record<string, any>) || {};
+          await db
+            .update(prompts)
+            .set({
+              payloadJson: {
+                ...currentPayload,
+                isImported: true,
+                importedPromptId: savedPrompt.id,
+                importedPromptData: savedPrompt,
+              },
+            })
+            .where(eq(prompts.id, req.body.draftId));
+        }
+      } catch (e) {
+        console.error("Error updating draft import status:", e);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      data: savedPrompt,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const saveExternalDraft = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user!.id;
+    const { draftId, formState, instructionsText } = req.body;
+
+    const topic = formState.topic || 'Draf Prompt Eksternal';
+    const category = formState.feature || 'poster';
+
+    let savedPrompt: any;
+
+    if (draftId) {
+      const existing = await db
+        .select()
+        .from(prompts)
+        .where(and(eq(prompts.id, draftId), eq(prompts.userId, userId)))
+        .limit(1);
+
+      if (existing.length > 0) {
+        const [updated] = await db
+          .update(prompts)
+          .set({
+            topic,
+            category,
+            promptFinal: instructionsText,
+            payloadJson: {
+              formState,
+              instructionsText,
+              isImported: false,
+            },
+          })
+          .where(eq(prompts.id, draftId))
+          .returning();
+        savedPrompt = updated;
+      }
+    }
+
+    if (!savedPrompt) {
+      const newId = draftId || crypto.randomUUID();
+      const [inserted] = await db
+        .insert(prompts)
+        .values({
+          id: newId,
+          userId,
+          mode: 'external_draft',
+          topic,
+          category,
+          promptFinal: instructionsText,
+          payloadJson: {
+            formState,
+            instructionsText,
+            isImported: false,
+          },
+          schemaVersion: 'v2',
+        })
+        .returning();
+      savedPrompt = inserted;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Draf prompt eksternal berhasil disimpan',
+      data: savedPrompt,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const suggestCharacter = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prompt = `Generate 1 unique, creative, high-quality character concept in JSON format.
+Return ONLY raw JSON with keys:
+"nama": (unique creative name in Indonesian, e.g. "Astra si Kucing Astronot", "Mimi si Kelinci Botanis"),
+"spesies": (specific species description in Indonesian),
+"jenis": (Hewan, Manusia, Makhluk Fantasi, or Robot),
+"kategori": (Maskot Brand, Karakter Edukasi, Tokoh Cerita, Karakter Game, or Influencer Virtual),
+"gaya": (3D Pixar Disney Style, 3D Cute Isometric, 2D Flat Vector, Anime Chibi Style, or Claymation 3D),
+"usia": (Anak-anak, Remaja, Dewasa, or Lansia),
+"kepribadian": (3 adjectives, e.g. "Ceria, Energik, Ramah"),
+"warna": (auto, Kuning & Biru, Merah & Oranye, Hijau Tropis, or Ungu Pastel & Pink),
+"platform": (Poster, Logo, Banner & Video, Poster Edukasi, Logo & Brand Mascot, Banner 16:9, or YouTube 16:9 Widescreen),
+"desc": (detailed description of outfit, accessories, and distinct visual features in 2-3 short Indonesian sentences).`;
+
+    try {
+      const rawRes = await (aiService as any).geminiClient.generateChatCompletion([
+        { role: 'system', content: 'Kamu adalah asisten AI pembuat karakter visual kreatif.' },
+        { role: 'user', content: prompt }
+      ]);
+
+      const cleanJson = (aiService as any).geminiClient.sanitizeJson(rawRes);
+      const parsed = JSON.parse(cleanJson);
+      return res.status(200).json({
+        success: true,
+        data: parsed,
+      });
+    } catch (aiErr) {
+      logger.warn('AI suggest character API fallback: ' + (aiErr as any)?.message);
+    }
+
+    const fallbackIdeas = [
+      {
+        nama: 'Astra si Kucing Astronot',
+        spesies: 'Kucing Persia Putih Salju',
+        jenis: 'Hewan',
+        kategori: 'Maskot Brand',
+        gaya: '3D Pixar Disney Style',
+        usia: 'Anak-anak',
+        kepribadian: 'Pemberani, Cerdas, Ceria',
+        warna: 'Kuning & Biru',
+        platform: 'Poster, Logo, Banner & Video',
+        desc: 'Kucing putih imut memakai baju astronot futuristik perak bertransparansi kaca helmet, membawa bendera bintang emas.',
+      },
+    ];
+
+    const pick = fallbackIdeas[Math.floor(Math.random() * fallbackIdeas.length)];
+    res.status(200).json({ success: true, data: pick });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const suggestVisualStyle = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prompt = `Generate 1 unique creative visual design system concept in JSON format.
+Return ONLY raw JSON with keys:
+"nama": (unique style name, e.g. "Cyberpunk Glassmorphism 2026", "Minimalist Earthy Terracotta"),
+"kategori": (Modern Minimalis, Cyberpunk Neon, Retro Vintage, Organic Nature, Luxury Gold, or Pixel Art Gaming),
+"mood": (Elegan & Profesional, Energetik & Dynamic, Misterius & Atmospheric, Soft & Calming Pastel, or Bold & Impactful),
+"medium": (3D Studio Render, 2D Swiss Vector Grid, Hyperrealistic Photography, Oil Painting Fine Art, or Collage Paper Cutout),
+"warna": (Dark Mode & Neon Accent, Light Mode Monochrome, Vibrant Pastel, Warm Earth Tone, or Deep Ocean Cyan),
+"cahaya": (Cinematic Studio Light, Natural Golden Hour, Volumetric Rim Light, or Studio Rim Neon Glow),
+"tekstur": (Smooth Glassmorphism & Matte, Rough Paper & Grain, Metallic Chrome Reflection, or Soft Clay Fabric),
+"desc": (detailed description of visual aesthetic and grid layout in 2 short Indonesian sentences),
+"extra": (additional visual notes in 1 short sentence).`;
+
+    try {
+      const rawRes = await (aiService as any).geminiClient.generateChatCompletion([
+        { role: 'system', content: 'Kamu adalah asisten AI perancang gaya visual desainer.' },
+        { role: 'user', content: prompt }
+      ]);
+
+      const cleanJson = (aiService as any).geminiClient.sanitizeJson(rawRes);
+      const parsed = JSON.parse(cleanJson);
+      return res.status(200).json({
+        success: true,
+        data: parsed,
+      });
+    } catch (aiErr) {
+      logger.warn('AI suggest visual style API fallback: ' + (aiErr as any)?.message);
+    }
+
+    const fallbackStyles = [
+      {
+        nama: 'Cyberpunk Glassmorphism 2026',
+        kategori: 'Cyberpunk Neon',
+        mood: 'Bold & Impactful',
+        medium: '3D Studio Render',
+        warna: 'Dark Mode & Neon Accent',
+        cahaya: 'Studio Rim Neon Glow',
+        tekstur: 'Smooth Glassmorphism & Matte',
+        desc: 'Perpaduan grid tipografi Swiss kontemporer dengan efek kaca frosting miring dan aksen neon cyan. Memberikan kesan sangat futuristik dan mewah.',
+        extra: 'Tipografi san-serif bold presisi tinggi dengan bayangan neon lembut.',
+      },
+    ];
+
+    const pick = fallbackStyles[Math.floor(Math.random() * fallbackStyles.length)];
+    res.status(200).json({ success: true, data: pick });
+  } catch (error) {
+    next(error);
+  }
+};
+
+

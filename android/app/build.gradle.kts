@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.ai_poster_prompt_studio"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

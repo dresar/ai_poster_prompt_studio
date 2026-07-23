@@ -1,0 +1,27 @@
+[2026-07-23 18:57:31:5731] info: Cleared port 3000
+[2026-07-23 18:57:31:5731] info: Server is running in development mode on port 3000
+[2026-07-23 18:58:01:581] info: Starting automatic image cleanup. Total files in uploads: 2
+[2026-07-23 18:58:03:583] info: Image cleanup finished. Deleted 0 unused local images.
+[2026-07-23 19:04:45:445] error: GET /api/poster/ideas?category=edukasi&slideCount=5 - 500 - aiService.generateContentIdeas is not a function
+[2026-07-23 19:04:45:445] error: TypeError: aiService.generateContentIdeas is not a function
+    at getContentIdeas (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:66841:35)
+    at Layer.handle [as handle_request] (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:17840:9)
+    at next (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:18009:17)
+    at C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:63319:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+[2026-07-23 19:04:45:445] error: POST /api/poster/chat - 500 - aiService.chat is not a function
+[2026-07-23 19:04:45:445] error: TypeError: aiService.chat is not a function
+    at chat (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:67208:35)
+    at Layer.handle [as handle_request] (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:17840:9)
+    at next (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:18009:17)
+    at Route.dispatch (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:17989:7)
+    at Layer.handle [as handle_request] (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:17840:9)
+    at C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:18211:19
+    at router10.process_params (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:18247:16)
+    at next (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:18207:15)
+    at spamBlocker (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:67701:12)
+    at Layer.handle [as handle_request] (C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\app.js:17840:9)
+[2026-07-23 19:05:03:53] info: Cleared port 3000
+[2026-07-23 19:05:03:53] info: Server is running in development mode on port 3000
+[2026-07-23 19:05:33:533] info: Starting automatic image cleanup. Total files in uploads: 2
+[2026-07-23 19:05:34:534] info: Image cleanup finished. Deleted 0 unused local images.

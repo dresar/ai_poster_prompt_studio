@@ -65650,62 +65650,25 @@ ${previousError}
     });
   }
   // --- ENHANCE PROMPT ---
-  async generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes, provider) {
+  async generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes) {
     const styleMap = {
-      kpop_aesthetic: "K-pop / Korean Aesthetic \u2014 smooth glass skin, bright dewy complexion, soft pink blush, puppy eyes, gradient lips, light natural makeup over flawless porcelain skin",
-      professional_headshot: "Professional Headshot \u2014 corporate clean look, neutral background, sharp focus on face, natural skin with minimal retouching, confident expression",
-      cinematic_portrait: "Cinematic Portrait \u2014 dramatic Rembrandt lighting, deep shadows, film grain, moody color grading, editorial magazine quality",
-      cyberpunk_mech: "Cyberpunk Mech \u2014 neon holographic overlays, circuit tattoos, mechanical implants on face, electric blue and magenta glow, dystopian high-tech aesthetic"
+      realistis: "photorealistic portrait retouching, crisp sharp focus, natural skin texture, studio lighting",
+      sinematik: "dramatic cinematic movie still, volumetric lighting, moody color grading, anamorphic lens flare",
+      cyberpunk: "futuristic cyberpunk aesthetic, neon neon glow, dark moody atmosphere, holographic accents",
+      anime: "high quality anime illustration style, Makoto Shinkai aesthetic, vibrant colors, detailed line art",
+      minimalis: "clean minimalist aesthetic, soft diffuse lighting, pastel tone palette, elegant simplicity"
     };
     const changeLevelMap = {
-      natural: "natural \u2014 subtle enhancements only, preserve identity and likeness, no dramatic changes",
-      medium: "medium \u2014 noticeable improvements while keeping realistic look, enhance features meaningfully"
+      rendah: "subtle enhancement \u2014 preserve original features, clean noise, enhance lighting and contrast slightly",
+      sedang: "moderate transformation \u2014 improve textures, refine background elements, enhance color palette",
+      tinggi: "dramatic transformation \u2014 completely redefine environment, style, and lighting while keeping subject identity"
     };
     const styleDescription = styleMap[enhanceStyle] || enhanceStyle;
     const changeLevelDescription = changeLevelMap[changeLevel] || changeLevel;
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const imageInfo = await this.imageAnalyzer.fetchImageAsBase64(imageUrl);
-        const visionPrompt = `You are an expert AI photo retouching prompt engineer.
-Analyze this photo and produce a super-detailed AI image generation prompt in JSON format.
-
-ANALYZE:
-- Subject, Lighting, Background, Outfit
-
-ENHANCEMENT REQUEST:
-- Style: ${styleDescription}
-- Change Level: ${changeLevelDescription}
-- Notes: ${notes || "none"}
-
-Return ONLY valid JSON:
-{
-  "payloadJson": {
-    "meta": { "mode": "photo_enhance", "language": "id", "createdAt": "${(/* @__PURE__ */ new Date()).toISOString()}" },
-    "input": { "imageUrl": "${imageUrl}", "enhanceStyle": "${enhanceStyle}", "changeLevel": "${changeLevel}", "notes": "${notes}" },
-    "analysis": {},
-    "output": {
-      "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT",
-      "analysisShortcomings": "Penjelasan kondisi foto dan transformasi yang dilakukan (Bahasa Indonesia)",
-      "viralScore": 0,
-      "hooks": ["HOOK_1", "HOOK_2", "HOOK_3", "HOOK_4"]
-    }
-  },
-  "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT"
-}`;
-        const response = await this.groqClient.post(apiKey, {
-          model: "llama-3.2-11b-vision-preview",
-          messages: [{ role: "user", content: [{ type: "text", text: visionPrompt }, { type: "image_url", image_url: { url: `data:${imageInfo.mimeType};base64,${imageInfo.base64Data}` } }] }]
-        });
-        const parsed = JSON.parse(this.groqClient.sanitizeJson(response.choices[0]?.message?.content || "{}"));
-        if (!parsed.payloadJson) parsed.payloadJson = parsed;
-        if (!parsed.promptFinal) parsed.promptFinal = parsed.payloadJson?.output?.promptFinal || "";
-        return parsed;
-      });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
-        const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(imageUrl);
-        const prompt = `You are an expert AI photo retouching and enhancement prompt engineer.
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
+      const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(imageUrl);
+      const prompt = `You are an expert AI photo retouching and enhancement prompt engineer.
 You are given a real photo to deeply analyze. Your job is to produce a highly detailed, professional AI image generation prompt that will transform this photo according to the requested style.
 
 ENHANCEMENT REQUEST:
@@ -65735,16 +65698,15 @@ Based on your deep visual analysis of the photo, generate the following JSON out
 }
 
 Output ONLY valid JSON.`;
-        const response = await model.generateContent([prompt, imagePart]);
-        const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-        if (!parsed.payloadJson) parsed.payloadJson = parsed;
-        if (!parsed.promptFinal) parsed.promptFinal = parsed.payloadJson?.output?.promptFinal || "";
-        return parsed;
-      });
-    }
+      const response = await model.generateContent([prompt, imagePart]);
+      const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+      if (!parsed.payloadJson) parsed.payloadJson = parsed;
+      if (!parsed.promptFinal) parsed.promptFinal = parsed.payloadJson?.output?.promptFinal || "";
+      return parsed;
+    });
   }
   // --- PROMPT TEMPLATE ---
-  async generatePromptTemplate(category, idea, provider) {
+  async generatePromptTemplate(category, idea) {
     const prompt = `Kamu adalah seorang prompt engineer AI profesional. Tugasmu adalah membuat sebuah template prompt generatif (DSL) dan detail pelengkapnya untuk kategori "${category}" berdasarkan ide dasar: "${idea}".
 
 Template ini akan digunakan oleh pengguna aplikasi untuk membuat konten secara dinamis. Oleh karena itu, template harus menyertakan token parameter dalam tanda kurung kurawal ganda seperti {{topic}}, {{description}}, {{keyPoints}}, {{style}}, {{colorPalette}}, {{mood}}, {{cta}}, dll., yang nantinya akan digantikan oleh input formulir pengguna.
@@ -65775,22 +65737,11 @@ Output harus berformat JSON dengan struktur persis seperti berikut:
   }
 }
 Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
-    if (provider === "groq") {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, {
-          model: "llama-3.3-70b-versatile",
-          response_format: { type: "json_object" },
-          messages: [{ role: "user", content: prompt }]
-        });
-        return JSON.parse(this.groqClient.sanitizeJson(response.choices[0]?.message?.content || "{}"));
-      });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
-        const response = await model.generateContent(prompt);
-        return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-      });
-    }
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
+      const response = await model.generateContent(prompt);
+      return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+    });
   }
   // --- IMPROVE PROMPT ---
   async improvePrompt(promptDraft, provider) {
@@ -66222,11 +66173,41 @@ var AIGatewayService = class {
   async generatePosterPrompts(formState) {
     return await this.promptGenerator.generatePrompt(formState);
   }
+  async generatePrompt(formState, previousError) {
+    return await this.promptGenerator.generatePrompt(formState, previousError);
+  }
+  async generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes) {
+    return await this.promptGenerator.generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes);
+  }
+  async generatePromptTemplate(category, idea) {
+    return await this.promptGenerator.generatePromptTemplate(category, idea);
+  }
+  async generateContentIdeas(userId, category, slideCount) {
+    return await this.chatAssistant.generateContentIdeas(userId, category, slideCount);
+  }
+  async chat(message, history) {
+    return await this.chatAssistant.chat(message, history);
+  }
   async generateChatResponse(messages, systemInstruction) {
     return await this.chatAssistant.generateResponse(messages, systemInstruction);
   }
+  async generateHooks(topic) {
+    return await this.topicAnalyzer.generateHooks(topic);
+  }
+  async scoreViral(promptFinal) {
+    return await this.viralScoreService.evaluateScore(promptFinal);
+  }
   async evaluateViralScore(payload) {
     return await this.viralScoreService.evaluateScore(payload);
+  }
+  async improvePrompt(promptDraft) {
+    return await this.chatAssistant.generateResponse([
+      { role: "system", content: "Kamu adalah AI Prompt Improver. Perbaiki dan tingkatkan prompt berikut agar lebih detail, spesifik, dan estetik." },
+      { role: "user", content: promptDraft }
+    ]);
+  }
+  async analyzeStoryboard(topic, duration) {
+    return await this.promptGenerator.generatePrompt({ topic, duration, feature: "video" });
   }
 };
 

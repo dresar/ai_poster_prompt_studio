@@ -33,11 +33,50 @@ export class AIGatewayService {
     return await this.promptGenerator.generatePrompt(formState);
   }
 
+  async generatePrompt(formState: any, previousError?: string): Promise<any> {
+    return await this.promptGenerator.generatePrompt(formState, previousError);
+  }
+
+  async generateEnhancePrompt(imageUrl: string, enhanceStyle: string, changeLevel: string, notes: string): Promise<any> {
+    return await this.promptGenerator.generateEnhancePrompt(imageUrl, enhanceStyle, changeLevel, notes);
+  }
+
+  async generatePromptTemplate(category: string, idea: string): Promise<any> {
+    return await this.promptGenerator.generatePromptTemplate(category, idea);
+  }
+
+  async generateContentIdeas(userId: string, category: string, slideCount?: number): Promise<string[]> {
+    return await this.chatAssistant.generateContentIdeas(userId, category, slideCount);
+  }
+
+  async chat(message: string, history: any[]): Promise<string> {
+    return await this.chatAssistant.chat(message, history);
+  }
+
   async generateChatResponse(messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>, systemInstruction?: string): Promise<string> {
     return await this.chatAssistant.generateResponse(messages, systemInstruction);
   }
 
+  async generateHooks(topic: string): Promise<string[]> {
+    return await this.topicAnalyzer.generateHooks(topic);
+  }
+
+  async scoreViral(promptFinal: string): Promise<any> {
+    return await this.viralScoreService.evaluateScore(promptFinal);
+  }
+
   async evaluateViralScore(payload: any): Promise<any> {
     return await this.viralScoreService.evaluateScore(payload);
+  }
+
+  async improvePrompt(promptDraft: string): Promise<string> {
+    return await this.chatAssistant.generateResponse([
+      { role: 'system', content: 'Kamu adalah AI Prompt Improver. Perbaiki dan tingkatkan prompt berikut agar lebih detail, spesifik, dan estetik.' },
+      { role: 'user', content: promptDraft }
+    ]);
+  }
+
+  async analyzeStoryboard(topic: string, duration: number): Promise<any> {
+    return await this.promptGenerator.generatePrompt({ topic, duration, feature: 'video' });
   }
 }

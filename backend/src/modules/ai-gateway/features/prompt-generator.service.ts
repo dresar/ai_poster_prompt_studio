@@ -768,49 +768,36 @@ OUTPUT HANYA BLOK JSON VALID. JANGAN TULIS PENJELASAN LAIN.`;
   }
 
   // --- ENHANCE PROMPT ---
-  async generateEnhancePrompt(imageUrl: string, enhanceStyle: string, changeLevel: string, notes: string, provider: 'gemini' | 'groq'): Promise<{ payloadJson: any; promptFinal: string; }> {
+  async generateEnhancePrompt(imageUrl: string, enhanceStyle: string, changeLevel: string, notes: string): Promise<{ payloadJson: any; promptFinal: string; }> {
     const styleMap: Record<string, string> = {
-      kpop_aesthetic: 'K-pop / Korean Aesthetic — smooth glass skin, bright dewy complexion, soft pink blush, puppy eyes, gradient lips, light natural makeup over flawless porcelain skin',
-      professional_headshot: 'Professional Headshot — corporate clean look, neutral background, sharp focus on face, natural skin with minimal retouching, confident expression',
-      cinematic_portrait: 'Cinematic Portrait — dramatic Rembrandt lighting, deep shadows, film grain, moody color grading, editorial magazine quality',
-      cyberpunk_mech: 'Cyberpunk Mech — neon holographic overlays, circuit tattoos, mechanical implants on face, electric blue and magenta glow, dystopian high-tech aesthetic',
+      realistis: 'photorealistic portrait retouching, crisp sharp focus, natural skin texture, studio lighting',
+      sinematik: 'dramatic cinematic movie still, volumetric lighting, moody color grading, anamorphic lens flare',
+      cyberpunk: 'futuristic cyberpunk aesthetic, neon neon glow, dark moody atmosphere, holographic accents',
+      anime: 'high quality anime illustration style, Makoto Shinkai aesthetic, vibrant colors, detailed line art',
+      minimalis: 'clean minimalist aesthetic, soft diffuse lighting, pastel tone palette, elegant simplicity',
     };
     const changeLevelMap: Record<string, string> = {
-      natural: 'natural — subtle enhancements only, preserve identity and likeness, no dramatic changes',
-      medium: 'medium — noticeable improvements while keeping realistic look, enhance features meaningfully',
+      rendah: 'subtle enhancement — preserve original features, clean noise, enhance lighting and contrast slightly',
+      sedang: 'moderate transformation — improve textures, refine background elements, enhance color palette',
+      tinggi: 'dramatic transformation — completely redefine environment, style, and lighting while keeping subject identity',
     };
     const styleDescription = styleMap[enhanceStyle] || enhanceStyle;
     const changeLevelDescription = changeLevelMap[changeLevel] || changeLevel;
 
-    if (provider === 'groq') {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const imageInfo = await this.imageAnalyzer.fetchImageAsBase64(imageUrl);
-        const visionPrompt = `You are an expert AI photo retouching prompt engineer.\nAnalyze this photo and produce a super-detailed AI image generation prompt in JSON format.\n\nANALYZE:\n- Subject, Lighting, Background, Outfit\n\nENHANCEMENT REQUEST:\n- Style: ${styleDescription}\n- Change Level: ${changeLevelDescription}\n- Notes: ${notes || 'none'}\n\nReturn ONLY valid JSON:\n{\n  "payloadJson": {\n    "meta": { "mode": "photo_enhance", "language": "id", "createdAt": "${new Date().toISOString()}" },\n    "input": { "imageUrl": "${imageUrl}", "enhanceStyle": "${enhanceStyle}", "changeLevel": "${changeLevel}", "notes": "${notes}" },\n    "analysis": {},\n    "output": {\n      "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT",\n      "analysisShortcomings": "Penjelasan kondisi foto dan transformasi yang dilakukan (Bahasa Indonesia)",\n      "viralScore": 0,\n      "hooks": ["HOOK_1", "HOOK_2", "HOOK_3", "HOOK_4"]\n    }\n  },\n  "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT"\n}`;
-        const response = await this.groqClient.post(apiKey, {
-          model: 'llama-3.2-11b-vision-preview',
-          messages: [{ role: 'user', content: [{ type: 'text', text: visionPrompt }, { type: 'image_url', image_url: { url: `data:${imageInfo.mimeType};base64,${imageInfo.base64Data}` } }] }],
-        });
-        const parsed = JSON.parse(this.groqClient.sanitizeJson(response.choices[0]?.message?.content || '{}'));
-        if (!parsed.payloadJson) parsed.payloadJson = parsed;
-        if (!parsed.promptFinal) parsed.promptFinal = parsed.payloadJson?.output?.promptFinal || '';
-        return parsed;
-      });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig: { responseMimeType: 'application/json' } });
-        const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(imageUrl);
-        const prompt = `You are an expert AI photo retouching and enhancement prompt engineer.\nYou are given a real photo to deeply analyze. Your job is to produce a highly detailed, professional AI image generation prompt that will transform this photo according to the requested style.\n\nENHANCEMENT REQUEST:\n- Style: ${styleDescription}\n- Change Level: ${changeLevelDescription}\n- Additional Notes from user: ${notes || 'none'}\n\nBased on your deep visual analysis of the photo, generate the following JSON output:\n{\n  "payloadJson": {\n    "meta": { "mode": "photo_enhance", "language": "id", "createdAt": "${new Date().toISOString()}" },\n    "input": {\n      "imageUrl": "${imageUrl}",\n      "enhanceStyle": "${enhanceStyle}",\n      "changeLevel": "${changeLevel}",\n      "notes": "${notes}"\n    },\n    "analysis": {},\n    "output": {\n      "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT",\n      "analysisShortcomings": "Penjelasan mendalam tentang kondisi foto asli dan transformasi apa yang akan dilakukan dalam bahasa Indonesia",\n      "viralScore": 0,\n      "hooks": ["HOOK_1", "HOOK_2", "HOOK_3", "HOOK_4"]\n    }\n  },\n  "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT"\n}\n\nOutput ONLY valid JSON.`;
-        const response = await model.generateContent([prompt, imagePart]);
-        const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-        if (!parsed.payloadJson) parsed.payloadJson = parsed;
-        if (!parsed.promptFinal) parsed.promptFinal = parsed.payloadJson?.output?.promptFinal || '';
-        return parsed;
-      });
-    }
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig: { responseMimeType: 'application/json' } });
+      const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(imageUrl);
+      const prompt = `You are an expert AI photo retouching and enhancement prompt engineer.\nYou are given a real photo to deeply analyze. Your job is to produce a highly detailed, professional AI image generation prompt that will transform this photo according to the requested style.\n\nENHANCEMENT REQUEST:\n- Style: ${styleDescription}\n- Change Level: ${changeLevelDescription}\n- Additional Notes from user: ${notes || 'none'}\n\nBased on your deep visual analysis of the photo, generate the following JSON output:\n{\n  "payloadJson": {\n    "meta": { "mode": "photo_enhance", "language": "id", "createdAt": "${new Date().toISOString()}" },\n    "input": {\n      "imageUrl": "${imageUrl}",\n      "enhanceStyle": "${enhanceStyle}",\n      "changeLevel": "${changeLevel}",\n      "notes": "${notes}"\n    },\n    "analysis": {},\n    "output": {\n      "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT",\n      "analysisShortcomings": "Penjelasan mendalam tentang kondisi foto asli dan transformasi apa yang akan dilakukan dalam bahasa Indonesia",\n      "viralScore": 0,\n      "hooks": ["HOOK_1", "HOOK_2", "HOOK_3", "HOOK_4"]\n    }\n  },\n  "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT"\n}\n\nOutput ONLY valid JSON.`;
+      const response = await model.generateContent([prompt, imagePart]);
+      const parsed = JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+      if (!parsed.payloadJson) parsed.payloadJson = parsed;
+      if (!parsed.promptFinal) parsed.promptFinal = parsed.payloadJson?.output?.promptFinal || '';
+      return parsed;
+    });
   }
 
   // --- PROMPT TEMPLATE ---
-  async generatePromptTemplate(category: string, idea: string, provider: 'gemini' | 'groq') {
+  async generatePromptTemplate(category: string, idea: string) {
     const prompt = `Kamu adalah seorang prompt engineer AI profesional. Tugasmu adalah membuat sebuah template prompt generatif (DSL) dan detail pelengkapnya untuk kategori "${category}" berdasarkan ide dasar: "${idea}".
 
 Template ini akan digunakan oleh pengguna aplikasi untuk membuat konten secara dinamis. Oleh karena itu, template harus menyertakan token parameter dalam tanda kurung kurawal ganda seperti {{topic}}, {{description}}, {{keyPoints}}, {{style}}, {{colorPalette}}, {{mood}}, {{cta}}, dll., yang nantinya akan digantikan oleh input formulir pengguna.
@@ -842,22 +829,11 @@ Output harus berformat JSON dengan struktur persis seperti berikut:
 }
 Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
 
-    if (provider === 'groq') {
-      return this.groqClient.executeWithKey(async (apiKey) => {
-        const response = await this.groqClient.post(apiKey, {
-          model: 'llama-3.3-70b-versatile',
-          response_format: { type: 'json_object' },
-          messages: [{ role: 'user', content: prompt }],
-        });
-        return JSON.parse(this.groqClient.sanitizeJson(response.choices[0]?.message?.content || '{}'));
-      });
-    } else {
-      return this.geminiClient.executeWithKey(async (genAI) => {
-        const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig: { responseMimeType: 'application/json' } });
-        const response = await model.generateContent(prompt);
-        return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
-      });
-    }
+    return this.geminiClient.executeWithKey(async (genAI) => {
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig: { responseMimeType: 'application/json' } });
+      const response = await model.generateContent(prompt);
+      return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
+    });
   }
 
   // --- IMPROVE PROMPT ---

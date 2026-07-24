@@ -67,18 +67,18 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "whitespaceRatio": "Rasio ruang kosong agar tidak overwhelming",
     "colorPalette": "Palet edukasi profesional + hex + makna psikologis tiap warna",
     "typographyHierarchy": "Hierarki: angka/stat besar, headline, subheading, body, caption sumber",
-    "slideNumberBadgeStyle": "Badge desain nomor slide kontras di pojok atas"
+    "slideNumberBadgeStyle": "ATURAN KETAT BADGE NOMOR: SLIDE 1 (COVER/HOOK) HARAM MEMILIKI BADGE NOMOR 1/$slideCount! AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH. BADGE NOMOR HANYA MULAI DITAMPILKAN PADA SLIDE 2 DENGAN FORMAT '2/$slideCount', '3/$slideCount', DST."
   },
   "visualBlueprint": {
     "coreVisualStyle": "Gaya yang mendukung penyampaian informasi edukatif efektif",
-    "compositionRules": "Aturan komposisi memandu mata + posisi badge nomor slide di pojok",
+    "compositionRules": "Aturan komposisi memandu mata (SLIDE 1: DILARANG ADA BADGE NOMOR 1/$slideCount. SLIDE 2+: Posisi badge nomor slide di pojok atas)",
     "dataVisualizationStyle": "Tipe visualisasi data: chart/diagram/timeline/comparison table",
     "illustrationIconography": "Ikon/ilustrasi yang merepresentasikan konsep secara universal"
   },
   "renderingBlueprint": {
     "renderStyle": "Modern flat/semi-3D/minimalist clean",
     "qualityParameters": "Keterbacaan optimal di berbagai ukuran layar",
-    "negativePrompt": "Elemen yang membuat konten terkesan tidak terpercaya"
+    "negativePrompt": "watermark, blur, 1/$slideCount on slide 1, slide 1 cover number badge, 1/6 cover badge, 1/5 cover badge, elemen yang membuat konten terkesan tidak terpercaya"
   },
   "brandingEngine": {
     "logoPlacement": "${useManualLogo ? 'Buat badge lingkaran estetik di pojok frame dengan tulisan LOGO di tengah. Slot ini khusus tempat tempel logo di Canva.' : 'NO_LOGO'}",
@@ -90,7 +90,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "headline": "Hook memikat & singkat MAX 8 KATA (Cover Hook Slide 1)",
       "description": "Subjudul singkat MAX 15 KATA. TANPA bullet list, TANPA paragraf panjang, TANPA infografik, TANPA statistik besar. Tujuan utama memancing rasa penasaran agar audiens swipe ke Slide 2.",
       "subject": "Satu visual utama memikat yang memenuhi minimal 65–70% kanvas artwork",
-      "sceneDescription": "Deskripsi latar dan detail artwork visual",
+      "sceneDescription": "Deskripsi latar dan detail artwork visual (ATURAN KETAT SLIDE 1 COVER: DILARANG KERAS MENAMPILKAN BADGE NOMOR SLIDE 1/$slideCount DI POJOK ATAS, AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH TANPA TEKS NOMOR SLIDE)",
       "visualEmphasis": "Data atau ilustrasi kunci yang ditonjolkan",
       "communicationGoal": "Poin inti yang harus ditangkap pembaca saat swipe cepat di HP",
       "educationalObjective": "Tujuan pembelajaran spesifik slide ini",

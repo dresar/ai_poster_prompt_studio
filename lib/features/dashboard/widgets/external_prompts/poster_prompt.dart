@@ -68,18 +68,18 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
     "whitespaceRatio": "Rasio negative space untuk kesan premium",
     "colorPalette": "Palet warna + kode hex + filosofi psikologis",
     "typographyHierarchy": "Skala tipografi: heading/subheading/body + font yang disarankan",
-    "slideNumberBadgeStyle": "Badge desain nomor slide kontras di pojok atas"
+    "slideNumberBadgeStyle": "ATURAN KETAT BADGE NOMOR: SLIDE 1 (COVER/HOOK) HARAM MEMILIKI BADGE NOMOR 1/$slideCount! AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH. BADGE NOMOR HANYA BOLEH DAN WAJIB MULAI DITAMPILKAN PADA SLIDE 2 DENGAN FORMAT '2/$slideCount', '3/$slideCount', DST."
   },
   "visualBlueprint": {
     "coreVisualStyle": "Gaya visual utama + alasan pemilihan",
-    "compositionRules": "Aturan komposisi visual + posisi badge nomor slide di pojok",
+    "compositionRules": "Aturan komposisi visual (SLIDE 1: DILARANG ADA BADGE NOMOR 1/$slideCount. SLIDE 2+: Posisi badge nomor slide di pojok atas)",
     "illustrationIconography": "Jenis ilustrasi/ikonografi yang digunakan konsisten",
     "lightingMood": "Mood pencahayaan"
   },
   "renderingBlueprint": {
     "renderStyle": "Gaya rendering: 3D studio/flat premium/cinematic",
     "qualityParameters": "Resolusi, anti-aliasing, color depth",
-    "negativePrompt": "Elemen yang HARUS dihindari dalam visual"
+    "negativePrompt": "watermark, blur, 1/$slideCount on slide 1, slide 1 number badge, 1/6 cover badge, 1/5 cover badge, teks berantakan, kualitas buruk, anatomi aneh"
   },
   "brandingEngine": {
     "logoPlacement": "${useManualLogo ? 'Buat badge lingkaran estetik di pojok frame dengan tulisan LOGO di tengah. Slot ini khusus tempat tempel logo di Canva.' : 'NO_LOGO'}",
@@ -91,7 +91,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "headline": "Headline kuat dan memancing rasa ingin tahu (Hook Slide 1)",
       "description": "Narasi poin utama poster (40–80 kata / 350–700 karakter total). GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN, CAPTION = PENJELASAN LENGKAP.",
       "subject": "Deskripsi subjek/karakter visual utama",
-      "sceneDescription": "Deskripsi latar, suasana, aksi, dan detail visual + badge nomor slide di pojok atas",
+      "sceneDescription": "Deskripsi latar, suasana, aksi, dan detail visual memikat (ATURAN KETAT SLIDE 1 COVER: DILARANG KERAS MENAMPILKAN BADGE NOMOR SLIDE 1/$slideCount DI POJOK ATAS, AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH TANPA NOMOR SLIDE)",
       "visualEmphasis": "Focal point dan cara penekanan visual",
       "communicationGoal": "Tujuan komunikasi spesifik slide ini",
       "educationalObjective": "Nilai edukasi atau insight yang disampaikan",
@@ -99,7 +99,7 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
       "supportingFacts": ["Fakta/statistik nyata + nama sumber + tahun 2026"],
       "calloutSuggestions": ["Teks callout/highlight yang paling menarik perhatian"],
       "referenceImageUrl": "URL CDN / gambar referensi asli dari riset internet opsional (misal https://... atau NO_REFERENCE_URL)",
-      "storytellingSequence": "Posisi dalam alur: Slide 1 (Hook Memancing Penasaran) s/d Slide Terakhir (Follow Sosmed & CTA)"
+      "storytellingSequence": "Posisi dalam alur: Slide 1 (Hook Memancing Penasaran - TANPA NOMOR SLIDE 1/$slideCount) s/d Slide Terakhir (Follow Sosmed & CTA)"
     }
   ],
   "output": {

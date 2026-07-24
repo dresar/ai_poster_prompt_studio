@@ -83,7 +83,7 @@ Tampilkan balasan KODE JSON per bagian dalam format KODE CANVAS / CODE BLOCK (``
 Anda WAJIB memproses instruksi ini dan membalas dengan KODE JSON SECARA BERTAHAP per bagian:
 1️⃣ Balasan Part 1 JSON: Buat objek JSON ("systemInit", "contentPayload", "brandingEngine") dalam kode block canvas siap salin.
 2️⃣ Balasan Part 2 JSON: Buat objek JSON ("designSystem", "visualBlueprint", "renderingBlueprint") dalam kode block canvas siap salin.
-3️⃣ Balasan Part 3 JSON: Buat objek JSON ("slidesContent" / "segmentsContent") LENGKAP Slide 1 s/d $slideCount (1 per 1 per slide, badge 1/$slideCount di pojok, riset 2026 + kredit sumber, Slide 1 Hook, Slide Terakhir Follow CTA) dalam kode block canvas siap salin.
+3️⃣ Balasan Part 3 JSON: Buat objek JSON ("slidesContent" / "segmentsContent") LENGKAP Slide 1 s/d $slideCount (1 per 1 per slide, ATURAN BADGE: SLIDE 1 COVER WAJIB TANPA BADGE NOMOR 1/$slideCount, BADGE NOMOR HANYA MULAI PADA SLIDE 2 S/D $slideCount, riset 2026 + kredit sumber, Slide 1 Hook, Slide Terakhir Follow CTA) dalam kode block canvas siap salin.
 4️⃣ Balasan Part 4 JSON: Buat objek JSON ("output") berisi viral score, hooks array, dan caption sosial media + TEPAT 3 HASHTAG TRENDING 2026. Nanti jika pengguna mengumpulkan seluruh instruksi atau meminta file akhir, barulah buatkan FILE UNDUH (.json).
 
 👉 SAAT SAYA MENGIRIM PART 1 INI: Silakan baca informasi awal di bawah ini, lalu JAWAB DENGAN BALASAN KODE JSON PART 1 SAJA DALAM KODE BLOCK CANVAS TERLEBIH DAHULU dan beri tahu bahwa Anda siap menerima Part 2!

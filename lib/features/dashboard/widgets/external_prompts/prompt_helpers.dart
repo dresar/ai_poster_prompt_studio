@@ -211,10 +211,10 @@ String slideStructureRules(dynamic slideCount) {
   final isSingleSlide = countInt == 1;
 
   final badgeRuleText = isSingleSlide
-      ? '2. DILARANG SERTAKAN BADGE NOMOR SLIDE (KHUSUS 1 SLIDE): Karena ini adalah poster tunggal (1 slide), DILARANG KERAS mencantumkan badge/indikator nomor slide ("1/1", "1/10", dst). Hapus atau jangan adakan badge nomor slide!'
-      : '2. ATURAN BADGE/INDIKATOR NOMOR SLIDE (CAROUSEL >1 SLIDE):\n'
-          '   a. SLIDE PERTAMA (HOOK) — DILARANG ADA BADGE NOMOR: Slide 1 TIDAK BOLEH memiliki badge atau indikator nomor slide apapun ("1/$slideCount", "1/10", dsb). Slide pertama adalah Hook murni tanpa nomor slide.\n'
-          '   b. SLIDE KEDUA S/D TERAKHIR — WAJIB ADA BADGE NOMOR: Mulai Slide 2, sertakan badge nomor slide yang estetik di pojok atas frame (contoh: "2/$slideCount", "3/$slideCount", ..., "${slideCount}/$slideCount"). Badge harus kontras, bersih, dan konsisten di semua slide.';
+      ? '2. DILARANG SERTAKAN BADGE NOMOR SLIDE (KHUSUS 1 SLIDE): Karena ini adalah poster tunggal (1 slide), DILARANG KERAS mencantumkan badge/indikator nomor slide ("1/1", "1/10", "1/$slideCount", dst). Hapus atau jangan adakan badge nomor slide!'
+      : '2. HUKUM HARAM BADGE NOMOR PADA SLIDE 1 (HOOK / COVER):\n'
+          '   a. SLIDE PERTAMA (HOOK / COVER) — HARAM & DILARANG KERAS ADA BADGE NOMOR 1/$slideCount: Slide 1 (Cover / Hook) DILARANG KERAS MENAMPILKAN TEKS NOMOR SLIDE "1/$slideCount", "1/6", "1/5", "SLIDE 1", ATAU BADGE NOMOR APAPUN! Area pojok atas Slide 1 WAJIB KOSONG BERSIH TANPA TEKS INDIKATOR NOMOR SLIDE!\n'
+          '   b. SLIDE KEDUA S/D TERAKHIR — BARU BOLEH & WAJIB DITAMPILKAN BADGE NOMOR: Badge nomor slide BARU BOLEH DITAMPILKAN MULAI SLIDE 2 DENGAN FORMAT "2/$slideCount", "3/$slideCount", ..., "${slideCount}/$slideCount" (Contoh untuk 6 Slide: Slide 1 COVER = WAJIB KOSONG BERSIH TANPA NOMOR, Slide 2 = "2/6", Slide 3 = "3/6", Slide 4 = "4/6", Slide 5 = "5/6", Slide 6 = "6/6").';
 
   final slideDensityText = '5. KEPADATAN TEKS UNTUK CAROUSEL EDUKASI ($slideCount SLIDE):\n'
       '   a. GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN (70% Visual Art, 30% Teks Ringkas).\n'

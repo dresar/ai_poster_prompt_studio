@@ -111,21 +111,23 @@ Ini adalah LANJUTAN BAGIAN 2. Buatlah balasan KODE JSON PART 2 yang memuat field
   final badgeInstructionText = isSingleSlide
       ? '- DILARANG BADGE NOMOR SLIDE (1 SLIDE): Karena ini poster tunggal (1 slide), DILARANG KERAS mencantumkan badge/indikator nomor slide ("1/1", "1/10", dst). Hapus total elemen ini.'
       : '- ATURAN BADGE NOMOR SLIDE CAROUSEL:\n'
-          '  • SLIDE 1 (HOOK): DILARANG ADA BADGE NOMOR — Slide 1 murni tanpa nomor apapun ("1/$slideCount" dll).\n'
-          '  • SLIDE 2 S/D $slideCount: WAJIB ADA BADGE NOMOR di pojok atas (contoh: "2/$slideCount", "3/$slideCount", ..., "$slideCount/$slideCount"). Desain badge kontras dan konsisten.';
+          '  • SLIDE 1 (COVER HOOK) — HUKUM HARAM BADGE NOMOR: DILARANG KERAS ADA BADGE NOMOR APAPUN ("1/$slideCount", "1/5", "1/6", "SLIDE 1") DI POJOK ATAS! Pojok atas Slide 1 wajib 100% kosong bersih tanpa angka nomor slide.\n'
+          '  • SLIDE 2 S/D $slideCount: BARU BOLEH ADA BADGE NOMOR di pojok atas (contoh: "2/$slideCount", "3/$slideCount", ..., "$slideCount/$slideCount"). Desain badge kontras dan konsisten.';
 
   final part3Header = '''
 ========================================
 [BAGIAN 3 / 4: DETAIL ALUR SLIDE (1 S/D $slideCount) & RISET DATA 2026]
 ========================================
-⚠️ PETUNJUK UNTUK AI:
+⚠️ PETUNJUK KETAT UNTUK AI:
 Ini adalah LANJUTAN BAGIAN 3. Buatlah balasan KODE JSON PART 3 ("slidesContent" / "segmentsContent") untuk SEMUA $slideCount SLIDE/SEGMEN TERPISAH 1 PER 1.
 Aturan Keras Part 3:
+- SLIDE 1 (COVER HOOK): WAJIB SUPER MINIMALIS & PUNCHY! Hanya Hook memikat (max 5-8 kata) + Subjudul singkat (max 10 kata). DILARANG KERAS ADA BULLET LIST (keyPoints), DILARANG ADA DATA STATISTIK (supportingFacts), DILARANG ADA KOTAK CALLOUT PANJANG, DILARANG ADA WATERMARK SOSMED/WEB DI SLIDE 1 COVER.
+- SLIDE 2 (PEMBUKA TOPIK & JUDUL MATERI): Adalah slide tempat Pembuka Topik Utama & Pengenalan Materi!
+- BADGE LOGO PLACEHOLDER: Di dalam slot logo HANYA BISA BERISI KATA "LOGO" ATAU LINGKARAN PUTIH BERSIH POLOS. DILARANG KERAS MENGISIKAN ATAU MEMBUAT TEKS MERK/BRAND PALSU DI DALAM LOGO (seperti "inka.tech", "brandname", dll).
 - GAYA BAHASA SUPER NON-FORMAL & SANTAI: Gunakan gaya bahasa SUPER SANTAI, CASUAL, AKRAB, GAUL, DAN ENAK DIBACA. DILARANG KERAS menggunakan bahasa kaku/akademis/korporat.
-${isSingleSlide ? '- POSTER TUNGGAL (1 SLIDE): WAJIB menggunakan rasio PORTRAIT (Vertikal 4:5 / 9:16) dan narasi teks WAJIB SANGAT KOMPLEKS, PADAT, DAN MENDALAM (150-250 kata + riset 2026).\n' : ''}${isMultiSlide ? '- CAROUSEL BANYAK SLIDE ($slideCount SLIDE): Karena slide cukup banyak ($slideCount slide), narasi teks per slide WAJIB SINGKAT, RINGKAS, TO THE POINT, DAN PUNCHY (sekitar 40-70 kata per slide). DILARANG KERAS membuat teks terlalu tebal/penuh di setiap slide agar audiens nyaman membaca.\n' : ''}$badgeInstructionText
-- RISET DATA REAL 2026: Riset berita/data 2026 + sertakan kredit sumber terpercaya (contoh: "Sumber: Kompas 2026", "Data: BPS 2025/2026").
-- SLIDE 1 HOOK: Slide 1 WAJIB berupa Hook memancing rasa ingin tahu tinggi.
-- SLIDE TERAKHIR ($slideCount): Slide Terakhir WAJIB berupa Call-To-Action (CTA) & ajakan Follow media sosial.
+${isSingleSlide ? '- POSTER TUNGGAL (1 SLIDE): WAJIB menggunakan rasio PORTRAIT (Vertikal 4:5 / 9:16) dan narasi teks WAJIB SANGAT KOMPLEKS, PADAT, DAN MENDALAM (150-250 kata + riset 2026).\n' : ''}${isMultiSlide ? '- CAROUSEL BANYAK SLIDE ($slideCount SLIDE): Teks per slide konten (Slide 2+) WAJIB RINGKAS & PUNCHY (~40-70 kata per slide).\n' : ''}$badgeInstructionText
+- RISET DATA REAL 2026: Riset berita/data 2026 + sertakan kredit sumber terpercaya (contoh: "Sumber: Kompas 2026", "Data: BPS 2025/2026") pada slide konten (Slide 2+).
+- SLIDE TERAKHIR ($slideCount): Slide Terakhir WAJIB berupa Call-To-Action (CTA), Watermark Sosmed, & ajakan Follow.
 
 ----------------------------------------
 ''';

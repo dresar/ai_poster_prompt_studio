@@ -87,18 +87,18 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
   "slidesContent": [
     {
       "slideNumber": 1,
-      "headline": "Hook memikat & singkat MAX 8 KATA (Cover Hook Slide 1)",
-      "description": "Subjudul singkat MAX 15 KATA. TANPA bullet list, TANPA paragraf panjang, TANPA infografik, TANPA statistik besar. Tujuan utama memancing rasa penasaran agar audiens swipe ke Slide 2.",
+      "headline": "Hook memikat & singkat MAX 5-8 KATA (Cover Hook Slide 1 Penasaran)",
+      "description": "Subjudul singkat MAX 10 KATA. TANPA bullet list, TANPA paragraf panjang, TANPA infografik, TANPA statistik besar, TANPA watermark sosmed/web di Slide 1. Tujuan utama memancing rasa penasaran agar audiens swipe ke Slide 2.",
       "subject": "Satu visual utama memikat yang memenuhi minimal 65–70% kanvas artwork",
-      "sceneDescription": "Deskripsi latar dan detail artwork visual (ATURAN KETAT SLIDE 1 COVER: DILARANG KERAS MENAMPILKAN BADGE NOMOR SLIDE 1/$slideCount DI POJOK ATAS, AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH TANPA TEKS NOMOR SLIDE)",
-      "visualEmphasis": "Data atau ilustrasi kunci yang ditonjolkan",
-      "communicationGoal": "Poin inti yang harus ditangkap pembaca saat swipe cepat di HP",
-      "educationalObjective": "Tujuan pembelajaran spesifik slide ini",
-      "keyPoints": ["Poin 1 singkat (20–50 karakter)", "Poin 2 singkat (20–50 karakter)", "Poin 3 singkat (20–50 karakter)"],
-      "supportingFacts": ["Fakta/statistik ringkas (sumber: Kompas 2026)"],
-      "calloutSuggestions": ["Pull-quote atau highlight paling impactful"],
-      "referenceImageUrl": "URL CDN / foto referensi asli dari hasil riset internet opsional (misal https://... atau NO_REFERENCE_URL)",
-      "storytellingSequence": "Alur: Slide 1 (Hook) > Konteks > Data 2026 > Solusi > Slide Terakhir (Follow Sosmed & CTA)"
+      "sceneDescription": "Deskripsi latar dan detail artwork visual (ATURAN KETAT SLIDE 1 COVER: DILARANG KERAS MENAMPILKAN BADGE NOMOR SLIDE 1/$slideCount DI POJOK ATAS! AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH TANPA ANGKAN BADGE NOMOR. DI DALAM BADGE LOGO HANYA BOLEH ADA KATA 'LOGO' ATAU LINGKARAN PUTIH BERSIH POLOS. DILARANG MENERJEMAHKAN MERK/BRAND PALSU SEPERTI inka.tech DI DALAM LOGO)",
+      "visualEmphasis": "Visual utama memikat yang menonjol di tengah kanvas",
+      "communicationGoal": "Memancing rasa penasaran audiens dalam 3 detik pertama",
+      "educationalObjective": "Gerbang pembuka sebelum masuk topik utama di Slide 2",
+      "keyPoints": [],
+      "supportingFacts": [],
+      "calloutSuggestions": [],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Alur: Slide 1 (Cover Hook Penasaran - TANPA NOMOR 1/$slideCount) > Slide 2 (Pembuka Topik & Judul Materi) > Slide 3-5 (Materi & Data 2026) > Slide Terakhir (Follow Sosmed & CTA)"
     }
   ],
   "output": {

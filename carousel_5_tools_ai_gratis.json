@@ -1,0 +1,237 @@
+{
+  "systemInit": {
+    "mission": "Membangun carousel edukasi berbasis data untuk platform Instagram/TikTok yang memposisikan 5 tools AI gratis sebagai solusi konkret atas beban kerja administratif berlebih. Strategi komunikasi menggabungkan hook rasa penasaran tinggi di slide pembuka, struktur edukasi bertahap (satu tools = satu slide) dengan bukti data riset 2026, dan penutup yang mendorong aksi simpan-bagikan-ikuti. Target emosional audiens adalah rasa terinspirasi sekaligus sedikit FOMO (takut tertinggal dari rekan kerja yang sudah lebih efisien), dipadukan rasa lega karena solusi yang ditawarkan gratis dan mudah diakses. Gaya visual teknologi modern dipilih agar konten terasa kredibel, futuristik, namun tetap hangat dan tidak intimidatif bagi pekerja non-teknis."
+  },
+  "contentPayload": {
+    "topic": "5 Tools AI Gratis yang Menghemat Waktu Kerja 10x Lipat",
+    "targetAudience": "Pekerja kantoran, freelancer, content creator, dan karyawan muda usia 22-38 tahun di Indonesia, mayoritas Gen Z dan Milenial melek digital yang aktif menggunakan smartphone untuk bekerja, sering merasa kewalahan dengan tugas administratif repetitif seperti membalas email, membuat laporan, mengatur jadwal rapat, dan menyusun presentasi mendadak. Mereka aktif di Instagram dan TikTok, gemar menyimpan konten bermanfaat (save-worthy content), dan tertarik pada tips produktivitas praktis yang bisa langsung dipakai tanpa perlu belajar teknis mendalam.",
+    "emotionalTrigger": "FOMO dan curiosity gap dipilih sebagai pemicu emosional utama karena topik ini menyentuh kecemasan nyata pekerja modern: takut tertinggal dari rekan kerja yang sudah lebih produktif berkat AI. Data Microsoft Work Trend Index 2026 menunjukkan 33% pekerja Indonesia sudah masuk kategori pengguna AI tingkat lanjut, jauh di atas rata-rata global, sehingga audiens yang belum memanfaatkan AI secara optimal akan merasa perlu segera beradaptasi. Rasa penasaran dipicu lewat hook yang menjanjikan kompresi waktu kerja ekstrem (8 jam menjadi hitungan menit), mendorong swipe hingga slide terakhir.",
+    "contentPillar": "Edukasi produktivitas dan teknologi praktis",
+    "viralMechanism": "Shareability tinggi karena konten bersifat sangat actionable dan gratis, membuat audiens ingin menandai rekan kerja atau tim mereka. Informational gap dibangun lewat hook yang tidak langsung membocorkan nama tools di slide pertama, memaksa audiens swipe untuk tahu jawabannya. Format daftar bernomor (5 tools) juga terbukti secara psikologis mendorong rasa perlu menyelesaikan (completion bias) sehingga retention swipe tinggi, sementara sifat 'gratis' dan 'terbukti data 2026' meningkatkan kepercayaan dan dorongan untuk menyimpan postingan sebagai referensi jangka panjang."
+  },
+  "designSystem": {
+    "gridStructure": "Struktur grid vertikal 9:16 dengan margin aman 8% di setiap sisi untuk mencegah teks terpotong safe zone Instagram/TikTok. Layout menggunakan sistem grid 12 kolom asimetris: area visual utama (mascot/ikon 3D) mengambil 60-70% ruang di bagian tengah-atas kanvas, sementara blok teks (headline, subheadline, keypoints) terkonsentrasi pada 30-40% ruang bagian bawah dalam bentuk floating card glassmorphism. Badge nomor slide (mulai slide 2) diposisikan di pojok kanan atas dengan ukuran kompak, sedangkan slot logo bulat berada di pojok kiri atas dengan padding lapang di sekelilingnya.",
+    "whitespaceRatio": "Rasio negative space dijaga pada kisaran 35-40% dari total kanvas untuk memberi kesan premium, lega, dan tidak sesak. Ruang kosong sengaja disisakan di sekitar elemen visual utama dan di antara blok teks agar mata audiens memiliki titik istirahat, menghindari kesan penuh sesak yang umum pada konten edukasi murahan. Area kosong ini WAJIB dibiarkan bersih tanpa elemen tambahan apapun.",
+    "colorPalette": "Palet Teknologi Modern yang diselaraskan dengan jiwa topik efisiensi dan kecerdasan buatan: warna dasar Deep Space Navy (#0B1220) sebagai background utama melambangkan fokus, ketenangan, dan kedalaman teknologi. Aksen gradasi Electric Blue (#3B82F6) menuju Cyber Violet (#8B5CF6) digunakan pada elemen glowing, ikon, dan garis pemisah, merepresentasikan inovasi dan kecerdasan digital. Warna aksen tersier Neon Cyan (#22D3EE) dipakai pada highlight kecil dan garis energi untuk kesan futuristik dan kecepatan. Warna teks utama Soft White (#F8FAFC) untuk keterbacaan maksimal di atas background gelap, dengan aksen Warm Amber (#FBBF24) khusus untuk elemen callout/statistik penting agar menarik perhatian tanpa merusak harmoni dingin palet teknologi. Filosofi psikologis: biru dan ungu membangun rasa percaya dan kecerdasan, cyan menghadirkan energi kecepatan (relevan dengan tema 'hemat waktu 10x lipat'), amber memberi kontras hangat yang membuat data statistik terasa penting dan mudah ditemukan mata.",
+    "typographyHierarchy": "Font headline menggunakan gaya sans-serif geometris tebal seperti Poppins ExtraBold atau Sora Bold, ukuran besar 48-64pt untuk hook dan headline utama guna menciptakan dominasi visual yang jelas terbaca dalam satu pandangan sekilas di layar HP. Subheadline menggunakan Poppins SemiBold 24-32pt sebagai penjelas singkat headline. Body text/keypoints menggunakan Inter Regular atau Poppins Regular 16-20pt dengan line-height lapang untuk kenyamanan baca. Badge nomor slide menggunakan font monospace tebal kecil seperti JetBrains Mono Bold 14-18pt untuk kesan teknikal. Seluruh tipografi menggunakan warna Soft White dengan sesekali aksen gradient blue-violet pada kata kunci tertentu untuk penekanan visual tanpa mengorbankan keterbacaan.",
+    "slideNumberBadgeStyle": "ATURAN KETAT BADGE NOMOR: SLIDE 1 (COVER/HOOK) HARAM MEMILIKI BADGE NOMOR 1/6! AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH. BADGE NOMOR HANYA BOLEH DAN WAJIB MULAI DITAMPILKAN PADA SLIDE 2 DENGAN FORMAT '2/6', '3/6', '4/6', '5/6', '6/6'. Bentuk badge berupa pill/kapsul kecil transparan glassmorphism dengan border tipis gradient blue-violet, teks angka putih tebal, diposisikan di pojok kanan atas kanvas dengan padding aman dari tepi."
+  },
+  "visualBlueprint": {
+    "coreVisualStyle": "Gaya visual utama adalah 3D Isometric Tech Illustration dipadukan dengan elemen glassmorphism UI modern, dipilih karena mampu memvisualisasikan konsep abstrak 'AI' dan 'efisiensi kerja' menjadi objek yang konkret, hangat, dan mudah dipahami audiens non-teknis, sekaligus tetap terasa premium dan kredibel untuk konten edukasi teknologi. Rendering 3D dengan permukaan matte-glossy kombinasi memberi kesan modern tanpa terlihat terlalu kaku atau korporat.",
+    "compositionRules": "SLIDE 1 (COVER/HOOK): DILARANG KERAS ADA BADGE NOMOR 1/6 ATAU INDIKATOR SLIDE APAPUN, area pojok atas wajib bersih kosong, hanya slot logo bulat di pojok kiri atas yang boleh tampil. Visual mascot/karakter utama mendominasi 65-70% kanvas di posisi tengah, dengan headline besar di bawahnya. SLIDE 2 HINGGA 6: Badge nomor slide wajib tampil di pojok kanan atas, slot logo tetap konsisten di pojok kiri atas, elemen ikon tools AI terkait diposisikan di sisi kanan atau tengah-atas kanvas sebagai focal point, dengan kartu teks (headline, deskripsi singkat, keypoints/bullet) mengambang di bagian bawah kanvas menggunakan efek glassmorphism semi-transparan agar background tech tetap terlihat. Komposisi mengikuti aturan rule of thirds dengan focal point visual selalu berada di sepertiga atas-tengah kanvas.",
+    "illustrationIconography": "Ikonografi konsisten menggunakan gaya line-icon dengan isi gradient glow blue-violet-cyan, merepresentasikan masing-masing kategori tools: ikon gelembung chat/pena untuk penulisan AI, ikon kuas ajaib/layer gambar untuk desain visual, ikon kotak terstruktur/checklist mengambang untuk manajemen proyek, ikon gelombang suara/mikrofon untuk transkripsi audio, dan ikon slide/layout presentasi untuk pembuatan presentasi otomatis. Setiap ikon dirender dalam gaya 3D kaca tembus pandang (frosted glass icon) dengan cahaya neon tipis di tepinya agar terasa satu keluarga visual yang koheren di seluruh slide.",
+    "lightingMood": "Pencahayaan cinematic dark-mode dengan sumber cahaya utama berupa glow lembut biru-ungu yang seolah terpancar dari objek 3D itu sendiri (self-illuminating tech glow), menciptakan suasana fokus, canggih, dan tenang seperti ruang kerja digital malam hari yang produktif. Terdapat rim light tipis cyan di tepi objek utama untuk memberi dimensi dan memisahkan objek dari background gelap. Mood keseluruhan: tenang namun energik, futuristik namun approachable, merepresentasikan jiwa materi tentang efisiensi kerja cerdas tanpa lelah."
+  },
+  "renderingBlueprint": {
+    "renderStyle": "3D isometric studio render dipadukan flat premium glassmorphism UI overlay, resolusi tinggi dengan tekstur permukaan matte-glossy campuran, pencahayaan studio softbox digital disertai glow neon aksen sesuai palet warna yang ditentukan.",
+    "qualityParameters": "Resolusi output minimal 2048x2048 piksel untuk kualitas cetak dan digital tinggi, anti-aliasing halus pada seluruh tepi objek 3D, color depth 24-bit dengan rentang dinamis tinggi (high dynamic range) agar gradasi glow biru-ungu-cyan terlihat halus tanpa banding, ketajaman fokus utama pada objek sentral dengan sedikit depth of field lembut pada elemen latar belakang.",
+    "negativePrompt": "watermark palsu, blur, teks buram, 1/6 pada slide 1, badge nomor pada slide cover, 1/6 cover badge, 1/5 cover badge, teks berantakan, tipografi bertumpuk, kualitas rendah, anatomi karakter aneh, tangan cacat, wajah distorsi, logo brand asli pihak ketiga, elemen kolase, grid multi-panel, beberapa slide dalam satu gambar, teks tambahan yang tidak diminta, infografik tambahan yang tidak diminta, warna oversaturasi berlebihan, noise digital, kompresi artefak"
+  },
+  "brandingEngine": {
+    "logoPlacement": "Sebuah slot badge lingkaran estetik berdiameter proporsional (sekitar 10-12% lebar kanvas) diposisikan di pojok kiri atas setiap slide, dengan border tipis gradient glow blue-violet mengelilingi lingkaran, isi lingkaran berwarna glassmorphism semi-transparan gelap, dan di tengah lingkaran tertulis kata 'LOGO' dalam font sans-serif putih ukuran kecil-sedang sebagai penanda placeholder. Area padding kosong yang lapang dan bersih disediakan mengelilingi lingkaran slot logo tersebut, memastikan posisi slot terlihat menonjol, rapi, dan mudah diganti dengan logo asli saat proses editing di Canva.",
+    "watermarkFooter": "Instagram: @arif_ex21 | TikTok: @arif_ex21 | YouTube: @arif_ex21 | Website: ink.my.id"
+  },
+  "slidesContent": [
+    {
+      "slideNumber": 1,
+      "headline": "Berhenti Kerja Keras, Mulai Kerja Cerdas",
+      "description": "5 AI ini bakal selesaikan kerjaan 8 jam cuma dalam hitungan menit. Serius, gratis semua! Swipe sekarang sebelum rekan kerjamu duluan tahu rahasia ini.",
+      "subject": "Karakter mascot 3D robot ramah bernama konsep 'Robo Efisien': tubuh bulat lucu warna gradient biru-ungu metalik glossy, mata layar digital berbentuk oval dengan ekspresi ceria dan percaya diri (garis melengkung menyerupai senyum di layar mata), tangan robotik ramping sedang memegang jam pasir digital bercahaya yang pasirnya berubah menjadi partikel cahaya cepat, pose berdiri tegak dengan satu tangan terangkat seolah menunjuk ke arah penonton mengajak untuk swipe, terdapat detail panel cahaya kecil berkedip di dada robot sebagai aksen teknologi.",
+      "sceneDescription": "Area pojok atas kanvas WAJIB KOSONG BERSIH TANPA BADGE NOMOR SLIDE APAPUN, hanya slot logo bulat di pojok kiri atas yang tampil. Latar belakang Deep Space Navy gelap dengan efek partikel cahaya bokeh biru-ungu-cyan melayang lembut merepresentasikan aliran data digital, beberapa garis grid tipis transparan bergaya blueprint teknologi tersebar di latar sebagai tekstur dekoratif tanpa mengganggu fokus utama. Mascot Robo Efisien diposisikan tepat di tengah kanvas, mengambil sekitar 65-70% ruang vertikal, dengan glow cahaya biru-ungu terpancar lembut dari tubuhnya menerangi area sekitarnya. Jam pasir digital yang dipegangnya memancarkan trail partikel cahaya cyan yang mengalir dinamis, memberi kesan kecepatan dan efisiensi waktu.",
+      "visualEmphasis": "Focal point utama adalah wajah dan pose mascot Robo Efisien yang penuh percaya diri memegang jam pasir digital bercahaya, ditempatkan tepat di titik tengah-atas kanvas mengikuti rule of thirds, dengan glow terang sebagai penarik mata pertama sebelum audiens membaca headline di bawahnya.",
+      "communicationGoal": "Memancing rasa penasaran audiens dalam tiga detik pertama tanpa membocorkan nama-nama tools, mendorong aksi swipe ke slide berikutnya melalui janji hasil ekstrem (8 jam menjadi hitungan menit).",
+      "educationalObjective": "Memperkenalkan premis besar konten: efisiensi kerja drastis melalui pemanfaatan AI gratis, sebagai gerbang masuk sebelum masuk ke detail masing-masing tools di slide selanjutnya.",
+      "keyPoints": [
+        "5 tools AI gratis siap pakai",
+        "Hemat waktu kerja hingga 10x lipat",
+        "Tanpa biaya berlangganan mahal"
+      ],
+      "supportingFacts": [
+        "Sebanyak 33% pekerja Indonesia kini masuk kategori Frontier Professionals atau pengguna AI tingkat lanjut, dua kali lipat rata-rata global 16% - Sumber: Microsoft Work Trend Index 2026",
+        "96% pekerja Indonesia yang menggunakan AI setiap hari merasa lebih produktif dalam pekerjaannya - Sumber: Riset Lanskap AI Indonesia 2026"
+      ],
+      "calloutSuggestions": [
+        "8 JAM JADI HITUNGAN MENIT"
+      ],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Slide 1 (Hook Memancing Penasaran - TANPA NOMOR SLIDE 1/6), gerbang masuk sebelum audiens diperkenalkan pada 5 tools secara bertahap di slide berikutnya."
+    },
+    {
+      "slideNumber": 2,
+      "headline": "ChatGPT: Sulap Laporan Tebal Jadi Ringkasan Kilat",
+      "description": "Males baca laporan puluhan halaman? Tinggal tempel ke ChatGPT, langsung jadi poin-poin eksekutif yang gampang dicerna. Nulis email, artikel, sampai rangkuman dokumen rumit selesai dalam hitungan detik doang.",
+      "subject": "Mascot 3D robot Robo Efisien tampil dengan pose duduk santai namun fokus di depan layar laptop transparan bercahaya, tangan kanan robot mengetuk-ngetuk keyboard virtual, di atas kepala robot muncul ikon gelembung chat 3D kaca tembus pandang dengan garis-garis teks bercahaya mengalir keluar dari gelembung tersebut merepresentasikan proses generate teks otomatis, ekspresi mata layar robot menunjukkan fokus dan puas.",
+      "sceneDescription": "Badge nomor slide '2/6' tampil jelas di pojok kanan atas kanvas dalam bentuk pill glassmorphism. Slot logo bulat tetap konsisten di pojok kiri atas dengan padding lapang. Latar belakang Deep Space Navy dengan gradasi glow biru-ungu lebih terkonsentrasi di sekitar area laptop virtual, beberapa lembar dokumen digital transparan tampak beterbangan lembut di sekitar mascot lalu menyusut menjadi ikon ringkasan kecil bercahaya, memvisualisasikan proses kompresi dokumen panjang menjadi poin singkat. Kartu teks glassmorphism mengambang di bagian bawah kanvas berisi headline, deskripsi, dan keypoints.",
+      "visualEmphasis": "Focal point pada gelembung chat 3D bercahaya di atas kepala mascot yang memancarkan garis teks mengalir, menyimbolkan kecepatan pemrosesan bahasa alami secara visual mencolok.",
+      "communicationGoal": "Mengedukasi audiens bahwa ChatGPT dapat memangkas waktu membaca dan menulis dokumen panjang secara drastis, menggantikan tugas administratif berat dengan proses instan.",
+      "educationalObjective": "Audiens memahami satu use case konkret ChatGPT: meringkas laporan panjang menjadi poin eksekutif, sehingga bisa langsung dipraktikkan di pekerjaan sehari-hari.",
+      "keyPoints": [
+        "Ringkas laporan panjang jadi poin inti",
+        "Draf email & artikel dalam hitungan detik",
+        "Pahami konteks instruksi manusia natural"
+      ],
+      "supportingFacts": [
+        "Penggunaan AI untuk pekerjaan dan produktivitas seperti penulisan otomatis dan analisis data di Indonesia melonjak dari 12,3% pada 2025 menjadi 26,9% pada 2026 - Sumber: Survei APJII 2026",
+        "ChatGPT tercatat sebagai platform AI consumer paling dominan di Indonesia dengan rata-rata 119,5 juta kunjungan bulanan - Sumber: Similarweb via Riset Lanskap AI Indonesia 2026"
+      ],
+      "calloutSuggestions": [
+        "RINGKAS DALAM HITUNGAN DETIK"
+      ],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Slide 2, tools AI pertama yang diperkenalkan setelah hook, membuka daftar edukasi lima tools secara berurutan."
+    },
+    {
+      "slideNumber": 3,
+      "headline": "Canva Magic Studio: Desain Kilat Tanpa Skill Desainer",
+      "description": "Nggak jago desain? Nggak masalah. Tinggal ketik perintah teks, background hilang otomatis, ukuran aset menyesuaikan sendiri. Konten harian media sosial kelar cepat, branding tetap rapi dan konsisten tanpa nunggu berjam-jam.",
+      "subject": "Mascot 3D robot Robo Efisien memegang kuas ajaib bercahaya di tangan kanan, sedang 'melukis' di kanvas digital transparan melayang di depannya, dari ujung kuas keluar percikan partikel warna-warni lembut yang membentuk bingkai gambar bercahaya, ekspresi mata layar robot antusias dan kreatif, pose tubuh sedikit condong ke depan seolah sedang bekerja aktif mendesain.",
+      "sceneDescription": "Badge nomor slide '3/6' tampil di pojok kanan atas kanvas dengan gaya pill glassmorphism konsisten. Slot logo bulat tetap di pojok kiri atas. Latar belakang gelap dengan beberapa bingkai kanvas digital kecil transparan melayang di sekitar mascot, masing-masing menampilkan siluet bentuk geometris sederhana yang sedang 'dirender' bertahap, memvisualisasikan proses desain otomatis instan. Glow warna gradient blue-violet-cyan lebih terang di area kuas ajaib sebagai penekanan visual. Kartu teks glassmorphism di bagian bawah kanvas.",
+      "visualEmphasis": "Focal point pada kuas ajaib bercahaya dan kanvas digital transparan di depan mascot, memvisualisasikan proses kreasi visual instan berbasis perintah teks secara jelas.",
+      "communicationGoal": "Menunjukkan bahwa siapapun tanpa keahlian desain grafis dapat menghasilkan visual profesional secara instan menggunakan Canva Magic Studio.",
+      "educationalObjective": "Audiens memahami cara kerja dasar Magic Studio: input perintah teks untuk generate gambar, hapus background otomatis, dan resize aset instan.",
+      "keyPoints": [
+        "Generate gambar dari perintah teks",
+        "Hapus background otomatis sekali klik",
+        "Resize aset ke berbagai ukuran instan"
+      ],
+      "supportingFacts": [
+        "Integrasi API AI generatif kini telah diadopsi 80% perusahaan skala besar di Indonesia untuk berbagai keperluan operasional termasuk produksi konten visual - Sumber: Riset Lanskap AI Indonesia 2026"
+      ],
+      "calloutSuggestions": [
+        "DESAIN TANPA RIBET"
+      ],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Slide 3, tools AI kedua dalam urutan edukasi, melanjutkan alur dari kebutuhan tulisan (ChatGPT) menuju kebutuhan visual (Canva)."
+    },
+    {
+      "slideNumber": 4,
+      "headline": "Notion AI: Rapikan Kekacauan Jadi Kerja Terstruktur",
+      "description": "Catatan berantakan langsung berubah jadi tabel rapi dan daftar prioritas otomatis. Cocok banget buat tim remote biar tugas tetap sinkron. Waktu buat beres-beres file dan jadwal manual? Tinggal kenangan.",
+      "subject": "Mascot 3D robot Robo Efisien berdiri di samping papan tulis digital transparan melayang, tangan kiri robot menggerakkan potongan-potongan kertas catatan kusut yang secara ajaib tersusun rapi membentuk grid tabel bercahaya di papan tersebut, ekspresi mata layar robot tenang dan teratur, pose tubuh rapi dan simetris merepresentasikan keteraturan.",
+      "sceneDescription": "Badge nomor slide '4/6' tampil konsisten di pojok kanan atas. Slot logo bulat tetap di pojok kiri atas. Latar belakang gelap dengan garis-garis grid tipis bercahaya membentuk pola tabel transparan di sekitar mascot, beberapa ikon checklist kecil bercahaya cyan tersebar rapi di udara sekitar papan tulis digital, memvisualisasikan transformasi dari chaos menjadi struktur. Kartu teks glassmorphism di bagian bawah kanvas.",
+      "visualEmphasis": "Focal point pada papan tulis digital transparan yang menampilkan transisi visual dari catatan kusut menjadi tabel terstruktur bercahaya, menjadi metafora utama fungsi Notion AI.",
+      "communicationGoal": "Mengomunikasikan manfaat Notion AI dalam merapikan alur kerja dan kolaborasi tim jarak jauh secara otomatis.",
+      "educationalObjective": "Audiens memahami bahwa Notion AI dapat mengubah catatan tak terstruktur menjadi tabel dan daftar prioritas yang rapi, mengurangi beban administratif tim.",
+      "keyPoints": [
+        "Ubah catatan kusut jadi tabel rapi",
+        "Susun kerangka proyek otomatis",
+        "Jaga sinkronisasi tim remote"
+      ],
+      "supportingFacts": [
+        "Tingkat adopsi AI di Indonesia untuk pemanfaatan produktivitas nasional telah menyentuh angka 92% menurut data Kementerian Komunikasi dan Digital per April 2026 - Sumber: Komdigi 2026"
+      ],
+      "calloutSuggestions": [
+        "DARI KUSUT JADI RAPI"
+      ],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Slide 4, tools AI ketiga, melanjutkan alur dari kebutuhan visual menuju kebutuhan organisasi kerja dan kolaborasi tim."
+    },
+    {
+      "slideNumber": 5,
+      "headline": "Otter.ai & Gamma: Rapat Lancar, Presentasi Kelar",
+      "description": "Otter.ai catat semua obrolan rapat online jadi teks akurat plus ringkasan, kamu bisa fokus aktif diskusi tanpa takut ada info kelewat. Butuh slide dadakan buat klien? Gamma App otomatis susun layout, gambar, dan poin presentasi yang rapi dalam sekejap.",
+      "subject": "Mascot 3D robot Robo Efisien digambarkan dalam dua pose kecil bersisian dalam satu frame: pose pertama robot memakai headset digital transparan dengan gelombang suara bercahaya cyan mengalir masuk lalu keluar sebagai teks rapi, pose kedua robot menyusun kartu-kartu slide presentasi transparan melayang membentuk susunan rapi bercahaya di udara, kedua pose dipisahkan garis energi tipis gradient blue-violet sebagai penghubung visual.",
+      "sceneDescription": "Badge nomor slide '5/6' tampil konsisten di pojok kanan atas. Slot logo bulat tetap di pojok kiri atas. Latar belakang gelap terbagi lembut menjadi dua zona visual tanpa garis tegas, zona kiri bernuansa gelombang suara bercahaya cyan untuk Otter.ai, zona kanan bernuansa kartu slide melayang bercahaya violet untuk Gamma App, kedua zona menyatu harmonis dalam satu komposisi kanvas. Kartu teks glassmorphism di bagian bawah kanvas merangkum kedua tools sekaligus.",
+      "visualEmphasis": "Focal point ganda namun seimbang: gelombang suara bercahaya di satu sisi dan susunan kartu slide melayang di sisi lain, dihubungkan garis energi tipis agar mata audiens membaca kedua elemen sebagai satu kesatuan cerita efisiensi.",
+      "communicationGoal": "Menyampaikan dua manfaat AI sekaligus dalam satu slide: efisiensi mencatat rapat dan efisiensi menyusun presentasi mendadak, sebagai penutup daftar sebelum masuk ke ajakan bertindak.",
+      "educationalObjective": "Audiens memahami bahwa Otter.ai membantu transkripsi rapat real-time dengan identifikasi pembicara, sementara Gamma App membantu menyusun presentasi profesional otomatis dari topik atau draf teks singkat.",
+      "keyPoints": [
+        "Transkripsi rapat real-time & akurat",
+        "Identifikasi pembicara otomatis",
+        "Slide presentasi tersusun otomatis"
+      ],
+      "supportingFacts": [
+        "72% pekerja Indonesia yang rutin menggunakan AI setiap hari mengaku merasakan kenaikan gaji berkat peningkatan produktivitas kerjanya - Sumber: Riset Lanskap AI Indonesia 2026",
+        "93% pengguna AI di Indonesia memperlakukan output AI sebagai titik awal kerja, bukan jawaban akhir, menegaskan AI sebagai mitra kerja bukan pengganti - Sumber: Microsoft Work Trend Index 2026"
+      ],
+      "calloutSuggestions": [
+        "RAPAT & PRESENTASI TANPA RIBET"
+      ],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Slide 5, menggabungkan tools AI keempat dan kelima sekaligus untuk menjaga struktur enam slide, melengkapi daftar sebelum penutup ajakan bertindak."
+    },
+    {
+      "slideNumber": 6,
+      "headline": "Simpan Sekarang, Jangan Sampai Ketinggalan!",
+      "description": "5 tools ini gratis dan siap dipakai hari ini juga. Simpan postingan ini sekarang dan mulai optimasi kerjamu sebelum rekan kerjamu menyalip produktivitasmu. Share ke tim biar sama-sama cepat, dan follow buat tips produktivitas AI lainnya!",
+      "subject": "Mascot 3D robot Robo Efisien berpose ceria dengan kedua tangan terangkat ke atas merayakan, di sekelilingnya melayang ikon-ikon kecil bercahaya merepresentasikan aksi simpan (ikon bookmark bercahaya), bagikan (ikon panah share bercahaya), dan follow (ikon lonceng/plus bercahaya), ekspresi mata layar robot sangat antusias dan mengajak, pose tubuh terbuka lebar seolah menyambut audiens.",
+      "sceneDescription": "Badge nomor slide '6/6' tampil konsisten di pojok kanan atas. Slot logo bulat tetap di pojok kiri atas. Latar belakang Deep Space Navy dengan ledakan lembut partikel cahaya blue-violet-cyan menyebar dari pusat mascot ke seluruh kanvas, menciptakan suasana perayaan dan penutup yang energik namun tetap elegan. Tiga ikon aksi (bookmark, share, follow) tersusun rapi melayang mengelilingi mascot dalam formasi segitiga seimbang. Kartu teks glassmorphism besar di bagian bawah kanvas berisi headline CTA, deskripsi ajakan, dan watermark sosial media.",
+      "visualEmphasis": "Focal point pada tiga ikon aksi (simpan, bagikan, follow) yang melayang jelas di sekitar mascot yang merayakan, memberi instruksi visual eksplisit tentang tindakan yang diharapkan dari audiens.",
+      "communicationGoal": "Mendorong audiens melakukan tiga aksi konkret: menyimpan postingan, membagikan ke rekan kerja, dan mengikuti akun untuk konten produktivitas AI selanjutnya.",
+      "educationalObjective": "Menutup rangkaian edukasi dengan penguatan bahwa kelima tools yang telah dijelaskan dapat langsung diakses gratis, mendorong audiens mengambil tindakan nyata segera.",
+      "keyPoints": [
+        "Simpan postingan buat referensi",
+        "Bagikan ke rekan kerja & tim",
+        "Follow buat tips AI selanjutnya"
+      ],
+      "supportingFacts": [
+        "Adopsi AI di Indonesia untuk kebutuhan produktivitas terus meningkat tajam, dari 12,3% pada 2025 menjadi 26,9% pada 2026, menandakan urgensi adaptasi teknologi bagi pekerja yang ingin tetap kompetitif - Sumber: Survei APJII 2026"
+      ],
+      "calloutSuggestions": [
+        "SAVE • SHARE • FOLLOW"
+      ],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Slide 6 (Penutup - Follow Sosmed & CTA), menutup alur carousel dengan ajakan bertindak jelas setelah audiens menerima seluruh nilai edukasi dari lima tools AI."
+    }
+  ],
+  "output": {
+    "viralScore": 91,
+    "analysisShortcomings": "Potensi kelemahan konten terletak pada padatnya informasi lima tools dalam enam slide, yang memaksa dua tools (Otter.ai dan Gamma App) digabung dalam satu slide sehingga porsi penjelasan masing-masing sedikit lebih ringkas dibanding tiga tools lainnya. Mitigasi yang diterapkan adalah memastikan slide gabungan tetap memiliki komposisi visual seimbang dan headline yang jelas menyebut kedua nama tools, serta caption Instagram/TikTok yang menyertai carousel dapat memberikan elaborasi tambahan bagi audiens yang ingin detail lebih dalam. Risiko lain adalah audiens skeptis terhadap klaim 'hemat waktu 10x lipat' tanpa konteks; hal ini dimitigasi dengan menyertakan data riset kredibel bertahun 2026 di setiap slide sebagai bukti pendukung objektif, bukan klaim kosong.",
+    "hooks": [
+      "Berhenti kerja keras, saatnya kerja cerdas: 5 AI ini selesaikan kerjaan 8 jam cuma dalam hitungan menit!",
+      "Rekan kerjamu diam-diam sudah pakai 5 tools AI gratis ini buat kerja 10x lebih cepat, kamu masih belum tahu?",
+      "5 tools AI gratis yang bikin laporan, desain, rapat, sampai presentasi selesai secepat kilat, wajib disimpan sekarang!"
+    ],
+    "logoExplanation": "Slot logo bulat ditempatkan konsisten di pojok kiri atas seluruh enam slide dengan gaya glassmorphism yang selaras dengan tema teknologi modern keseluruhan konten, memudahkan proses branding personal atau brand klien saat file JSON ini diproses lebih lanjut menjadi desain Canva. Posisi yang konsisten di setiap slide membangun pengenalan brand yang kuat sepanjang pengalaman swipe carousel, sementara ukuran dan padding yang lapang memastikan logo asli nantinya tidak bertabrakan dengan elemen visual atau teks lain.",
+    "socialMediaCaption": "Capek kerja lembur terus tapi progres jalan di tempat? 😩 Padahal ada 5 tools AI GRATIS yang bisa mangkas waktu kerjamu sampai 10x lipat! ✨ Mulai dari nulis laporan, bikin desain, rapikan tugas tim, catat rapat otomatis, sampai bikin presentasi dadakan buat klien, semua bisa kelar dalam hitungan menit 🚀 Bahkan riset terbaru bilang pekerja yang rutin pakai AI ngerasa jauh lebih produktif dan sebagian malah naik gaji lho 💰 Yuk mulai optimasi kerjamu HARI INI sebelum rekan kerjamu duluan selangkah 🔥 Simpan postingan ini biar nggak lupa, share ke tim kerja kamu, dan follow buat tips produktivitas AI lainnya! 🙌 #ProduktivitasKerja #ToolsAIGratis #TipsKerjaCerdas"
+  },
+  "strictGenerationRules": {
+    "followJsonExactly": true,
+    "doNotInventContent": true,
+    "doNotAddExtraText": true,
+    "doNotAddExtraSections": true,
+    "doNotAddExtraIcons": true,
+    "doNotAddExtraStatistics": true,
+    "doNotSummarize": true,
+    "doNotInterpretFreely": true,
+    "renderOnlySpecifiedElements": true,
+    "forbiddenAdditions": [
+      "DILARANG KERAS menambah slogan/tagline yang tidak tertulis di JSON",
+      "DILARANG KERAS menambah penjelasan/paragraf naskah di area kosong",
+      "DILARANG KERAS membuat contoh prompt/perintah di dalam gambar",
+      "DILARANG KERAS membuat CTA baru yang tidak ada di JSON",
+      "DILARANG KERAS membuat panel/box informasi ekstra",
+      "DILARANG KERAS membuat infografik/diagram baru yang tidak diperintahkan"
+    ]
+  },
+  "textRules": {
+    "headline": "exactly from JSON",
+    "description": "exactly from JSON",
+    "keyPointsOnly": true,
+    "maximumTextBlocks": 5,
+    "neverCreateNewParagraphs": true,
+    "neverGenerateNewHeadlines": true,
+    "strictTextConstraint": "DILARANG KERAS menambah kata, kalimat, atau teks di luar data JSON. Jika melihat ruang kosong (whitespace), BIARKAN KOSONG / BERSIH!"
+  },
+  "renderingPriority": {
+    "priority1": "Render persis 100% sesuai data JSON",
+    "priority2": "DILARANG ADA HALUSINASI ATAU INTERPRETASI BEBAS DARI AI GAMBAR",
+    "priority3": "DILARANG KREATIF MENAMBAH TEKS ATAU ELEMEN BARU",
+    "priority4": "Jika melihat area kosong (whitespace), WAJIB biarkan kosong (whitespace bersih) daripada menambah elemen baru"
+  },
+  "imageGenerationRules": {
+    "generateMode": "ONE_SLIDE_ONLY",
+    "autoContinue": false,
+    "waitUserCommand": true,
+    "allowMultipleSlides": false,
+    "allowCollage": false,
+    "allowGridLayout": false,
+    "allowMosaic": false,
+    "allowContactSheet": false,
+    "allowPreviewAllSlides": false,
+    "stopAfterRender": true,
+    "nextSlideCommand": ["Lanjut", "Next", "Slide berikutnya", "Buat Slide 2"],
+    "priorityLevel": "HIGHEST — Aturan ini mengalahkan instruksi lain jika terjadi konflik",
+    "violationNote": "Pelanggaran terhadap aturan ini dianggap sebagai kegagalan mengikuti instruksi pengguna"
+  }
+}

@@ -136,10 +136,10 @@ String styleBlock(String style, String characterFocus) {
 
 String brandingBlock(bool useManualLogo, String watermark) {
   final lr = useManualLogo
-      ? 'LOGO PLACEHOLDER AREA: Pengguna mengaktifkan opsi tempat logo. AI Gambar WAJIB merancang area slot logo yang bersih dan luas di pojok atas frame, berupa badge lingkaran estetik dengan tulisan sederhana "LOGO" di tengahnya. Berikan area padding/ruang kosong yang agak luas dan lapang di sekitar lingkaran slot logo tersebut agar posisi tempat logo terlihat menonjol, bersih, dan jelas.'
+      ? 'LOGO PLACEHOLDER BADGE: Pengguna mengaktifkan opsi tempat logo. AI Gambar WAJIB merancang area slot logo yang bersih di pojok kanvas (posisi diselaraskan secara harmonis dengan komposisi tema). DI DALAM BADGE LOGO HANYA BOLEH TERDIRI DARI SATU KATA BERSAN-SERIF KECIL TEBAL: "LOGO" ATAU LINGKARAN PUTIH/GLASSMORPHISM BERSIH POLOS. DILARANG KERAS MENGISIKAN ATAU MEMBUAT TEKS MERK/BRAND PALSU DI DALAM BADGE LOGO (seperti "inka.tech", "brandname", dll). Berikan padding/ruang kosong lapang di sekeliling slot logo agar posisi logo terlihat menonjol dan bersih.'
       : 'LOGO: DILARANG menggambar logo atau tempat logo. Isi "logoPlacement":"NO_LOGO".';
   final wr = watermark.isNotEmpty
-      ? 'WATERMARK: Gunakan teks ini persis: "$watermark"'
+      ? 'WATERMARK FOOTER: Gunakan teks ini persis di footer slide konten (bukan di slide 1 cover): "$watermark"'
       : 'WATERMARK: DILARANG membuat watermark. Isi "watermarkFooter":"NO_WATERMARK".';
   return '$lr\n$wr';
 }
@@ -159,6 +159,8 @@ String imageGenerationRulesJson() {
     "doNotInterpretFreely": true,
     "renderOnlySpecifiedElements": true,
     "forbiddenAdditions": [
+      "DILARANG KERAS menggambar badge nomor slide 1/5, 1/6, 1/10 di Slide 1 Cover",
+      "DILARANG KERAS menuliskan nama brand/merek palsu seperti inka.tech di dalam logo badge",
       "DILARANG KERAS menambah slogan/tagline yang tidak tertulis di JSON",
       "DILARANG KERAS menambah penjelasan/paragraf naskah di area kosong",
       "DILARANG KERAS membuat contoh prompt/perintah di dalam gambar",
@@ -204,15 +206,15 @@ String slideStructureRules(dynamic slideCount) {
   final isSingleSlide = countInt == 1;
 
   final badgeRuleText = isSingleSlide
-      ? '2. DILARANG SERTAKAN BADGE NOMOR SLIDE (KHUSUS 1 SLIDE): Karena ini adalah poster tunggal (1 slide), DILARANG KERAS mencantumkan badge/indikator nomor slide ("1/1", "1/10", "1/$slideCount", dst). Hapus atau jangan adakan badge nomor slide!'
+      ? '2. DILARANG SERTAKAN BADGE NOMOR SLIDE (KHUSUS 1 SLIDE): Karena ini adalah poster tunggal (1 slide), DILARANG KERAS mencantumkan badge/indikator nomor slide ("1/1", "1/10", "1/$slideCount", dst). Hapus total badge nomor slide!'
       : '2. HUKUM HARAM BADGE NOMOR PADA SLIDE 1 (HOOK / COVER):\n'
-          '   a. SLIDE PERTAMA (HOOK / COVER) — HARAM & DILARANG KERAS ADA BADGE NOMOR 1/$slideCount: Slide 1 (Cover / Hook) DILARANG KERAS MENAMPILKAN TEKS NOMOR SLIDE "1/$slideCount", "1/6", "1/5", "SLIDE 1", ATAU BADGE NOMOR APAPUN! Area pojok atas Slide 1 WAJIB KOSONG BERSIH TANPA TEKS INDIKATOR NOMOR SLIDE!\n'
-          '   b. SLIDE KEDUA S/D TERAKHIR — BARU BOLEH & WAJIB DITAMPILKAN BADGE NOMOR: Badge nomor slide BARU BOLEH DITAMPILKAN MULAI SLIDE 2 DENGAN FORMAT "2/$slideCount", "3/$slideCount", ..., "$slideCount/$slideCount" (Contoh untuk 6 Slide: Slide 1 COVER = WAJIB KOSONG BERSIH TANPA NOMOR, Slide 2 = "2/6", Slide 3 = "3/6", Slide 4 = "4/6", Slide 5 = "5/6", Slide 6 = "6/6").';
+          '   a. SLIDE PERTAMA (HOOK / COVER) — HARAM & DILARANG KERAS ADA BADGE NOMOR 1/$slideCount: Slide 1 (Cover / Hook) DILARANG KERAS MENAMPILKAN TEKS NOMOR SLIDE "1/$slideCount", "1/5", "1/6", "SLIDE 1", ATAU BADGE NOMOR APAPUN DI POJOK ATAS! Area pojok atas Slide 1 WAJIB 100% KOSONG BERSIH TANPA TEKS NOMOR SLIDE!\n'
+          '   b. SLIDE KEDUA S/D TERAKHIR — BARU BOLEH DITAMPILKAN BADGE NOMOR: Badge nomor slide BARU BOLEH DITAMPILKAN MULAI SLIDE 2 DENGAN FORMAT "2/$slideCount", "3/$slideCount", ..., "$slideCount/$slideCount".';
 
   final slideDensityText = '5. KEPADATAN TEKS UNTUK CAROUSEL EDUKASI ($slideCount SLIDE):\n'
-      '   a. GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN (70% Visual Art, 30% Teks Ringkas).\n'
-      '   b. CAPTION = PENJELASAN LENGKAP & MENDALAM.\n'
-      '   c. BATAS KARAKTER TEKS GAMBAR: Total teks per 1 slide WAJIB 350–700 karakter (~40–70 kata per slide agar nyaman dibaca di layar HP). Headline: 30–60 karakter, Subheadline: 40–80 karakter, Bullet points: 3–5 poin (20–50 karakter per bullet point). DILARANG KERAS menjejalkan naskah tebal di dalam gambar carousel!';
+      '   a. SLIDE 1 (HOOK COVER): WAJIB SUPER MINIMALIS! Hanya Hook singkat memikat (max 5-8 kata) + Subjudul singkat (max 10 kata). DILARANG ADA BULLET POINTS, DILARANG ADA DATA STATISTIK, DILARANG ADA KOTAK CALLOUT PANJANG, DILARANG ADA WATERMARK SOSMED/WEB DI SLIDE 1 COVER.\n'
+      '   b. SLIDE 2 (PEMBUKA TOPIK & JUDUL MATERI): Tempat pengenalan judul topik utama & materi dasar.\n'
+      '   c. SLIDE KONTEN (SLIDE 2 S/D $slideCount): Gambar = 70% Visual Art, 30% Teks Ringkas (~40-70 kata per slide). DILARANG KERAS menjejalkan naskah tebal!';
 
   final singleRuleText = isSingleSlide
       ? '\n8. ATURAN KHUSUS 1 SLIDE (POSTER TUNGGAL WAJIB PORTRAIT & SUPER KOMPLEKS):\n'
@@ -237,6 +239,7 @@ DILARANG KERAS:
 - Menampilkan preview semua slide.
 - Menampilkan slide berikutnya atau slide sebelumnya dalam gambar yang sama.
 - Menghasilkan gambar yang berisi urutan 1/$slideCount–$slideCount/$slideCount sekaligus.
+- MENAMPILKAN BADGE NOMOR 1/$slideCount PADA SLIDE 1 COVER.
 
 Setiap file gambar hanya boleh memuat SATU HALAMAN / SATU FRAME / SATU ARTBOARD / SATU CANVAS.
 
@@ -260,7 +263,7 @@ Apabila terdapat instruksi lain yang dapat ditafsirkan sebagai membuat seluruh c
       'dalam array "slidesContent" (atau "segmentsContent"/"scenes"). '
       'DILARANG KERAS menggabungkan beberapa slide sekaligus atau hanya membuat 1 slide ringkasan.\n'
       '$badgeRuleText\n'
-      '3. SLIDE PERTAMA (HOOK COVER SLIDE): Slide pertama HANYA boleh berisi hook singkat (maksimal 8 kata), satu subjudul singkat (maksimal 15 kata), satu visual utama yang memenuhi minimal 65–70% kanvas, TANPA bullet list, TANPA paragraf panjang, TANPA infografik, dan TANPA statistik besar. DILARANG SERTAKAN BADGE NOMOR SLIDE ("1/$slideCount"). Tujuan utama slide pertama adalah memancing rasa penasaran agar pengguna melakukan swipe ke slide berikutnya.\n'
+      '3. SLIDE PERTAMA (HOOK COVER SLIDE): Slide pertama HANYA boleh berisi hook singkat (maksimal 5–8 kata) + subjudul singkat (maksimal 10 kata), satu visual utama yang memenuhi minimal 65–70% kanvas, TANPA bullet list, TANPA data statistik, TANPA callout box panjang, TANPA watermark sosmed/web. DILARANG SERTAKAN BADGE NOMOR SLIDE ("1/$slideCount"). Tujuan utama slide pertama adalah memancing rasa penasaran agar pengguna melakukan swipe ke Slide 2.\n'
       '4. SLIDE TERAKHIR (CALL-TO-ACTION & FOLLOW SOSMED): Slide terakhir WAJIB berisi ajakan bertindak '
       'yang jelas untuk Simpan (Save), Bagikan (Share), dan Follow/Ikuti akun media sosial ini untuk konten bermanfaat selanjutnya.\n'
       '$slideDensityText\n'

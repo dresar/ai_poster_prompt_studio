@@ -79,27 +79,27 @@ FORMAT JSON OUTPUT (semua field wajib diisi, SEMUA slide wajib ditulis PENUH)
   "renderingBlueprint": {
     "renderStyle": "Gaya rendering: 3D studio/flat premium/cinematic",
     "qualityParameters": "Resolusi, anti-aliasing, color depth",
-    "negativePrompt": "watermark, blur, 1/$slideCount on slide 1, slide 1 number badge, 1/6 cover badge, 1/5 cover badge, teks berantakan, kualitas buruk, anatomi aneh"
+    "negativePrompt": "watermark, blur, 1/$slideCount, 1/5, 1/6, 1/10, 1/4, 1/1, badge 1/5, 1/5 badge, cover number badge, top right badge 1/5, number badge 1/5, inka.tech, brandname, fake logo text, teks berantakan, kualitas buruk, anatomi aneh"
   },
   "brandingEngine": {
-    "logoPlacement": "${useManualLogo ? 'Buat badge lingkaran estetik di pojok frame dengan tulisan LOGO di tengah. Slot ini khusus tempat tempel logo di Canva.' : 'NO_LOGO'}",
+    "logoPlacement": "${useManualLogo ? 'Buat badge lingkaran/rounded rectangle estetik di pojok kanvas (posisi diselaraskan secara harmonis dengan tema). DI DALAM BADGE LOGO HANYA BOLEH TERDIRI DARI SATU KATA BERSAN-SERIF KECIL TEBAL: "LOGO" ATAU LINGKARAN PUTIH BERSIH POLOS. DILARANG KERAS MENGISIKAN ATAU MEMBUAT TEKS MERK/BRAND PALSU DI DALAM BADGE LOGO (seperti "inka.tech", "brandname", dll).' : 'NO_LOGO'}",
     "watermarkFooter": "${watermark.isNotEmpty ? watermark : 'NO_WATERMARK'}"
   },
   "slidesContent": [
     {
       "slideNumber": 1,
-      "headline": "Headline kuat dan memancing rasa ingin tahu (Hook Slide 1)",
-      "description": "Narasi poin utama poster (40–80 kata / 350–700 karakter total). GAMBAR = POIN INTI & VISUAL ARTWORK DOMINAN, CAPTION = PENJELASAN LENGKAP.",
+      "headline": "Hook memikat & singkat MAX 5-8 KATA (Cover Hook Slide 1 Penasaran)",
+      "description": "Subjudul singkat MAX 10 KATA. TANPA bullet list, TANPA paragraf panjang, TANPA infografik, TANPA statistik besar, TANPA watermark sosmed/web di Slide 1. Tujuan utama memancing rasa penasaran agar audiens swipe ke Slide 2.",
       "subject": "Deskripsi subjek/karakter visual utama",
-      "sceneDescription": "Deskripsi latar, suasana, aksi, dan detail visual memikat (ATURAN KETAT SLIDE 1 COVER: DILARANG KERAS MENAMPILKAN BADGE NOMOR SLIDE 1/$slideCount DI POJOK ATAS, AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH TANPA NOMOR SLIDE)",
+      "sceneDescription": "Deskripsi latar, suasana, aksi, dan detail visual memikat (ATURAN KETAT SLIDE 1 COVER: DILARANG KERAS MENAMPILKAN BADGE NOMOR SLIDE 1/$slideCount DI POJOK ATAS! AREA ATAS SLIDE 1 WAJIB KOSONG BERSIH TANPA ANGKAN BADGE NOMOR. DI DALAM BADGE LOGO HANYA BOLEH ADA KATA 'LOGO' ATAU LINGKARAN PUTIH BERSIH POLOS. DILARANG MENERJEMAHKAN MERK/BRAND PALSU SEPERTI inka.tech DI DALAM LOGO)",
       "visualEmphasis": "Focal point dan cara penekanan visual",
-      "communicationGoal": "Tujuan komunikasi spesifik slide ini",
-      "educationalObjective": "Nilai edukasi atau insight yang disampaikan",
-      "keyPoints": ["Poin A dari riset 2026", "Poin B dari riset 2026"],
-      "supportingFacts": ["Fakta/statistik nyata + nama sumber + tahun 2026"],
-      "calloutSuggestions": ["Teks callout/highlight yang paling menarik perhatian"],
-      "referenceImageUrl": "URL CDN / gambar referensi asli dari riset internet opsional (misal https://... atau NO_REFERENCE_URL)",
-      "storytellingSequence": "Posisi dalam alur: Slide 1 (Hook Memancing Penasaran - TANPA NOMOR SLIDE 1/$slideCount) s/d Slide Terakhir (Follow Sosmed & CTA)"
+      "communicationGoal": "Memancing rasa penasaran audiens dalam 3 detik pertama",
+      "educationalObjective": "Gerbang pembuka sebelum masuk topik utama di Slide 2",
+      "keyPoints": [],
+      "supportingFacts": [],
+      "calloutSuggestions": [],
+      "referenceImageUrl": "NO_REFERENCE_URL",
+      "storytellingSequence": "Alur: Slide 1 (Cover Hook Penasaran - TANPA NOMOR 1/$slideCount) > Slide 2 (Pembuka Topik & Judul Materi) > Slide 3-5 (Materi & Data 2026) > Slide Terakhir (Follow Sosmed & CTA)"
     }
   ],
   "output": {

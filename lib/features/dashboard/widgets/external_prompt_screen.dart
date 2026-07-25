@@ -235,9 +235,9 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Tempelkan seluruh hasil teks JSON yang Anda salin dari ChatGPT / Claude di sini. Sistem akan membaginya otomatis ke Form 1 - 4!',
-                  style: TextStyle(fontSize: 11, color: Colors.black70),
+                  style: TextStyle(fontSize: 11, color: Colors.black87),
                 ),
                 const SizedBox(height: 10),
                 Expanded(

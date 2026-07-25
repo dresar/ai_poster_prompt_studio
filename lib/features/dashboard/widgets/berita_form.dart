@@ -110,12 +110,14 @@ class _BeritaFormState extends State<BeritaForm> {
       'useManualLogo': _useManualLogo,
       'slideCount': _slideCount,
       'style': _selectedStyle?.value ?? 'auto',
+      'stylePrompt': _selectedStyle?.helperText ?? '',
       'layout': _selectedLayout?.value ?? 'auto',
       'aspectRatio': _selectedRatio?.value ?? 'auto',
       'colorPalette': _selectedColor?.value ?? 'auto',
       'mood': _selectedMood?.value ?? 'auto',
       'textRule': _selectedTextRule?.value ?? 'auto',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'characterPrompt': _selectedCharFocus?.helperText ?? '',
     });
   }
 

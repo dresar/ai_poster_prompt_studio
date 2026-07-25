@@ -16,7 +16,10 @@ String buildEdukasiPrompt(Map<String, dynamic> formState) {
   final mood = formState['mood'] ?? 'auto';
   final textRule = formState['textRule'] ?? 'auto';
 
-  final ss = styleBlock(style, charFocus);
+  final stylePrompt = (formState['stylePrompt'] ?? '').toString();
+  final charPrompt = (formState['characterPrompt'] ?? '').toString();
+
+  final ss = styleBlock(style, charFocus, stylePrompt: stylePrompt, characterPrompt: charPrompt);
   final bs = brandingBlock(useManualLogo, watermark);
   final outs = outputRulesBlock();
   final sr = slideStructureRules(slideCount);

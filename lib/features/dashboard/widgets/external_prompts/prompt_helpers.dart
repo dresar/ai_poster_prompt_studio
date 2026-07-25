@@ -90,7 +90,12 @@ ATURAN PENGIRIMAN OUTPUT
 4. Jangan pernah mengorbankan kelengkapan isi demi mempersingkat cara pengiriman.''';
 }
 
-String styleBlock(String style, String characterFocus) {
+String styleBlock(
+  String style,
+  String characterFocus, {
+  String? stylePrompt,
+  String? characterPrompt,
+}) {
   final isStyleAuto = style == 'auto' || style == 'random' || style.isEmpty;
   final isCharAuto = characterFocus == 'auto' || characterFocus == 'random';
   final isCharNone = characterFocus == 'none' ||
@@ -98,19 +103,26 @@ String styleBlock(String style, String characterFocus) {
       characterFocus == 'product_only' ||
       characterFocus == 'tanpa_karakter';
 
+  final hasStylePrompt = stylePrompt != null && stylePrompt.trim().isNotEmpty;
+  final hasCharPrompt = characterPrompt != null && characterPrompt.trim().isNotEmpty;
+
   // -------------------------------------------------------------
   // 1. ANALISIS GAYA VISUAL & WARNA TERANG ELEGAN DARI CLAUDE
   // -------------------------------------------------------------
-  final String sRule = isStyleAuto
-      ? 'ANALISIS & DESAIN GAYA VISUAL OTOMATIS CLAUDE (TEMA TERANG ELEGAN & HARMONIS):\n'
-          '- TUGAS CLAUDE: Menganalisis topik & materi konten secara mendalam, lalu merancang deskripsi gaya visual yang sangat profesional, bersih, dan estetik langsung di dalam field "designSystem" & "visualBlueprint".\n'
-          '- KETENTUAN TEMA WARNA BASE: WAJIB MENGGUNAKAN TEMA TERANG (Base Putih Bersih / Off-White / Light Grey). DILARANG KERAS TEMA GELAP / DARK MODE!\n'
-          '- HARMONISASI WARNA: Bebas menggunakan kombinasi warna aksen yang kaya dan bervariasi (misal 2–4 paduan warna aksen), ASALKAN TIDAK MENCORT / TIDAK NORAK / TIDAK TERLALU MENCOLOK, serta SANGAT NYAMBUNG DAN HARMONIS DENGAN JIWA & TEMA MATERI KONTEN.\n'
-          '- HASIL JSON: Seluruh instruksi visual (lighting, komposisi, grid, warna, tipografi) WAJIB dituliskan secara rinci, eksplisit, dan kaya dalam bentuk TEKS MURNI di dalam JSON (DILARANG MENYERTAKAN LINK URL APAPUN!).'
-      : 'ANALISIS & DESAIN GAYA VISUAL MANUAL "$style" (HARMONIS DENGAN TOPIK MATERI):\n'
-          '- TUGAS CLAUDE: Menyintesis dan menuliskankan instruksi gaya visual "$style" secara mendalam, rinci, dan lengkap di dalam field "designSystem" & "visualBlueprint".\n'
-          '- HARMONISASI WARNA: Sesuaikan nuansa visual, lighting, dan warna aksen dari gaya "$style" agar SANGAT SELARAS, ELEGAN, DAN NYAMBUNG DENGAN JIWA & TEMA MATERI KONTEN.\n'
-          '- HASIL JSON: Seluruh instruksi visual WAJIB 100% teks murni eksplisit agar AI Gambar (ChatGPT DALL-E 3 / Midjourney / Flux) dapat membacanya secara utuh tanpa perlu koneksi internet (DILARANG MENYERTAKAN LINK URL APAPUN!).';
+  final String sRule;
+  if (isStyleAuto) {
+    sRule = 'ANALISIS & DESAIN GAYA VISUAL OTOMATIS CLAUDE (TEMA TERANG ELEGAN & HARMONIS):\n'
+        '- TUGAS CLAUDE: Menganalisis topik & materi konten secara mendalam, lalu merancang deskripsi gaya visual yang sangat profesional, bersih, dan estetik langsung di dalam field "designSystem" & "visualBlueprint".\n'
+        '- KETENTUAN TEMA WARNA BASE: WAJIB MENGGUNAKAN TEMA TERANG (Base Putih Bersih / Off-White / Light Grey). DILARANG KERAS TEMA GELAP / DARK MODE!\n'
+        '- HARMONISASI WARNA: Bebas menggunakan kombinasi warna aksen yang kaya dan bervariasi (misal 2–4 paduan warna aksen), ASALKAN TIDAK MENCORT / TIDAK NORAK / TIDAK TERLALU MENCOLOK, serta SANGAT NYAMBUNG DAN HARMONIS DENGAN JIWA & TEMA MATERI KONTEN.\n'
+        '- HASIL JSON: Seluruh instruksi visual (lighting, komposisi, grid, warna, tipografi) WAJIB dituliskan secara rinci, eksplisit, dan kaya dalam bentuk TEKS MURNI di dalam JSON (DILARANG MENYERTAKAN LINK URL APAPUN!).';
+  } else {
+    sRule = 'ANALISIS & DESAIN GAYA VISUAL DATABASE "$style":\n'
+        '${hasStylePrompt ? "- MASTER TEMPLATE PROMPT GAYA VISUAL DARI DATABASE:\n  \"\"\"\n  $stylePrompt\n  \"\"\"\n" : ""}'
+        '- TUGAS CLAUDE: Menyintesis dan menuliskankan instruksi gaya visual "$style" ${hasStylePrompt ? "berdasarkan master template database di atas" : ""} secara mendalam, rinci, dan lengkap di dalam field "designSystem" & "visualBlueprint".\n'
+        '- HARMONISASI WARNA: Sesuaikan nuansa visual, lighting, dan warna aksen dari gaya "$style" agar SANGAT SELARAS, ELEGAN, DAN NYAMBUNG DENGAN JIWA & TEMA MATERI KONTEN.\n'
+        '- HASIL JSON: Seluruh instruksi visual WAJIB 100% teks murni eksplisit agar AI Gambar (ChatGPT DALL-E 3 / Midjourney / Flux) dapat membacanya secara utuh tanpa perlu koneksi internet (DILARANG MENYERTAKAN LINK URL APAPUN!).';
+  }
 
   // -------------------------------------------------------------
   // 2. ANALISIS SUBJEK/KARAKTER (3 OPSI CLEAR MODES)
@@ -126,8 +138,9 @@ String styleBlock(String style, String characterFocus) {
         '- CLAUDE BEBAS MENGANALISIS DAN MEMILIH SUBJEK/KARAKTER visual (apakah 3D mascot ramah, ilustrasi karakter manusia profesional, atau figur ikonik) yang paling cocok, hangat, dan merepresentasikan jiwa materi secara menarik.\n'
         '- Tuliskan deskripsi fisik, pakaian, ekspresi, pose, dan konsistensi karakter tersebut secara rinci dan eksplisit di dalam JSON field "character".';
   } else {
-    cRule = 'ATURAN SUBJEK/KARAKTER = OPSI 1: KARAKTER MANUSIA / MASKOT SPESIFIK ("$characterFocus"):\n'
-        '- CLAUDE WAJIB merancang deskripsi fisik, bentuk, pakaian, pose, ekspresi, dan konsistensi visual karakter "$characterFocus" secara SANGAT RINCI, KAYA, DAN EKSPLISIT di dalam JSON field "character" agar AI Gambar dapat merender karakter secara konsisten antar slide.\n'
+    cRule = 'ATURAN SUBJEK/KARAKTER = OPSI 1: KARAKTER MANUSIA / MASKOT SPESIFIK DATABASE ("$characterFocus"):\n'
+        '${hasCharPrompt ? "- MASTER PROMPT KARAKTER DARI DATABASE:\n  \"\"\"\n  $characterPrompt\n  \"\"\"\n" : ""}'
+        '- CLAUDE WAJIB merancang deskripsi fisik, bentuk, pakaian, pose, ekspresi, dan konsistensi visual karakter "$characterFocus" ${hasCharPrompt ? "sesuai master prompt database di atas" : ""} secara SANGAT RINCI, KAYA, DAN EKSPLISIT di dalam JSON field "character" agar AI Gambar dapat merender karakter secara konsisten antar slide.\n'
         '- DILARANG KERAS menyertakan link URL apapun. Seluruh deskripsi karakter WAJIB berupa teks murni yang rinci dan lengkap!';
   }
 

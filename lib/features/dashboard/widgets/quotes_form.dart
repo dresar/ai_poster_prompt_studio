@@ -96,10 +96,12 @@ class _QuotesFormState extends State<QuotesForm> {
       'useManualLogo': _useManualLogo,
       'includeCaption': true,
       'style': _selectedStyle?.value ?? 'auto',
+      'stylePrompt': _selectedStyle?.helperText ?? '',
       'theme': _selectedTheme?.value ?? 'auto',
       'aspectRatio': _selectedRatio?.value ?? '9:16',
       'colorPalette': _selectedColor?.value ?? 'auto',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'characterPrompt': _selectedCharFocus?.helperText ?? '',
       'slideCount': _slideCount,
     });
   }
@@ -116,10 +118,12 @@ class _QuotesFormState extends State<QuotesForm> {
       'useManualLogo': _useManualLogo,
       'includeCaption': true,
       'style': _selectedStyle?.value ?? 'auto',
+      'stylePrompt': _selectedStyle?.helperText ?? '',
       'theme': _selectedTheme?.value ?? 'auto',
       'aspectRatio': _selectedRatio?.value ?? '9:16',
       'colorPalette': _selectedColor?.value ?? 'auto',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'characterPrompt': _selectedCharFocus?.helperText ?? '',
       'slideCount': _slideCount,
     });
   }

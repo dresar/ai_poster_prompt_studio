@@ -96,9 +96,11 @@ class _DigitalProductFormState extends State<DigitalProductForm> {
       'watermark': _watermarkText,
       'referenceImage': _refImage,
       'style': _selectedStyle?.value ?? 'auto',
+      'stylePrompt': _selectedStyle?.helperText ?? '',
       'aspectRatio': _selectedRatio?.value ?? '1:1',
       'colorPalette': _selectedColor?.value ?? 'auto',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'characterPrompt': _selectedCharFocus?.helperText ?? '',
       'slideCount': _slideCount,
       'useManualLogo': _useManualLogo,
     });
@@ -115,9 +117,11 @@ class _DigitalProductFormState extends State<DigitalProductForm> {
       'watermark': _watermarkText,
       'referenceImage': _refImage,
       'style': _selectedStyle?.value ?? 'auto',
+      'stylePrompt': _selectedStyle?.helperText ?? '',
       'aspectRatio': _selectedRatio?.value ?? '1:1',
       'colorPalette': _selectedColor?.value ?? 'auto',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'characterPrompt': _selectedCharFocus?.helperText ?? '',
       'slideCount': _slideCount,
       'useManualLogo': _useManualLogo,
     });

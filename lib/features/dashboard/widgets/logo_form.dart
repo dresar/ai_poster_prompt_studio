@@ -93,9 +93,11 @@ class _LogoFormState extends State<LogoForm> {
       'watermark': _watermarkText,
       'useManualLogo': _useManualLogo,
       'style': _selectedStyle?.value ?? 'auto',
+      'stylePrompt': _selectedStyle?.helperText ?? '',
       'colorPalette': _selectedColor?.value ?? 'auto',
       'textRule': _selectedTextRule?.value ?? 'flexible',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'characterPrompt': _selectedCharFocus?.helperText ?? '',
       'slideCount': _slideCount,
     });
   }
@@ -111,9 +113,11 @@ class _LogoFormState extends State<LogoForm> {
       'watermark': _watermarkText,
       'useManualLogo': _useManualLogo,
       'style': _selectedStyle?.value ?? 'auto',
+      'stylePrompt': _selectedStyle?.helperText ?? '',
       'colorPalette': _selectedColor?.value ?? 'auto',
       'textRule': _selectedTextRule?.value ?? 'flexible',
       'characterFocus': _selectedCharFocus?.value ?? 'random',
+      'characterPrompt': _selectedCharFocus?.helperText ?? '',
       'slideCount': _slideCount,
     });
   }

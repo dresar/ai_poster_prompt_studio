@@ -19,6 +19,7 @@ import { logger } from "../../config/logger";
 import { PayloadSchema, VideoPayloadSchema, AdvancedVideoPayloadSchema } from "./payload.schema";
 import { renderDSL, compileFinalPrompt, compileFinalVideoPrompt, compileEdukasiMasterPrompt } from "./dslRenderer";
 import { repairJson } from "../../utils/jsonRepair";
+import { savePromptJson } from "../../utils/prompt-storage";
 import https from "https";
 import crypto from "crypto";
 import path from "path";
@@ -1196,8 +1197,9 @@ export const importExternalPrompt = async (req: Request, res: Response, next: Ne
     };
     payloadJson.viralBreakdown = viralData.breakdown;
 
-    // 6. Save prompt to DB
+    // 6. Save prompt to DB & disk storage (.json)
     const promptId = crypto.randomUUID();
+    const storagePath = savePromptJson(promptId, payloadJson);
     const [savedPrompt] = await db
       .insert(prompts)
       .values({
@@ -1282,6 +1284,8 @@ export const saveExternalDraft = async (
 
     let savedPrompt: any;
 
+    const draftPayload = { formState, instructionsText, isImported: false };
+
     if (draftId) {
       const existing = await db
         .select()
@@ -1290,17 +1294,14 @@ export const saveExternalDraft = async (
         .limit(1);
 
       if (existing.length > 0) {
+        savePromptJson(draftId, draftPayload);
         const [updated] = await db
           .update(prompts)
           .set({
             topic,
             category,
             promptFinal: instructionsText,
-            payloadJson: {
-              formState,
-              instructionsText,
-              isImported: false,
-            },
+            payloadJson: draftPayload,
           })
           .where(eq(prompts.id, draftId))
           .returning();
@@ -1310,6 +1311,7 @@ export const saveExternalDraft = async (
 
     if (!savedPrompt) {
       const newId = draftId || crypto.randomUUID();
+      savePromptJson(newId, draftPayload);
       const [inserted] = await db
         .insert(prompts)
         .values({
@@ -1319,11 +1321,7 @@ export const saveExternalDraft = async (
           topic,
           category,
           promptFinal: instructionsText,
-          payloadJson: {
-            formState,
-            instructionsText,
-            isImported: false,
-          },
+          payloadJson: draftPayload,
           schemaVersion: 'v2',
         })
         .returning();

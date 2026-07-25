@@ -46,7 +46,6 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
     super.initState();
     _draftId = widget.draftId;
     _parts = compileExternalPromptParts(widget.formState);
-    _saveDraftSilently();
   }
 
   @override
@@ -96,7 +95,7 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
     return clean;
   }
 
-  Future<void> _saveDraftSilently() async {
+  Future<void> _saveDraftManual() async {
     setState(() => _isSavingDraft = true);
     try {
       final safeState = _sanitizeFormState(widget.formState);
@@ -112,10 +111,24 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
             _draftId = res.data['data']['id']?.toString();
             _draftSavedSuccess = true;
           });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('💾 Draf berhasil disimpan ke Riwayat!'),
+              backgroundColor: Colors.black,
+            ),
+          );
         }
       }
     } catch (e) {
-      debugPrint('Error auto-saving external prompt draft: $e');
+      debugPrint('Error manual saving external prompt draft: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Gagal menyimpan draf: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isSavingDraft = false);
@@ -133,11 +146,10 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('📋 $partLabel berhasil disalin! Draf tersimpan di Riwayat.'),
+        content: Text('📋 $partLabel berhasil disalin ke clipboard!'),
         backgroundColor: Colors.black,
       ),
     );
-    _saveDraftSilently();
   }
 
   void _processPastedJsonContent(String content) {
@@ -440,9 +452,9 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Status Draft Indicator Banner
+            // Status Draft Indicator Banner with Manual Save Button
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
                 color: _draftSavedSuccess ? const Color(0xFFE8F5E9) : const Color(0xFFFFF8E1),
@@ -452,8 +464,8 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
               child: Row(
                 children: [
                   Icon(
-                    _draftSavedSuccess ? Icons.cloud_done : Icons.cloud_upload,
-                    size: 16,
+                    _draftSavedSuccess ? Icons.cloud_done : Icons.bookmark_add_outlined,
+                    size: 18,
                     color: Colors.black87,
                   ),
                   const SizedBox(width: 8),
@@ -462,9 +474,35 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
                       _isSavingDraft
                           ? 'Menyimpan draf...'
                           : _draftSavedSuccess
-                              ? '💾 Draf tersimpan di Riwayat Salin Prompting.'
-                              : 'Draf sedang disinkronkan...',
+                              ? '💾 Draf tersimpan di Riwayat.'
+                              : 'Klik simpan untuk menyimpan draf ke Riwayat.',
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: _isSavingDraft ? null : _saveDraftManual,
+                    borderRadius: BorderRadius.circular(6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: NeoTheme.accentYellow,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.black, width: 1.5),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _isSavingDraft
+                              ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                              : const Icon(Icons.save_outlined, size: 14, color: Colors.black),
+                          const SizedBox(width: 4),
+                          Text(
+                            _draftSavedSuccess ? 'UPDATE DRAF' : 'SIMPAN DRAF',
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.black),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

@@ -5,6 +5,8 @@ import { eq, ne, and, or, ilike, desc, sql } from 'drizzle-orm';
 import { AppError } from '../../middlewares/errorHandler';
 import crypto from 'crypto';
 
+import { readPromptJson, deletePromptJson } from '../../utils/prompt-storage';
+
 export const getHistory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
@@ -36,7 +38,7 @@ export const getHistory = async (req: Request, res: Response, next: NextFunction
 
     const whereClause = and(...conditions);
 
-    const [totalResult, promptsList] = await Promise.all([
+    const [totalResult, rawPromptsList] = await Promise.all([
       db.select({ count: sql<number>`count(*)` }).from(prompts).where(whereClause),
       db.select().from(prompts)
         .where(whereClause)
@@ -46,6 +48,17 @@ export const getHistory = async (req: Request, res: Response, next: NextFunction
     ]);
 
     const total = Number(totalResult[0]?.count || 0);
+
+    // Hydrate payloadJson from disk storage (.json) if stored externally
+    const promptsList = rawPromptsList.map((item: any) => {
+      if (!item.payloadJson || Object.keys(item.payloadJson).length === 0) {
+        const diskJson = readPromptJson(item.id, item.storagePath);
+        if (diskJson) {
+          item.payloadJson = diskJson;
+        }
+      }
+      return item;
+    });
 
     res.status(200).json({
       success: true,
@@ -139,12 +152,13 @@ export const deletePrompt = async (req: Request, res: Response, next: NextFuncti
       throw new AppError('Prompt not found', 404, 'NOT_FOUND');
     }
 
-    // Delete associated local reference images from disk
+    // Delete associated local reference images and JSON storage from disk
     const { deleteLocalFileByUrl } = await import('../../utils/image-cleanup');
     deleteLocalFileByUrl(prompt.referenceImageUrl);
     if (Array.isArray(prompt.referenceImageUrls)) {
       prompt.referenceImageUrls.forEach(url => deleteLocalFileByUrl(url));
     }
+    deletePromptJson(id, (prompt as any).storagePath);
 
     await db.delete(prompts).where(eq(prompts.id, id));
 

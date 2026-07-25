@@ -124,6 +124,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
       try {
         final response = await dioClient.delete('/history/$id');
         if (response.data['success'] == true) {
+          setState(() {
+            _prompts.removeWhere((item) => item['id'] == id);
+          });
           _fetchHistory();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

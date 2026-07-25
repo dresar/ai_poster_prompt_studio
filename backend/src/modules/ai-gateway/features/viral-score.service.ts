@@ -31,7 +31,7 @@ Tulis respons hanya dalam format JSON yang valid.`;
 
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-2.5-flash',
         generationConfig: { responseMimeType: 'application/json' }
       });
       const response = await model.generateContent(prompt);

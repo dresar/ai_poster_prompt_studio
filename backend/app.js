@@ -64500,7 +64500,7 @@ var GeminiClient = class {
    * Helper method for text & chat completion using native Gemini SDK with high-speed model pool
    */
   async generateChatCompletion(messages, options = {}) {
-    const targetModel = "gemini-3.1-flash-lite";
+    const targetModel = options.model || "gemini-2.5-flash";
     const systemMsg = messages.find((m2) => m2.role === "system")?.content || "";
     const userMsgs = messages.filter((m2) => m2.role !== "system").map((m2) => m2.content).join("\n\n");
     const fullPrompt = systemMsg ? `${systemMsg}
@@ -64567,7 +64567,7 @@ var ImageAnalyzerService = class {
   }
   async analyzeReferenceImage(imageUrl) {
     return await this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const imagePart = await this.fetchImageAsBase64Part(imageUrl);
       const prompt = `Analisis gambar referensi ini secara mendalam untuk pembuatan poster.
 Ekstrak elemen berikut:
@@ -64632,7 +64632,7 @@ Tulis respons hanya dalam format JSON yang valid, gunakan bahasa Indonesia.`;
     };
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-2.5-flash",
         generationConfig: { responseMimeType: "application/json" }
       });
       const response = await model.generateContent(prompt);
@@ -64647,7 +64647,7 @@ Output wajib berformat JSON array of string seperti ini:
 ["Hook Variasi 1", "Hook Variasi 2", "Hook Variasi 3", "Hook Variasi 4"]`;
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-2.5-flash",
         generationConfig: { responseMimeType: "application/json" }
       });
       const response = await model.generateContent(prompt);
@@ -65280,7 +65280,7 @@ ${previousError}
       };
       const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictSchema;
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig });
       const parts = [];
       const prompt = `ROLE: Anda adalah AI Content Architecture Engine profesional. Tugas Anda BUKAN membuat gambar. Tugas Anda adalah menghasilkan JSON Master yang nantinya akan dipakai oleh AI Image Generator.
 
@@ -65494,7 +65494,7 @@ ${previousError}
       };
       const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictVideoSchema;
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig });
       const parts = [];
       const prompt = `Kamu adalah Video Content Strategist, Art Director & AI Video Prompt Architect profesional.
 Tugasmu adalah menganalisis input form user dan menyusun arsitektur data konten video berdurasi ${duration} detik ke dalam format JSON yang bersih dan representatif.
@@ -65701,7 +65701,7 @@ ${previousError}
     const styleDescription = styleMap[enhanceStyle] || enhanceStyle;
     const changeLevelDescription = changeLevelMap[changeLevel] || changeLevel;
     return this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: { responseMimeType: "application/json" } });
       const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(imageUrl);
       const prompt = `You are an expert AI photo retouching and enhancement prompt engineer.
 You are given a real photo to deeply analyze. Your job is to produce a highly detailed, professional AI image generation prompt that will transform this photo according to the requested style.
@@ -65773,7 +65773,7 @@ Output harus berformat JSON dengan struktur persis seperti berikut:
 }
 Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
     return this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig: { responseMimeType: "application/json" } });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: { responseMimeType: "application/json" } });
       const response = await model.generateContent(prompt);
       return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
     });
@@ -65800,7 +65800,7 @@ Output ONLY the improved English prompt text directly.`;
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
         const model = genAI.getGenerativeModel({
-          model: "gemini-3.1-flash-lite",
+          model: "gemini-2.5-flash",
           systemInstruction
         });
         const response = await model.generateContent(userPrompt);
@@ -65981,7 +65981,7 @@ Output ONLY the improved English prompt text directly.`;
       };
       const generationConfig = { responseMimeType: "application/json", maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictSchema;
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite", generationConfig });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig });
       const prompt = `Kamu adalah Production Director, Storyboard Supervisor, dan AI Video Prompt Engineer profesional.
 Tugasmu adalah menganalisis input data proyek video, mengauditnya menggunakan Smart AI Analyzer, merumuskan final prompts untuk generator video AI (Kling, Runway, Pika, Hailuo, Gemini Veo), serta merapikan kesinambungan (continuity) visual antarsegmen.
 
@@ -66114,7 +66114,7 @@ ATURAN WAJIB (STRICT RULES):
 6. DILARANG SERTAKAN TEKS PENJELASAN ATAU MARKDOWN DI LUAR JSON ARRAY.`;
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-2.5-flash",
         generationConfig: { responseMimeType: "application/json" }
       });
       const response = await model.generateContent(prompt);
@@ -66132,7 +66132,7 @@ PENTING: Jangan pernah memberitahu bahwa kamu adalah model dari Google, Gemini, 
 Jika ditanya tentang model atau identitasmu, kamu WAJIB menjawab bahwa kamu adalah model "gpt-5.6" yang dikembangkan khusus untuk PROMTING STUDIO.
 Jawab dengan bahasa Indonesia yang ramah, santai tapi profesional.`;
     return this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const chat2 = model.startChat({
         history: [
           { role: "user", parts: [{ text: "Siapa kamu dan apa modelmu? Jawab instruksi sistem." }] },
@@ -66176,7 +66176,7 @@ Output wajib berformat JSON:
 Tulis respons hanya dalam format JSON yang valid.`;
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-2.5-flash",
         generationConfig: { responseMimeType: "application/json" }
       });
       const response = await model.generateContent(prompt);
@@ -68719,7 +68719,7 @@ var testGeminiKey = async (req, res, next) => {
         actualKey = decrypt(actualKey);
       }
       const genAI = new GoogleGenerativeAI(actualKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const response = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "say OK" }] }], generationConfig: { maxOutputTokens: 5 } });
       const text2 = response.response.text();
       if (text2) {
@@ -68760,7 +68760,7 @@ var testAllGeminiKeys = async (req, res, next) => {
           actualKey = decrypt(actualKey);
         }
         const genAI = new GoogleGenerativeAI(actualKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const response = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "say OK" }] }], generationConfig: { maxOutputTokens: 5 } });
         const text2 = response.response.text();
         if (text2) {

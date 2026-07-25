@@ -46,7 +46,7 @@ export class ImageAnalyzerService {
 
   async analyzeReferenceImage(imageUrl: string): Promise<string> {
     return await this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       const imagePart = await this.fetchImageAsBase64Part(imageUrl);
       
       const prompt = `Analisis gambar referensi ini secara mendalam untuk pembuatan poster.

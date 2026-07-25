@@ -35,10 +35,9 @@ Output yang DILARANG KERAS:
 ============================================================
 HUKUM KETAT: DILARANG SERTAKAN LINK URL DALAM HASIL JSON OUTPUT!
 ============================================================
-1. LINK URL (https://porto.apprentice.cyou/txt/...) HANYA DIGUNAKAN OLEH ANDA (CLAUDE) UNTUK MEMBACA DAN MENGANALISIS PATOKAN GAYA VISUAL DAN KARAKTER.
-2. DILARANG KERAS MENAMPILKAN, MENULISKAN, ATAU MENYUNTIKKAN LINK URL APAPUN (HTTP/HTTPS/STYLEREFERENCEURL/CHARACTERREFERENCEURL) DI DALAM HASIL JSON OUTPUT!
-3. SELURUH INSTRUKSI VISUAL, PALET WARNA, LIGHTING, TIPOGRAFI, KOMPOSISI, DAN BIBLE KARAKTER WAJIB ANDA TERJEMAHKAN, SINTESIS, DAN RANGKUM SECARA MENDALAM, PANJANG, RINCI, LENGKAP, DAN EKSPLISIT DALAM BENTUK TEKS TEKSTUAL DI DALAM FIELD JSON (seperti designSystem, visualBlueprint, dan character).
-4. AI Gambar (DALL-E 3 / Midjourney / Flux) TIDAK BISA membuka URL internet saat merender gambar. Oleh karena itu, hasil JSON WAJIB 100% BERISI TEKS MURNI YANG SANGAT KAYA DAN DETIL TANPA LINK URL APAPUN.
+1. DILARANG KERAS MENAMPILKAN, MENULISKAN, ATAU MENYUNTIKKAN LINK URL APAPUN (HTTP / HTTPS / STYLEREFERENCEURL / CHARACTERREFERENCEURL) DI DALAM HASIL JSON OUTPUT.
+2. SELURUH INSTRUKSI VISUAL, PALET WARNA, LIGHTING, TIPOGRAFI, KOMPOSISI, DAN BIBLE KARAKTER WAJIB ANDA TERJEMAHKAN, SINTESIS, DAN RANGKUM SECARA MENDALAM, PANJANG, RINCI, LENGKAP, DAN EKSPLISIT DALAM BENTUK TEKS TEKSTUAL DI DALAM FIELD JSON (seperti designSystem, visualBlueprint, dan character).
+3. AI Gambar (ChatGPT DALL-E 3 / Midjourney / Flux) TIDAK BISA membuka URL internet saat merender gambar. Oleh karena itu, hasil JSON WAJIB 100% BERISI TEKS MURNI YANG KAYA DAN DETIL TANPA LINK URL APAPUN.
 
 ============================================================
 ATURAN RENDERING KETAT UNTUK AI GAMBAR (STRICT RENDERING MODE)
@@ -93,57 +92,51 @@ ATURAN PENGIRIMAN OUTPUT
 
 String styleBlock(String style, String characterFocus) {
   final isStyleAuto = style == 'auto' || style == 'random' || style.isEmpty;
-  final isCharAuto = characterFocus == 'auto' ||
-      characterFocus == 'random' ||
+  final isCharAuto = characterFocus == 'auto' || characterFocus == 'random';
+  final isCharNone = characterFocus == 'none' ||
+      characterFocus == 'no_character' ||
       characterFocus == 'product_only' ||
-      characterFocus.isEmpty;
+      characterFocus == 'tanpa_karakter';
 
-  final styleSlug = isStyleAuto
-      ? 'auto'
-      : style
-          .toLowerCase()
-          .trim()
-          .replaceAll(RegExp(r'[^\w\s-]'), '')
-          .replaceAll(RegExp(r'[\s_-]+'), '-');
+  // -------------------------------------------------------------
+  // 1. ANALISIS GAYA VISUAL & WARNA TERANG ELEGAN DARI CLAUDE
+  // -------------------------------------------------------------
+  final String sRule = isStyleAuto
+      ? 'ANALISIS & DESAIN GAYA VISUAL OTOMATIS CLAUDE (TEMA TERANG ELEGAN & HARMONIS):\n'
+          '- TUGAS CLAUDE: Menganalisis topik & materi konten secara mendalam, lalu merancang deskripsi gaya visual yang sangat profesional, bersih, dan estetik langsung di dalam field "designSystem" & "visualBlueprint".\n'
+          '- KETENTUAN TEMA WARNA BASE: WAJIB MENGGUNAKAN TEMA TERANG (Base Putih Bersih / Off-White / Light Grey). DILARANG KERAS TEMA GELAP / DARK MODE!\n'
+          '- HARMONISASI WARNA: Bebas menggunakan kombinasi warna aksen yang kaya dan bervariasi (misal 2–4 paduan warna aksen), ASALKAN TIDAK MENCORT / TIDAK NORAK / TIDAK TERLALU MENCOLOK, serta SANGAT NYAMBUNG DAN HARMONIS DENGAN JIWA & TEMA MATERI KONTEN.\n'
+          '- HASIL JSON: Seluruh instruksi visual (lighting, komposisi, grid, warna, tipografi) WAJIB dituliskan secara rinci, eksplisit, dan kaya dalam bentuk TEKS MURNI di dalam JSON (DILARANG MENYERTAKAN LINK URL APAPUN!).'
+      : 'ANALISIS & DESAIN GAYA VISUAL MANUAL "$style" (HARMONIS DENGAN TOPIK MATERI):\n'
+          '- TUGAS CLAUDE: Menyintesis dan menuliskankan instruksi gaya visual "$style" secara mendalam, rinci, dan lengkap di dalam field "designSystem" & "visualBlueprint".\n'
+          '- HARMONISASI WARNA: Sesuaikan nuansa visual, lighting, dan warna aksen dari gaya "$style" agar SANGAT SELARAS, ELEGAN, DAN NYAMBUNG DENGAN JIWA & TEMA MATERI KONTEN.\n'
+          '- HASIL JSON: Seluruh instruksi visual WAJIB 100% teks murni eksplisit agar AI Gambar (ChatGPT DALL-E 3 / Midjourney / Flux) dapat membacanya secara utuh tanpa perlu koneksi internet (DILARANG MENYERTAKAN LINK URL APAPUN!).';
 
-  final charSlug = isCharAuto
-      ? 'auto'
-      : characterFocus
-          .toLowerCase()
-          .trim()
-          .replaceAll(RegExp(r'[^\w\s-]'), '')
-          .replaceAll(RegExp(r'[\s_-]+'), '-');
-
-  final styleUrl = 'https://porto.apprentice.cyou/txt/styles/$styleSlug.txt';
-  final charUrl = 'https://porto.apprentice.cyou/txt/characters/$charSlug.txt';
-
-  final sRule = isStyleAuto
-      ? 'ANALISIS & DESAIN GAYA VISUAL OTOMATIS CLAUDE (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
-          '- LINK PATOKAN GAYA VISUAL UNTUK DIBACA CLAUDE: $styleUrl\n'
-          '- TUGAS CLAUDE: Bacalah panduan visual dari link di atas, lalu susunlah RINGKASAN GAYA VISUAL DAN PALET WARNA SECARA SANGAT DETIL, RINCI, PANJANG, DAN SEMPURNA langsung di dalam field "designSystem" & "visualBlueprint".\n'
-          '- HARMONISASI WARNA DENGAN TOPIK: Gunakan base terang (Putih/Off-White/Light Grey - DILARANG TEMA GELAP) dipadukan 1-2 warna aksen segar yang SANGAT NYAMBUNG DAN HARMONIS DENGAN ISI TEMA MATERI KONTEN.\n'
-          '- DILARANG SERTAKAN URL DI OUTPUT JSON: Seluruh hasil JSON WAJIB 100% teks murni eksplisit. DILARANG KERAS menyertakan link URL https atau styleReferenceUrl di dalam hasil JSON!'
-      : 'ANALISIS & DESAIN GAYA VISUAL MANUAL "$style" (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
-          '- LINK PATOKAN GAYA VISUAL UNTUK DIBACA CLAUDE: $styleUrl\n'
-          '- TUGAS CLAUDE: Bacalah panduan gaya visual "$style" dari link di atas, lalu SINTESIS DAN TULISKAN DESKRIPSI GAYA VISUAL SEPERTI WARNA, LIGHTING, TIPOGRAFI, KOMPOSISI, DAN AMBIENCE SECARA SANGAT RINCI, PANJANG, LENGKAP, DAN SEMPURNA langsung di dalam field "designSystem" & "visualBlueprint" agar AI Gambar (DALL-E 3 / Midjourney / Flux) dapat membacanya 100% tanpa perlu fetch internet!\n'
-          '- HARMONISASI WARNA: Sesuaikan nuansa dan warna aksen gaya "$style" agar sangat nyambung, estetis, dan selaras dengan topik materi.\n'
-          '- DILARANG SERTAKAN URL DI OUTPUT JSON: SELURUH RESULT JSON WAJIB 100% DESKRIPSI TEKS MURNI. JANGAN MENULIS LINK URL HTTPS ATAU STYLEREFERENCEURL DI DALAM HASIL JSON!';
-
-  final cRule = isCharAuto
-      ? 'ANALISIS & DESAIN KARAKTER OTOMATIS CLAUDE (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
-          '- LINK PATOKAN BIBLE KARAKTER UNTUK DIBACA CLAUDE: $charUrl\n'
-          '- TUGAS CLAUDE: Bacalah bible karakter di atas, lalu susun deskripsi subjek visual yang kaya, rinci, dan konsisten secara eksplisit di dalam JSON field "character". DILARANG MENUMPANKAN LINK URL APAPUN DI DALAM JSON OUTPUT.'
-      : 'ANALISIS & DESAIN KARAKTER MANUAL "$characterFocus" (OUTPUT JSON WAJIB TEKS INLINE TANPA URL):\n'
-          '- LINK PATOKAN BIBLE KARAKTER UNTUK DIBACA CLAUDE: $charUrl\n'
-          '- TUGAS CLAUDE: Bacalah bible karakter dari link di atas, lalu tuliskan deskripsi fisik, pakaian, ekspresi, pose, dan ciri khas karakter "$characterFocus" SECARA SANGAT RINCI, PANJANG, LENGKAP, DAN EKSPLISIT di dalam JSON field "character"!\n'
-          '- DILARANG SERTAKAN URL DI OUTPUT JSON: DILARANG KERAS menyertakan link URL https atau characterReferenceUrl di dalam JSON output. Seluruh deskripsi karakter WAJIB berupa teks murni yang kaya dan lengkap!';
+  // -------------------------------------------------------------
+  // 2. ANALISIS SUBJEK/KARAKTER (3 OPSI CLEAR MODES)
+  // -------------------------------------------------------------
+  final String cRule;
+  if (isCharNone) {
+    cRule = 'ATURAN SUBJEK/KARAKTER = OPSI 3: TANPA KARAKTER (PRODUCT / CONCEPT FOCUS):\n'
+        '- DILARANG KERAS MENGGAMBAR KARAKTER MANUSIA ATAU MASKOT KANVAS!\n'
+        '- FOCUS VISUAL: Perkuat gaya visual utama, objek 3D/mockup produk, ikonografi premium, bentuk geometris, dan elemen visual pendukung yang bersih dan fokus pada materi.\n'
+        '- Isi field "character" atau "subject" dengan deskripsi rinci objek 3D/produk/elemen grafis utama pengganti karakter.';
+  } else if (isCharAuto) {
+    cRule = 'ATURAN SUBJEK/KARAKTER = OPSI 2: RANDOM / KARAKTER BEBAS (AI BEBAS MEMILIH):\n'
+        '- CLAUDE BEBAS MENGANALISIS DAN MEMILIH SUBJEK/KARAKTER visual (apakah 3D mascot ramah, ilustrasi karakter manusia profesional, atau figur ikonik) yang paling cocok, hangat, dan merepresentasikan jiwa materi secara menarik.\n'
+        '- Tuliskan deskripsi fisik, pakaian, ekspresi, pose, dan konsistensi karakter tersebut secara rinci dan eksplisit di dalam JSON field "character".';
+  } else {
+    cRule = 'ATURAN SUBJEK/KARAKTER = OPSI 1: KARAKTER MANUSIA / MASKOT SPESIFIK ("$characterFocus"):\n'
+        '- CLAUDE WAJIB merancang deskripsi fisik, bentuk, pakaian, pose, ekspresi, dan konsistensi visual karakter "$characterFocus" secara SANGAT RINCI, KAYA, DAN EKSPLISIT di dalam JSON field "character" agar AI Gambar dapat merender karakter secara konsisten antar slide.\n'
+        '- DILARANG KERAS menyertakan link URL apapun. Seluruh deskripsi karakter WAJIB berupa teks murni yang rinci dan lengkap!';
+  }
 
   return '$sRule\n$cRule';
 }
 
 String brandingBlock(bool useManualLogo, String watermark) {
   final lr = useManualLogo
-      ? 'LOGO PLACEHOLDER (EDIT MANUAL CANVA): Pengguna mengaktifkan opsi tempat logo. AI WAJIB merancang badge lingkaran estetik di pojok frame dengan tulisan "LOGO" di bagian tengahnya. Tempat ini dibuat khusus sebagai slot agar pengguna bisa menempelkan logo asli di Canva.'
+      ? 'LOGO PLACEHOLDER AREA: Pengguna mengaktifkan opsi tempat logo. AI Gambar WAJIB merancang area slot logo yang bersih dan luas di pojok atas frame, berupa badge lingkaran estetik dengan tulisan sederhana "LOGO" di tengahnya. Berikan area padding/ruang kosong yang agak luas dan lapang di sekitar lingkaran slot logo tersebut agar posisi tempat logo terlihat menonjol, bersih, dan jelas.'
       : 'LOGO: DILARANG menggambar logo atau tempat logo. Isi "logoPlacement":"NO_LOGO".';
   final wr = watermark.isNotEmpty
       ? 'WATERMARK: Gunakan teks ini persis: "$watermark"'

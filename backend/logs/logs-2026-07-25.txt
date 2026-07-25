@@ -1,0 +1,3 @@
+[2026-07-25 17:03:43:343] info: Cleared port 3000
+[2026-07-25 17:03:43:343] info: Server is running in development mode on port 3000
+[2026-07-25 17:03:44:344] info: [PromptsSync] Synced 11 styles & 12 characters to disk as plain text files.

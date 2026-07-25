@@ -438,12 +438,11 @@ class _BeritaFormState extends State<BeritaForm> {
                 const SizedBox(height: 16),
                 const Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Pengaturan Branding & Watermark', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text('Branding & Watermark', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 8),
                 SwitchListTile(
-                  title: const Text('⚠️ Gunakan Logo (Upload Manual)', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Instruksi ke AI agar memberi tempat kosong untuk logo.', style: TextStyle(fontSize: 12)),
+                  title: const Text('Gunakan Logo', style: TextStyle(fontWeight: FontWeight.bold)),
                   value: _useManualLogo,
                   activeThumbColor: Colors.black,
                   onChanged: (val) => setState(() => _useManualLogo = val),

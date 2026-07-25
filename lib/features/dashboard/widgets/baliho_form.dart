@@ -339,7 +339,7 @@ class _BalihoFormState extends State<BalihoForm> {
                  SwitchListTile(
                    title: const Text('Gunakan Logo', style: TextStyle(fontWeight: FontWeight.bold)),
                    value: _useManualLogo,
-                   activeColor: Colors.black,
+                   activeThumbColor: Colors.black,
                    onChanged: (val) => setState(() => _useManualLogo = val),
                  ),
                  const SizedBox(height: 12),

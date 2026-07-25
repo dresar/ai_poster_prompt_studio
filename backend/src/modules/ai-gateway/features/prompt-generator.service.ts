@@ -340,7 +340,7 @@ OUTPUT HANYA BLOK JSON VALID. JANGAN TULIS PENJELASAN LAIN.`;
       const generationConfig: any = { responseMimeType: 'application/json', maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictSchema;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig });
       const parts: any[] = [];
 
       const prompt = `ROLE: Anda adalah AI Content Architecture Engine profesional. Tugas Anda BUKAN membuat gambar. Tugas Anda adalah menghasilkan JSON Master yang nantinya akan dipakai oleh AI Image Generator.
@@ -572,7 +572,7 @@ OUTPUT HANYA BLOK JSON VALID SESUAI SKEMA.`;
       const generationConfig: any = { responseMimeType: 'application/json', maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictVideoSchema;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig });
       const parts: any[] = [];
 
       const prompt = `Kamu adalah Video Content Strategist, Art Director & AI Video Prompt Architect profesional.
@@ -796,7 +796,7 @@ OUTPUT HANYA BLOK JSON VALID. JANGAN TULIS PENJELASAN LAIN.`;
     const changeLevelDescription = changeLevelMap[changeLevel] || changeLevel;
 
     return this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { responseMimeType: 'application/json' } });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig: { responseMimeType: 'application/json' } });
       const imagePart = await this.imageAnalyzer.fetchImageAsBase64Part(imageUrl);
       const prompt = `You are an expert AI photo retouching and enhancement prompt engineer.\nYou are given a real photo to deeply analyze. Your job is to produce a highly detailed, professional AI image generation prompt that will transform this photo according to the requested style.\n\nENHANCEMENT REQUEST:\n- Style: ${styleDescription}\n- Change Level: ${changeLevelDescription}\n- Additional Notes from user: ${notes || 'none'}\n\nBased on your deep visual analysis of the photo, generate the following JSON output:\n{\n  "payloadJson": {\n    "meta": { "mode": "photo_enhance", "language": "id", "createdAt": "${new Date().toISOString()}" },\n    "input": {\n      "imageUrl": "${imageUrl}",\n      "enhanceStyle": "${enhanceStyle}",\n      "changeLevel": "${changeLevel}",\n      "notes": "${notes}"\n    },\n    "analysis": {},\n    "output": {\n      "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT",\n      "analysisShortcomings": "Penjelasan mendalam tentang kondisi foto asli dan transformasi apa yang akan dilakukan dalam bahasa Indonesia",\n      "viralScore": 0,\n      "hooks": ["HOOK_1", "HOOK_2", "HOOK_3", "HOOK_4"]\n    }\n  },\n  "promptFinal": "SUPER_DETAILED_ENGLISH_RETOUCH_PROMPT"\n}\n\nOutput ONLY valid JSON.`;
       const response = await model.generateContent([prompt, imagePart]);
@@ -841,7 +841,7 @@ Output harus berformat JSON dengan struktur persis seperti berikut:
 Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
 
     return this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { responseMimeType: 'application/json' } });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig: { responseMimeType: 'application/json' } });
       const response = await model.generateContent(prompt);
       return JSON.parse(this.geminiClient.sanitizeJson(response.response.text()));
     });
@@ -866,7 +866,7 @@ Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
     } else {
       return this.geminiClient.executeWithKey(async (genAI) => {
         const model = genAI.getGenerativeModel({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.1-flash-lite',
           systemInstruction: systemInstruction
         });
         const response = await model.generateContent(userPrompt);
@@ -1050,7 +1050,7 @@ Tulis respons HANYA dalam format JSON yang valid, gunakan bahasa Indonesia.`;
       const generationConfig: any = { responseMimeType: 'application/json', maxOutputTokens: 8192 };
       if (isStrict) generationConfig.responseSchema = strictSchema;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite', generationConfig });
       const prompt = `Kamu adalah Production Director, Storyboard Supervisor, dan AI Video Prompt Engineer profesional.
 Tugasmu adalah menganalisis input data proyek video, mengauditnya menggunakan Smart AI Analyzer, merumuskan final prompts untuk generator video AI (Kling, Runway, Pika, Hailuo, Gemini Veo), serta merapikan kesinambungan (continuity) visual antarsegmen.
 

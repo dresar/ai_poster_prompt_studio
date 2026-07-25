@@ -148,7 +148,7 @@ export class GeminiClient {
     messages: Array<{ role: string; content: string }>,
     options: { temperature?: number; model?: string; max_tokens?: number } = {}
   ): Promise<string> {
-    const targetModel = options.model || 'gemini-2.5-flash';
+    const targetModel = options.model || 'gemini-3.1-flash-lite';
     const systemMsg = messages.find(m => m.role === 'system')?.content || '';
     const userMsgs = messages.filter(m => m.role !== 'system').map(m => m.content).join('\n\n');
     const fullPrompt = systemMsg ? `${systemMsg}\n\n${userMsgs}` : userMsgs;

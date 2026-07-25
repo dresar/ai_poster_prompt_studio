@@ -59,7 +59,7 @@ Tulis respons hanya dalam format JSON yang valid, gunakan bahasa Indonesia.`;
 
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         generationConfig: { responseMimeType: 'application/json' }
       });
       const response = await model.generateContent(prompt);
@@ -76,7 +76,7 @@ Output wajib berformat JSON array of string seperti ini:
 
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         generationConfig: { responseMimeType: 'application/json' }
       });
       const response = await model.generateContent(prompt);

@@ -621,7 +621,7 @@ export const testGeminiKey = async (req: Request, res: Response, next: NextFunct
       }
 
       const genAI = new GoogleGenerativeAI(actualKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
       const response = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'say OK' }] }], generationConfig: { maxOutputTokens: 5 } });
       const text = response.response.text();
       
@@ -670,7 +670,7 @@ export const testAllGeminiKeys = async (req: Request, res: Response, next: NextF
         }
 
         const genAI = new GoogleGenerativeAI(actualKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
         const response = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: 'say OK' }] }], generationConfig: { maxOutputTokens: 5 } });
         const text = response.response.text();
         

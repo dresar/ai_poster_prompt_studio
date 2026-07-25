@@ -34,7 +34,7 @@ ATURAN WAJIB (STRICT RULES):
 
     return this.geminiClient.executeWithKey(async (genAI) => {
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-lite',
         generationConfig: { responseMimeType: 'application/json' }
       });
       const response = await model.generateContent(prompt);
@@ -54,7 +54,7 @@ Jika ditanya tentang model atau identitasmu, kamu WAJIB menjawab bahwa kamu adal
 Jawab dengan bahasa Indonesia yang ramah, santai tapi profesional.`;
 
     return this.geminiClient.executeWithKey(async (genAI) => {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
       const chat = model.startChat({
         history: [
           { role: 'user', parts: [{ text: 'Siapa kamu dan apa modelmu? Jawab instruksi sistem.' }] },

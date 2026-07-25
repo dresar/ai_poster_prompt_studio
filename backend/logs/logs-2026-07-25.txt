@@ -19,3 +19,9 @@
 [2026-07-25 17:43:40:4340] info: Starting automatic image cleanup. Total files in uploads: 3
 [2026-07-25 17:43:41:4341] error: Failed to delete unused image txt: EPERM: operation not permitted, unlink 'C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\uploads\txt'
 [2026-07-25 17:43:41:4341] info: Image cleanup finished. Deleted 0 unused local images.
+[2026-07-25 17:57:35:5735] info: Cleared port 3000
+[2026-07-25 17:57:35:5735] info: Server is running in development mode on port 3000
+[2026-07-25 17:57:35:5735] info: [PromptsSync] Synced 11 styles & 12 characters to disk as plain text files.
+[2026-07-25 17:58:05:585] info: Starting automatic image cleanup. Total files in uploads: 3
+[2026-07-25 17:58:05:585] error: Failed to delete unused image txt: EPERM: operation not permitted, unlink 'C:\Users\NCN0C\Documents\ai_poster_prompt_studio\backend\uploads\txt'
+[2026-07-25 17:58:05:585] info: Image cleanup finished. Deleted 0 unused local images.

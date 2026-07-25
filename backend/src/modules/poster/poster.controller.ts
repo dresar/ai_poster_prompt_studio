@@ -1294,7 +1294,7 @@ export const saveExternalDraft = async (
         .limit(1);
 
       if (existing.length > 0) {
-        savePromptJson(draftId, draftPayload);
+        const storagePath = savePromptJson(draftId, draftPayload);
         const [updated] = await db
           .update(prompts)
           .set({
@@ -1302,6 +1302,7 @@ export const saveExternalDraft = async (
             category,
             promptFinal: instructionsText,
             payloadJson: draftPayload,
+            createdAt: new Date(),
           })
           .where(eq(prompts.id, draftId))
           .returning();
@@ -1311,7 +1312,7 @@ export const saveExternalDraft = async (
 
     if (!savedPrompt) {
       const newId = draftId || crypto.randomUUID();
-      savePromptJson(newId, draftPayload);
+      const storagePath = savePromptJson(newId, draftPayload);
       const [inserted] = await db
         .insert(prompts)
         .values({
@@ -1323,6 +1324,7 @@ export const saveExternalDraft = async (
           promptFinal: instructionsText,
           payloadJson: draftPayload,
           schemaVersion: 'v2',
+          createdAt: new Date(),
         })
         .returning();
       savedPrompt = inserted;

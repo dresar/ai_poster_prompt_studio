@@ -482,20 +482,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
     );
     if (result != null && mounted) {
-      final promptObj = result['prompt'] ?? result;
-      setState(() {
-        _currentBottomTab = 1; // Switch to Riwayat tab
-      });
-      ref.read(authProvider.notifier).fetchUserProfile();
+      if (result['saved'] == true) {
+        setState(() {
+          _currentBottomTab = 1; // Switch to Riwayat tab (which displays the newly saved draft at the top)
+        });
+      } else {
+        final promptObj = result['prompt'] ?? result;
+        setState(() {
+          _currentBottomTab = 1; // Switch to Riwayat tab
+        });
+        ref.read(authProvider.notifier).fetchUserProfile();
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HistoryDetailPage(
-            promptData: Map<String, dynamic>.from(promptObj),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HistoryDetailPage(
+              promptData: Map<String, dynamic>.from(promptObj),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 

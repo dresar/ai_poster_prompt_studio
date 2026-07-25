@@ -58640,6 +58640,84 @@ var init_encryption = __esm({
   }
 });
 
+// src/utils/prompt-storage.ts
+var prompt_storage_exports = {};
+__export(prompt_storage_exports, {
+  deletePromptJson: () => deletePromptJson,
+  readPromptJson: () => readPromptJson,
+  savePromptJson: () => savePromptJson
+});
+function savePromptJson(id, payload) {
+  try {
+    if (!import_fs.default.existsSync(storageBaseDir)) {
+      import_fs.default.mkdirSync(storageBaseDir, { recursive: true });
+    }
+    const filename = `${id}.json`;
+    const fullPath = import_path2.default.join(storageBaseDir, filename);
+    const relativePath = import_path2.default.join("storage", "prompts", filename);
+    const jsonString = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+    import_fs.default.writeFileSync(fullPath, jsonString, "utf8");
+    try {
+      import_fs.default.chmodSync(fullPath, 420);
+    } catch (_) {
+    }
+    return relativePath;
+  } catch (err) {
+    logger.error(`Failed to save prompt JSON to disk storage: ${err}`);
+    return "";
+  }
+}
+function readPromptJson(id, storagePath) {
+  try {
+    let fullPath = import_path2.default.join(storageBaseDir, `${id}.json`);
+    if (storagePath && storagePath.trim().length > 0) {
+      fullPath = import_path2.default.isAbsolute(storagePath) ? storagePath : import_path2.default.join(process.cwd(), storagePath);
+    }
+    if (import_fs.default.existsSync(fullPath)) {
+      const raw = import_fs.default.readFileSync(fullPath, "utf8");
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    logger.warn(`Failed to read prompt JSON from disk storage (${id}): ${err}`);
+  }
+  return null;
+}
+function deletePromptJson(id, storagePath) {
+  try {
+    let fullPath = import_path2.default.join(storageBaseDir, `${id}.json`);
+    if (storagePath && storagePath.trim().length > 0) {
+      fullPath = import_path2.default.isAbsolute(storagePath) ? storagePath : import_path2.default.join(process.cwd(), storagePath);
+    }
+    if (import_fs.default.existsSync(fullPath)) {
+      import_fs.default.unlinkSync(fullPath);
+      logger.info(`Deleted prompt JSON storage file: ${fullPath}`);
+    }
+  } catch (err) {
+    logger.warn(`Failed to delete prompt JSON storage file (${id}): ${err}`);
+  }
+}
+var import_path2, import_fs, storageBaseDir;
+var init_prompt_storage = __esm({
+  "src/utils/prompt-storage.ts"() {
+    "use strict";
+    import_path2 = __toESM(require("path"));
+    import_fs = __toESM(require("fs"));
+    init_logger();
+    storageBaseDir = import_path2.default.join(process.cwd(), "storage", "prompts");
+    try {
+      if (!import_fs.default.existsSync(storageBaseDir)) {
+        import_fs.default.mkdirSync(storageBaseDir, { recursive: true });
+      }
+      try {
+        import_fs.default.chmodSync(storageBaseDir, 493);
+      } catch (_) {
+      }
+    } catch (e) {
+      logger.error(`Error initializing prompt storage directory: ${e}`);
+    }
+  }
+});
+
 // src/utils/image-cleanup.ts
 var image_cleanup_exports = {};
 __export(image_cleanup_exports, {
@@ -66552,73 +66630,8 @@ function repairJson(rawInput) {
   }
 }
 
-// src/utils/prompt-storage.ts
-var import_path2 = __toESM(require("path"));
-var import_fs = __toESM(require("fs"));
-init_logger();
-var storageBaseDir = import_path2.default.join(process.cwd(), "storage", "prompts");
-try {
-  if (!import_fs.default.existsSync(storageBaseDir)) {
-    import_fs.default.mkdirSync(storageBaseDir, { recursive: true });
-  }
-  try {
-    import_fs.default.chmodSync(storageBaseDir, 493);
-  } catch (_) {
-  }
-} catch (e) {
-  logger.error(`Error initializing prompt storage directory: ${e}`);
-}
-function savePromptJson(id, payload) {
-  try {
-    if (!import_fs.default.existsSync(storageBaseDir)) {
-      import_fs.default.mkdirSync(storageBaseDir, { recursive: true });
-    }
-    const filename = `${id}.json`;
-    const fullPath = import_path2.default.join(storageBaseDir, filename);
-    const relativePath = import_path2.default.join("storage", "prompts", filename);
-    const jsonString = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
-    import_fs.default.writeFileSync(fullPath, jsonString, "utf8");
-    try {
-      import_fs.default.chmodSync(fullPath, 420);
-    } catch (_) {
-    }
-    return relativePath;
-  } catch (err) {
-    logger.error(`Failed to save prompt JSON to disk storage: ${err}`);
-    return "";
-  }
-}
-function readPromptJson(id, storagePath) {
-  try {
-    let fullPath = import_path2.default.join(storageBaseDir, `${id}.json`);
-    if (storagePath && storagePath.trim().length > 0) {
-      fullPath = import_path2.default.isAbsolute(storagePath) ? storagePath : import_path2.default.join(process.cwd(), storagePath);
-    }
-    if (import_fs.default.existsSync(fullPath)) {
-      const raw = import_fs.default.readFileSync(fullPath, "utf8");
-      return JSON.parse(raw);
-    }
-  } catch (err) {
-    logger.warn(`Failed to read prompt JSON from disk storage (${id}): ${err}`);
-  }
-  return null;
-}
-function deletePromptJson(id, storagePath) {
-  try {
-    let fullPath = import_path2.default.join(storageBaseDir, `${id}.json`);
-    if (storagePath && storagePath.trim().length > 0) {
-      fullPath = import_path2.default.isAbsolute(storagePath) ? storagePath : import_path2.default.join(process.cwd(), storagePath);
-    }
-    if (import_fs.default.existsSync(fullPath)) {
-      import_fs.default.unlinkSync(fullPath);
-      logger.info(`Deleted prompt JSON storage file: ${fullPath}`);
-    }
-  } catch (err) {
-    logger.warn(`Failed to delete prompt JSON storage file (${id}): ${err}`);
-  }
-}
-
 // src/modules/poster/poster.controller.ts
+init_prompt_storage();
 var import_https2 = __toESM(require("https"));
 var import_crypto4 = __toESM(require("crypto"));
 var import_path3 = __toESM(require("path"));
@@ -67546,19 +67559,20 @@ var saveExternalDraft = async (req, res, next) => {
     if (draftId) {
       const existing = await db.select().from(prompts).where(and(eq(prompts.id, draftId), eq(prompts.userId, userId))).limit(1);
       if (existing.length > 0) {
-        savePromptJson(draftId, draftPayload);
+        const storagePath = savePromptJson(draftId, draftPayload);
         const [updated] = await db.update(prompts).set({
           topic,
           category,
           promptFinal: instructionsText,
-          payloadJson: draftPayload
+          payloadJson: draftPayload,
+          createdAt: /* @__PURE__ */ new Date()
         }).where(eq(prompts.id, draftId)).returning();
         savedPrompt = updated;
       }
     }
     if (!savedPrompt) {
       const newId = draftId || import_crypto4.default.randomUUID();
-      savePromptJson(newId, draftPayload);
+      const storagePath = savePromptJson(newId, draftPayload);
       const [inserted] = await db.insert(prompts).values({
         id: newId,
         userId,
@@ -67567,7 +67581,8 @@ var saveExternalDraft = async (req, res, next) => {
         category,
         promptFinal: instructionsText,
         payloadJson: draftPayload,
-        schemaVersion: "v2"
+        schemaVersion: "v2",
+        createdAt: /* @__PURE__ */ new Date()
       }).returning();
       savedPrompt = inserted;
     }
@@ -67843,10 +67858,11 @@ var import_express3 = __toESM(require_express2());
 init_db2();
 init_schema2();
 var import_crypto6 = __toESM(require("crypto"));
+init_prompt_storage();
 var getHistory = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { page = "1", limit = "10", search, mode, category, favorite, type } = req.query;
+    const { page = "1", limit = "50", search, mode, category, favorite, type } = req.query;
     const pageNum = parseInt(String(page), 10);
     const limitNum = parseInt(String(limit), 10);
     const skip = (pageNum - 1) * limitNum;
@@ -67873,12 +67889,13 @@ var getHistory = async (req, res, next) => {
       db.select().from(prompts).where(whereClause).offset(skip).limit(limitNum).orderBy(desc(prompts.createdAt))
     ]);
     const total = Number(totalResult[0]?.count || 0);
+    const { savePromptJson: savePromptJson2 } = await Promise.resolve().then(() => (init_prompt_storage(), prompt_storage_exports));
     const promptsList = rawPromptsList.map((item) => {
-      if (!item.payloadJson || Object.keys(item.payloadJson).length === 0) {
-        const diskJson = readPromptJson(item.id, item.storagePath);
-        if (diskJson) {
-          item.payloadJson = diskJson;
-        }
+      const diskJson = readPromptJson(item.id, item.storagePath);
+      if (diskJson) {
+        item.payloadJson = diskJson;
+      } else if (item.payloadJson && Object.keys(item.payloadJson).length > 0) {
+        savePromptJson2(item.id, item.payloadJson);
       }
       return item;
     });

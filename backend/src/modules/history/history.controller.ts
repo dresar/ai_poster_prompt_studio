@@ -10,7 +10,7 @@ import { readPromptJson, deletePromptJson } from '../../utils/prompt-storage';
 export const getHistory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    const { page = '1', limit = '10', search, mode, category, favorite, type } = req.query;
+    const { page = '1', limit = '50', search, mode, category, favorite, type } = req.query;
 
     const pageNum = parseInt(String(page), 10);
     const limitNum = parseInt(String(limit), 10);
@@ -49,13 +49,15 @@ export const getHistory = async (req: Request, res: Response, next: NextFunction
 
     const total = Number(totalResult[0]?.count || 0);
 
-    // Hydrate payloadJson from disk storage (.json) if stored externally
+    // Auto-sync & auto-heal: Hydrate payloadJson from disk storage (.json) or auto-create if missing
+    const { savePromptJson } = await import('../../utils/prompt-storage');
     const promptsList = rawPromptsList.map((item: any) => {
-      if (!item.payloadJson || Object.keys(item.payloadJson).length === 0) {
-        const diskJson = readPromptJson(item.id, item.storagePath);
-        if (diskJson) {
-          item.payloadJson = diskJson;
-        }
+      const diskJson = readPromptJson(item.id, item.storagePath);
+      if (diskJson) {
+        item.payloadJson = diskJson;
+      } else if (item.payloadJson && Object.keys(item.payloadJson).length > 0) {
+        // Auto-heal missing disk storage JSON file
+        savePromptJson(item.id, item.payloadJson);
       }
       return item;
     });

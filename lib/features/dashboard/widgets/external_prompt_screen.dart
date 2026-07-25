@@ -437,7 +437,7 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.pop(context, _draftSavedSuccess ? {'saved': true, 'draftId': _draftId} : null),
             child: const Center(
               child: Icon(Icons.arrow_back_rounded, color: Colors.black, size: 18),
             ),

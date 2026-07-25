@@ -74,12 +74,35 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
     }
   }
 
+  Map<String, dynamic> _sanitizeFormState(Map<String, dynamic> raw) {
+    final clean = <String, dynamic>{};
+    raw.forEach((key, value) {
+      if (value == null) return;
+      if (value.runtimeType.toString().contains('XFile')) {
+        clean[key] = (value as dynamic).path;
+      } else if (value is Map<String, dynamic>) {
+        clean[key] = _sanitizeFormState(value);
+      } else if (value is List) {
+        clean[key] = value.map((e) => e != null && e.runtimeType.toString().contains('XFile') ? (e as dynamic).path : e).toList();
+      } else {
+        try {
+          jsonEncode(value);
+          clean[key] = value;
+        } catch (_) {
+          clean[key] = value.toString();
+        }
+      }
+    });
+    return clean;
+  }
+
   Future<void> _saveDraftSilently() async {
     setState(() => _isSavingDraft = true);
     try {
+      final safeState = _sanitizeFormState(widget.formState);
       final res = await dioClient.post('/poster/save-external-draft', data: {
         if (_draftId != null) 'draftId': _draftId,
-        'formState': widget.formState,
+        'formState': safeState,
         'instructionsText': _parts.fullPrompt,
       });
 
@@ -117,6 +140,176 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
     _saveDraftSilently();
   }
 
+  void _processPastedJsonContent(String content) {
+    if (content.trim().isEmpty) return;
+
+    final repaired = JsonRepairHelper.repair(content);
+    bool isSplit = false;
+
+    try {
+      final parsedObj = jsonDecode(repaired);
+      if (parsedObj is Map<String, dynamic>) {
+        Map<String, dynamic> p1 = {};
+        Map<String, dynamic> p2 = {};
+        Map<String, dynamic> p3 = {};
+        Map<String, dynamic> p4 = {};
+
+        if (parsedObj.containsKey('systemInit')) p1['systemInit'] = parsedObj['systemInit'];
+        if (parsedObj.containsKey('contentPayload')) p1['contentPayload'] = parsedObj['contentPayload'];
+        if (parsedObj.containsKey('brandingEngine')) p1['brandingEngine'] = parsedObj['brandingEngine'];
+
+        if (parsedObj.containsKey('designSystem')) p2['designSystem'] = parsedObj['designSystem'];
+        if (parsedObj.containsKey('visualBlueprint')) p2['visualBlueprint'] = parsedObj['visualBlueprint'];
+        if (parsedObj.containsKey('renderingBlueprint')) p2['renderingBlueprint'] = parsedObj['renderingBlueprint'];
+
+        if (parsedObj.containsKey('slidesContent')) p3['slidesContent'] = parsedObj['slidesContent'];
+        if (parsedObj.containsKey('segmentsContent')) p3['segmentsContent'] = parsedObj['segmentsContent'];
+
+        if (parsedObj.containsKey('output')) p4['output'] = parsedObj['output'];
+
+        if (p1.isNotEmpty || p2.isNotEmpty || p3.isNotEmpty || p4.isNotEmpty) {
+          const encoder = JsonEncoder.withIndent('  ');
+          setState(() {
+            _jsonController1.text = p1.isNotEmpty ? encoder.convert(p1) : '';
+            _jsonController2.text = p2.isNotEmpty ? encoder.convert(p2) : '';
+            _jsonController3.text = p3.isNotEmpty ? encoder.convert(p3) : '';
+            _jsonController4.text = p4.isNotEmpty ? encoder.convert(p4) : '';
+          });
+          isSplit = true;
+        }
+      }
+    } catch (err) {
+      debugPrint('Non-splittable JSON object: $err');
+    }
+
+    if (!isSplit) {
+      setState(() {
+        _jsonController1.text = repaired;
+        _jsonController2.clear();
+        _jsonController3.clear();
+        _jsonController4.clear();
+      });
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isSplit
+                ? '📂 Teks JSON dimuat & terbagi otomatis ke Form 1, 2, 3, & 4!'
+                : '📂 Teks JSON dimuat ke Form 1!',
+          ),
+          backgroundColor: Colors.black,
+        ),
+      );
+    }
+  }
+
+  void _showPasteCanvasModal() {
+    final modalController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Colors.black, width: 2.5),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.65,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('📋 Canvas Paste JSON AI', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.black),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Tempelkan seluruh hasil teks JSON yang Anda salin dari ChatGPT / Claude di sini. Sistem akan membaginya otomatis ke Form 1 - 4!',
+                  style: TextStyle(fontSize: 11, color: Colors.black70),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFAFAFA),
+                      border: Border.all(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: TextField(
+                      controller: modalController,
+                      maxLines: null,
+                      expands: true,
+                      style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                      decoration: const InputDecoration(
+                        hintText: 'Tempelkan (Paste) teks JSON di sini...',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.black, width: 1.8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: () async {
+                          final data = await Clipboard.getData(Clipboard.kTextPlain);
+                          if (data?.text != null) {
+                            modalController.text = data!.text!;
+                          }
+                        },
+                        icon: const Icon(Icons.content_paste, size: 16, color: Colors.black),
+                        label: const Text('Tempel Clipboard', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.black)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: NeoTheme.accentYellow,
+                          foregroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black, width: 2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: () {
+                          final text = modalController.text.trim();
+                          if (text.isEmpty) return;
+                          _processPastedJsonContent(text);
+                          Navigator.pop(ctx);
+                        },
+                        icon: const Icon(Icons.flash_on, size: 16, color: Colors.black),
+                        label: const Text('IMPOR & ISI FORM', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: Colors.black)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _pickJsonFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -136,66 +329,7 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
         }
 
         if (content.isNotEmpty) {
-          final repaired = JsonRepairHelper.repair(content);
-          bool isSplit = false;
-
-          try {
-            final parsedObj = jsonDecode(repaired);
-            if (parsedObj is Map<String, dynamic>) {
-              Map<String, dynamic> p1 = {};
-              Map<String, dynamic> p2 = {};
-              Map<String, dynamic> p3 = {};
-              Map<String, dynamic> p4 = {};
-
-              if (parsedObj.containsKey('systemInit')) p1['systemInit'] = parsedObj['systemInit'];
-              if (parsedObj.containsKey('contentPayload')) p1['contentPayload'] = parsedObj['contentPayload'];
-              if (parsedObj.containsKey('brandingEngine')) p1['brandingEngine'] = parsedObj['brandingEngine'];
-
-              if (parsedObj.containsKey('designSystem')) p2['designSystem'] = parsedObj['designSystem'];
-              if (parsedObj.containsKey('visualBlueprint')) p2['visualBlueprint'] = parsedObj['visualBlueprint'];
-              if (parsedObj.containsKey('renderingBlueprint')) p2['renderingBlueprint'] = parsedObj['renderingBlueprint'];
-
-              if (parsedObj.containsKey('slidesContent')) p3['slidesContent'] = parsedObj['slidesContent'];
-              if (parsedObj.containsKey('segmentsContent')) p3['segmentsContent'] = parsedObj['segmentsContent'];
-
-              if (parsedObj.containsKey('output')) p4['output'] = parsedObj['output'];
-
-              if (p1.isNotEmpty || p2.isNotEmpty || p3.isNotEmpty || p4.isNotEmpty) {
-                const encoder = JsonEncoder.withIndent('  ');
-                setState(() {
-                  _jsonController1.text = p1.isNotEmpty ? encoder.convert(p1) : '';
-                  _jsonController2.text = p2.isNotEmpty ? encoder.convert(p2) : '';
-                  _jsonController3.text = p3.isNotEmpty ? encoder.convert(p3) : '';
-                  _jsonController4.text = p4.isNotEmpty ? encoder.convert(p4) : '';
-                });
-                isSplit = true;
-              }
-            }
-          } catch (err) {
-            debugPrint('Non-splittable JSON object: $err');
-          }
-
-          if (!isSplit) {
-            setState(() {
-              _jsonController1.text = repaired;
-              _jsonController2.clear();
-              _jsonController3.clear();
-              _jsonController4.clear();
-            });
-          }
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  isSplit
-                      ? '📂 File JSON dimuat & terbagi otomatis ke Form 1, 2, 3, & 4!'
-                      : '📂 File JSON utuh dimuat & diperbaiki otomatis di Form 1!',
-                ),
-                backgroundColor: Colors.black,
-              ),
-            );
-          }
+          _processPastedJsonContent(content);
         }
       }
     } catch (e) {
@@ -233,7 +367,7 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final payload = Map<String, dynamic>.from(widget.formState);
+      final payload = _sanitizeFormState(widget.formState);
       payload['externalJson'] = mergedText;
       if (_draftId != null) {
         payload['draftId'] = _draftId;
@@ -418,33 +552,67 @@ class _ExternalPromptScreenState extends State<ExternalPromptScreen> {
               title: '2. Hasil JSON AI Eksternal',
               emoji: '📥',
               backgroundColor: const Color(0xFFFFF8E1),
-              trailing: Container(
-                decoration: BoxDecoration(
-                  color: NeoTheme.accentYellow,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black, width: 1.8),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black, offset: Offset(1, 1)),
-                  ],
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(6),
-                  onTap: _pickJsonFile,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.upload_file, size: 16, color: Colors.black),
-                        SizedBox(width: 4),
-                        Text(
-                          'UNGGAH FILE',
-                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: Colors.black),
-                        ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: NeoTheme.accentPink,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.black, width: 1.8),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black, offset: Offset(1, 1)),
                       ],
                     ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      onTap: _showPasteCanvasModal,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.content_paste, size: 14, color: Colors.white),
+                            SizedBox(width: 4),
+                            Text(
+                              'CANVAS TEMPEL',
+                              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 6),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: NeoTheme.accentYellow,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.black, width: 1.8),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black, offset: Offset(1, 1)),
+                      ],
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      onTap: _pickJsonFile,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.upload_file, size: 14, color: Colors.black),
+                            SizedBox(width: 4),
+                            Text(
+                              'UNGGAH FILE',
+                              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: Colors.black),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
